@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperCar | Authentification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --crimson: #C1121F;
+            --varden: #FFF6D6;
+            --cosmos: #003049;
+            --marble: #669BBC;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--cosmos);
+            color: white;
+            overflow: hidden;
+        }
+        .font-title { font-family: 'Syncopate', sans-serif; }
+        
+        .split-bg {
+            background: linear-gradient(160deg, var(--cosmos) 60%, #001a2a 60.1%);
+        }
+
+        /* Champ de saisie stylisé comme la page de services */
+        .floating-input {
+            background: rgba(255,255,255,0.03);
+            border-bottom: 2px solid rgba(102, 155, 188, 0.3);
+            transition: all 0.4s ease;
+        }
+        .floating-input:focus {
+            border-bottom-color: var(--crimson);
+            background: rgba(193, 18, 31, 0.05);
+            outline: none;
+        }
+
+        .image-panel-mask {
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .outline-text {
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body class="split-bg">
+    <nav class="fixed top-0 w-full z-50 px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
+    <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
+    
+    <ul class="flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase">
+        <li><a href="acceuil.html" class="hover:text-[var(--crimson)] transition-colors">Accueil</a></li>
+        <li><a href="services.html" class="hover:text-[var(--crimson)] transition-colors">Services</a></li>
+        <li><a href="contact.html" class="hover:text-[var(--crimson)] transition-colors">Contact</a></li>
+        <li><a href="voiture.html" class="hover:text-[var(--crimson)] transition-colors">Voitures</a></li>
+        <li><a href="demande.html" class="hover:text-[var(--crimson)] transition-colors">Demande</a></li>
+        <li><a href="connexion.html" class="border border-[var(--crimson)] px-4 py-2 hover:bg-[var(--crimson)] transition-all">Connexion</a></li>
+    </ul>
+</nav>
+<body class="split-bg h-screen flex items-center justify-center p-6">
+
+    <div class="w-full max-w-6xl h-[85vh] grid lg:grid-cols-2 bg-black/20 rounded-[40px] border border-white/10 backdrop-blur-xl overflow-hidden relative shadow-2xl">
+        
+        <div class="p-12 flex flex-col justify-center relative">
+            <div class="absolute top-10 left-10 outline-text font-title text-6xl select-none opacity-20">ACCÈS</div>
+            
+            <div class="z-10">
+                <h2 class="font-title text-3xl md:text-4xl mb-2 tracking-tighter">
+                    CONNEXION <br> <span class="text-[var(--crimson)]">PILOTE</span>
+                </h2>
+                <div class="w-16 h-1 bg-[var(--crimson)] mb-12"></div>
+
+                <form class="space-y-8">
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-[0.4em] text-[var(--marble)] font-bold">Identifiant</label>
+                        <input type="email" placeholder="VOTRE@EMAIL.COM" required class="floating-input w-full p-4 text-xs tracking-widest uppercase text-white">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-[0.4em] text-[var(--marble)] font-bold">Mot de passe</label>
+                        <input type="password" placeholder="••••••••••••" required class="floating-input w-full p-4 text-xs tracking-widest uppercase text-white">
+                    </div>
+
+                    <div class="flex flex-col gap-4 pt-6">
+                        <button type="submit" class="bg-[var(--crimson)] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500">
+                            VALIDER L'ACCÈS
+                        </button>
+                       <a href="#" class="text-[var(--varden)] font-bold text-xs uppercase tracking-[0.2em] hover:text-[var(--crimson)] transition-colors"></a>
+                        Créer un profil membre
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="hidden lg:block relative image-panel-mask">
+            <img src="https://i.pinimg.com/736x/62/83/c2/6283c22327b3244db1c77f37297093ce.jpg" 
+                 alt="SuperCar Interior" 
+                 class="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000">
+            
+            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+            
+            <div class="absolute bottom-12 right-12 text-right">
+                <span class="font-title text-5xl outline-text block">SUPER</span>
+                <span class="font-title text-5xl text-[var(--crimson)] block">CAR</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed -bottom-20 -left-20 font-title text-[20vw] outline-text select-none -z-10 opacity-5">ENGINE</div>
+
+</body>
+</html>
