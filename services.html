@@ -49,17 +49,6 @@
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 100%);
         }
 
-        .floating-input {
-            background: rgba(255,255,255,0.03);
-            border-bottom: 2px solid rgba(102, 155, 188, 0.3);
-            transition: all 0.4s ease;
-        }
-        .floating-input:focus {
-            border-bottom-color: var(--crimson);
-            background: rgba(193, 18, 31, 0.05);
-            outline: none;
-        }
-
         .vertical-text {
             writing-mode: vertical-rl;
             text-orientation: mixed;
@@ -148,42 +137,6 @@
                 <h3 class="font-title text-lg leading-tight mb-4 uppercase">Révision <br>Moteur</h3>
                 <p class="text-gray-500 text-xs leading-relaxed tracking-widest uppercase">Optimisation du cycle de puissance original.</p>
             </div>
-        </div>
-    </section>
-
-    <section id="booking" class="min-h-screen py-24 px-6 lg:px-24 flex flex-col justify-center relative border-t border-white/5">
-        <div class="absolute left-0 top-0 h-full w-24 border-r border-white/5 flex items-center justify-center">
-            <span class="vertical-text uppercase tracking-[1em] text-xs text-gray-600 font-bold">RESERVATION</span>
-        </div>
-
-        <div class="max-w-5xl mx-auto w-full grid lg:grid-cols-2 gap-20">
-            <div>
-                <h2 class="font-title text-4xl mb-8">PROGRAMMER <br> UNE INTERVENTION</h2>
-                <div class="space-y-6 text-gray-400">
-                    <p>Sélectionnez votre créneau pour un entretien dans nos ateliers certifiés.</p>
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-[1px] bg-[var(--crimson)]"></div>
-                        <span class="text-xs uppercase tracking-widest">Temps de réponse : < 2 heures</span>
-                    </div>
-                </div>
-            </div>
-
-            <form class="space-y-8 bg-white/5 p-10 rounded-[40px] border border-white/10 backdrop-blur-sm">
-                <div class="grid grid-cols-2 gap-6">
-                    <input type="text" placeholder="NOM" required class="floating-input w-full p-4 text-xs tracking-widest uppercase">
-                    <input type="text" placeholder="PRÉNOM" required class="floating-input w-full p-4 text-xs tracking-widest uppercase">
-                </div>
-                <select class="floating-input w-full p-4 text-xs tracking-widest uppercase appearance-none cursor-pointer">
-                    <option class="bg-[#001a2a]">CHOISIR LE SERVICE</option>
-                    <option class="bg-[#001a2a]">VIDANGE</option>
-                    <option class="bg-[#001a2a]">PNEUS</option>
-                    <option class="bg-[#001a2a]">DIAGNOSTIC</option>
-                    <option class="bg-[#001a2a]">RÉVISION MOTEUR</option>
-                </select>
-                <button type="submit" class="w-full bg-[var(--crimson)] py-6 font-title text-xs tracking-[0.4em] uppercase hover:bg-white hover:text-black transition-all duration-500">
-                    Confirmer l'accès
-                </button>
-            </form>
         </div>
     </section>
 
