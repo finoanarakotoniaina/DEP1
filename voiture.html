@@ -79,19 +79,19 @@
             pointer-events: none;
         }
 
-        /* Position normale : à droite */
+        /* Position normale : décalé à droite */
         .car-card .hover-specs { 
             left: 105%; 
             box-shadow: 15px 0 30px rgba(0,0,0,0.3); 
         }
 
-        /* Position pour la dernière voiture : AU MILIEU */
+        /* --- CORRECTION : DERNIÈRE VOITURE (Centré au-dessus de la carte) --- */
         .car-card.pos-last .hover-specs { 
-            left: 0 !important;
-            right: 0 !important;
-            margin: auto !important;
-            width: 90%;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            left: 50% !important;
+            transform: translateX(-50%);
+            width: 95%; /* Prend presque toute la largeur de la carte */
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
+            z-index: 200; /* Assure qu'il est bien devant */
         }
 
         .car-card:hover { transform: scale(1.02); z-index: 500; }
