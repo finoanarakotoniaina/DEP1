@@ -24,7 +24,8 @@
             gap: 25px;
             padding: 50px 10px;
             scrollbar-width: none;
-            clip-path: inset(-100px -400px -100px -400px);
+            /* Indispensable pour voir les panneaux qui sortent des lignes */
+            clip-path: inset(-100px -500px -100px -500px);
         }
 
         .story-row::-webkit-scrollbar { display: none; }
@@ -79,19 +80,17 @@
             pointer-events: none;
         }
 
-        /* Position normale : décalé à droite */
+        /* POSITION PAR DÉFAUT : À DROITE */
         .car-card .hover-specs { 
             left: 105%; 
             box-shadow: 15px 0 30px rgba(0,0,0,0.3); 
         }
 
-        /* --- CORRECTION : DERNIÈRE VOITURE (Centré au-dessus de la carte) --- */
+        /* POSITION DERNIÈRE VOITURE : À GAUCHE (pour rester dans l'écran) */
         .car-card.pos-last .hover-specs { 
-            left: 50% !important;
-            transform: translateX(-50%);
-            width: 95%; /* Prend presque toute la largeur de la carte */
-            box-shadow: 0 0 40px rgba(0,0,0,0.6);
-            z-index: 200; /* Assure qu'il est bien devant */
+            left: auto !important;
+            right: 105% !important;
+            box-shadow: -15px 0 30px rgba(0,0,0,0.3);
         }
 
         .car-card:hover { transform: scale(1.02); z-index: 500; }
