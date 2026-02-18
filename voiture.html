@@ -8,11 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     
-    <style>
-        :root { --crimson: #b91c1c; }
-        body { background-color: #051923; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-        .font-title { font-family: 'Syncopate', sans-serif; }
+    <link rel="stylesheet" href="style.css">
 
+    <style>
+        /* Ajustements spécifiques pour le panneau rouge sans casser ton style global */
         .row-wrapper {
             position: relative;
             padding: 0 60px;
@@ -26,48 +25,24 @@
             gap: 25px;
             padding: 50px 10px;
             scrollbar-width: none;
-            /* Indispensable pour ne pas couper le panneau rouge qui dépasse */
             clip-path: inset(-100px -500px -100px -500px);
         }
         .story-row::-webkit-scrollbar { display: none; }
-
-        .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 45px;
-            height: 45px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            color: white;
-            z-index: 1000;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.3s;
-        }
-        .nav-btn:hover { background: white; color: black; }
 
         .car-card {
             min-width: 350px;
             flex-shrink: 0;
             position: relative;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 24px;
             transition: all 0.4s ease;
-            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* --- PANNEAU INFOS --- */
+        /* --- LE PANNEAU ROUGE --- */
         .hover-specs {
             position: absolute;
             top: 0;
             width: 280px;
             height: 100%;
-            background: var(--crimson); 
+            background: #b91c1c; 
             color: white;
             padding: 30px;
             border-radius: 24px;
@@ -81,27 +56,31 @@
             pointer-events: none;
         }
 
-        /* 1. PAR DÉFAUT : S'OUVRE À DROITE */
+        /* POSITION NORMALE (À DROITE) */
         .car-card .hover-specs { 
             left: 105%; 
-            box-shadow: 20px 0 40px rgba(0,0,0,0.4);
         }
 
-        /* 2. EXCEPTION DERNIÈRE VOITURE : S'OUVRE À GAUCHE (VERS LE CENTRE) */
+        /* EXCEPTION DERNIÈRE VOITURE : ON RAMÈNE À GAUCHE (VERS LE CENTRE) */
         .car-card.pos-last .hover-specs { 
             left: auto !important;
             right: 105% !important;
-            box-shadow: -20px 0 40px rgba(0,0,0,0.4);
         }
 
-        /* 3. EXCEPTION PREMIÈRE VOITURE : FORCE À DROITE (VERS LE CENTRE) */
+        /* EXCEPTION PREMIÈRE VOITURE : ON S'ASSURE QU'ELLE RESTE À DROITE (VERS LE CENTRE) */
         .car-card.pos-first .hover-specs {
             left: 105% !important;
             right: auto !important;
         }
 
-        .car-card:hover { transform: scale(1.02); z-index: 600; border-color: var(--crimson); }
-        .car-card:hover .hover-specs { opacity: 1; visibility: visible; }
+        .car-card:hover .hover-specs { 
+            opacity: 1; 
+            visibility: visible; 
+        }
+        
+        .car-card:hover { 
+            z-index: 600; 
+        }
 
         .spec-item {
             display: flex;
@@ -110,74 +89,83 @@
             padding: 12px 0;
             font-size: 11px;
             text-transform: uppercase;
-            font-weight: 600;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 45px;
+            height: 45px;
+            z-index: 1000;
+            cursor: pointer;
         }
     </style>
 </head>
-<body>
+<body class="split-bg">
 
     <nav class="fixed top-0 w-full z-[2000] px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter uppercase">SUPER<span class="text-[#b91c1c]">CAR</span></div>
         <ul class="flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center text-white">
-            <li><a href="acceuil.html" class="hover:text-[#b91c1c]">Accueil</a></li>
+            <li><a href="acceuil.html">Accueil</a></li>
             <li><a href="voiture.html" class="text-[#b91c1c]">Voitures</a></li>
-            <li><a href="demande.html" class="hover:text-[#b91c1c]">Essai</a></li>
-            <li><a href="contact.html" class="hover:text-[#b91c1c]">Contact</a></li>
+            <li><a href="demande.html">Essai</a></li>
+            <li><a href="contact.html">Contact</a></li>
             <li><a href="connexion.html" class="border border-[#b91c1c] px-4 py-2 hover:bg-[#b91c1c]">Connexion</a></li>
         </ul>
     </nav>
 
-    <main class="pt-40 pb-20">
+    <main class="pt-40">
         <div class="px-24 mb-16">
             <h1 class="font-title text-6xl mb-4">NOS <span class="text-[#b91c1c]">MODÈLES</span></h1>
             <div class="w-32 h-1 bg-[#b91c1c]"></div>
         </div>
 
         <section>
-            <h2 class="font-title text-xl px-24 mb-4 opacity-40 tracking-widest uppercase">BMW Performance</h2>
+            <h2 class="font-title text-xl px-24 mb-4 opacity-40 text-white uppercase tracking-widest">BMW</h2>
             <div class="row-wrapper">
-                <button class="nav-btn left-4" onclick="scrollR('row-bmw', -1)">❮</button>
+                <button class="nav-btn left-2 text-white" onclick="scrollR('row-bmw', -1)">❮</button>
                 <div class="story-row" id="row-bmw"></div>
-                <button class="nav-btn right-4" onclick="scrollR('row-bmw', 1)">❯</button>
+                <button class="nav-btn right-2 text-white" onclick="scrollR('row-bmw', 1)">❯</button>
             </div>
         </section>
 
         <section>
-            <h2 class="font-title text-xl px-24 mb-4 opacity-40 tracking-widest uppercase">Mercedes AMG</h2>
+            <h2 class="font-title text-xl px-24 mb-4 opacity-40 text-white uppercase tracking-widest">MERCEDES</h2>
             <div class="row-wrapper">
-                <button class="nav-btn left-4" onclick="scrollR('row-merc', -1)">❮</button>
+                <button class="nav-btn left-2 text-white" onclick="scrollR('row-merc', -1)">❮</button>
                 <div class="story-row" id="row-merc"></div>
-                <button class="nav-btn right-4" onclick="scrollR('row-merc', 1)">❯</button>
+                <button class="nav-btn right-2 text-white" onclick="scrollR('row-merc', 1)">❯</button>
             </div>
         </section>
 
         <section>
-            <h2 class="font-title text-xl px-24 mb-4 opacity-40 tracking-widest uppercase">Porsche</h2>
+            <h2 class="font-title text-xl px-24 mb-4 opacity-40 text-white uppercase tracking-widest">PORSCHE</h2>
             <div class="row-wrapper">
-                <button class="nav-btn left-4" onclick="scrollR('row-porsche', -1)">❮</button>
+                <button class="nav-btn left-2 text-white" onclick="scrollR('row-porsche', -1)">❮</button>
                 <div class="story-row" id="row-porsche"></div>
-                <button class="nav-btn right-4" onclick="scrollR('row-porsche', 1)">❯</button>
+                <button class="nav-btn right-2 text-white" onclick="scrollR('row-porsche', 1)">❯</button>
             </div>
         </section>
     </main>
 
     <script>
-        function injectCars(rowId, carData) {
+        function inject(rowId, data) {
             const container = document.getElementById(rowId);
-            container.innerHTML = carData.map((car, index) => {
-                // Détection intelligente des bords
-                let edgeClass = "";
-                if (index === 0) edgeClass = "pos-first";
-                if (index === carData.length - 1) edgeClass = "pos-last";
+            container.innerHTML = data.map((car, index) => {
+                // Détection de la première et dernière voiture pour le placement du panneau
+                let edge = "";
+                if (index === 0) edge = "pos-first";
+                if (index === data.length - 1) edge = "pos-last";
 
                 return `
-                <div class="car-card ${edgeClass}">
+                <div class="car-card ${edge}">
                     <div class="hover-specs">
-                        <p class="font-title text-[10px] mb-6 border-b border-white/30 pb-2 text-center">SPÉCIFICATIONS</p>
+                        <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase">Specs</p>
                         <div class="spec-item"><span>État</span> <span>${car.etat}</span></div>
                         <div class="spec-item"><span>Kilométrage</span> <span>${car.km}</span></div>
                         <div class="spec-item"><span>Année</span> <span>${car.annee}</span></div>
-                        <div class="spec-item"><span>Carburant</span> <span>${car.carburant}</span></div>
+                        <div class="spec-item"><span>Énergie</span> <span>${car.carburant}</span></div>
                     </div>
                     <img src="${car.img}" class="w-full h-64 object-cover rounded-t-[24px]">
                     <div class="p-8">
@@ -196,37 +184,37 @@
             document.getElementById(id).scrollBy({ left: dir * 400, behavior: 'smooth' });
         }
 
-        // Remplace simplement les noms d'images par tes fichiers (ex: 'bmw1.jpg')
+        // Tes 18 voitures (6 par rangée)
         const bmw = [
-            { img: 'bmw1.jpg', nom: 'M4 COMPETITION', prix: 'Rs 5.2M', mot: 'V6 BITURBO', dispo: 'EN STOCK', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'bmw2.jpg', nom: 'M5 CS', prix: 'Rs 7.8M', mot: 'V8 TWIN', dispo: 'LIMITÉE', etat: 'Occasion', km: '12k km', annee: '2022', carburant: 'Essence' },
-            { img: 'bmw3.jpg', nom: 'M8 GRAN COUPE', prix: 'Rs 8.5M', mot: 'V8 TURBO', dispo: 'EN STOCK', etat: 'Neuf', km: '0 km', annee: '2023', carburant: 'Essence' },
-            { img: 'bmw4.jpg', nom: 'X6 M', prix: 'Rs 6.5M', mot: 'V8 Turbo', dispo: 'EN STOCK', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'bmw1.jpg', nom: 'M4 Competition', prix: 'Rs 5.2M', mot: 'V6 Biturbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'bmw2.jpg', nom: 'M5 CS', prix: 'Rs 7.8M', mot: 'V8 Twin', dispo: 'Limitée', etat: 'Occasion', km: '12k km', annee: '2022', carburant: 'Essence' },
+            { img: 'bmw3.jpg', nom: 'M8 Gran Coupe', prix: 'Rs 8.5M', mot: 'V8 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2023', carburant: 'Essence' },
+            { img: 'bmw4.jpg', nom: 'X5 M', prix: 'Rs 6.5M', mot: 'V8 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
             { img: 'bmw5.jpg', nom: 'M2 Coupe', prix: 'Rs 4.1M', mot: 'L6 Turbo', dispo: 'Disponible', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'bmw6.jpg', nom: 'i7 M70', prix: 'Rs 9.2M', mot: 'Électrique', dispo: 'Rare', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Élec' }
+            { img: 'bmw6.jpg', nom: 'i7 M70', prix: 'Rs 9.2M', mot: 'Électrique', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Élec' }
         ];
 
         const merc = [
-            { img: 'merc1.jpg', nom: 'AMG GT 63 S', prix: 'Rs 10.2M', mot: 'V8 Twin', dispo: 'EN STOCK', etat: 'Neuf', km: '100 km', annee: '2023', carburant: 'Essence' },
-            { img: 'merc2.jpg', nom: 'AMG G 63', prix: 'Rs 9.5M', mot: 'V8 Biturbo', dispo: 'SUR COMMANDE', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'merc3.jpg', nom: 'EQE 53 AMG', prix: 'Rs 8.9M', mot: 'Électrique', dispo: 'DISPONIBLE', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Élec' },
-            { img: 'merc4.jpg', nom: 'SL 63 AMG', prix: 'Rs 11.2M', mot: 'V8 Turbo', dispo: 'EN STOCK', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'merc5.jpg', nom: 'C63 S E-Perf', prix: 'Rs 5.8M', mot: 'Hybride AMG', dispo: 'Disponible', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Hybride' },
-            { img: 'merc6.jpg', nom: 'AMG One', prix: 'Rs 120M', mot: 'V6 F1 Hybrid', dispo: 'Collection', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' }
+            { img: 'merc1.jpg', nom: 'AMG GT 63 S', prix: 'Rs 10.2M', mot: 'V8 Twin', dispo: 'En Stock', etat: 'Neuf', km: '100 km', annee: '2023', carburant: 'Essence' },
+            { img: 'merc2.jpg', nom: 'AMG G 63', prix: 'Rs 9.5M', mot: 'V8 Biturbo', dispo: 'Sur Commande', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'merc3.jpg', nom: 'EQE 53 AMG', prix: 'Rs 8.9M', mot: 'Électrique', dispo: 'Disponible', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Élec' },
+            { img: 'merc4.jpg', nom: 'SL 63 AMG', prix: 'Rs 11.2M', mot: 'V8 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'merc5.jpg', nom: 'C63 AMG', prix: 'Rs 5.8M', mot: 'Hybride', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Hybride' },
+            { img: 'merc6.jpg', nom: 'AMG One', prix: 'Rs 135M', mot: 'V6 F1 Hybrid', dispo: 'Collection', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' }
         ];
 
         const porsche = [
-            { img: 'p1.jpg', nom: '911 GT3 RS', prix: 'Rs 15.2M', mot: '6 Cyl. Flat', dispo: 'RARE', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'p2.jpg', nom: 'Taycan Turbo S', prix: 'Rs 9.8M', mot: 'Électrique', dispo: 'EN STOCK', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Élec' },
-            { img: 'p3.jpg', nom: '718 Cayman GT4', prix: 'Rs 6.5M', mot: 'Flat 6', dispo: 'DISPONIBLE', etat: 'Occasion', km: '8k km', annee: '2022', carburant: 'Essence' },
-            { img: 'p4.jpg', nom: 'Panamera Turbo', prix: 'Rs 8.4M', mot: 'V8 Turbo', dispo: 'EN STOCK', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'p5.jpg', nom: 'Macan GTS', prix: 'Rs 4.7M', mot: 'V6 Turbo', dispo: 'EN STOCK', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'p6.jpg', nom: '918 Spyder', prix: 'Rs 72M', mot: 'V8 Hybride', dispo: 'Collection', etat: 'Occasion', km: '2k km', annee: '2015', carburant: 'Hybride' }
+            { img: 'p1.jpg', nom: '911 GT3 RS', prix: 'Rs 15.2M', mot: '6 Cyl. Flat', dispo: 'Rare', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'p2.jpg', nom: 'Taycan Turbo S', prix: 'Rs 9.8M', mot: 'Électrique', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Élec' },
+            { img: 'p3.jpg', nom: '718 Cayman GT4', prix: 'Rs 6.5M', mot: 'Flat 6', dispo: 'Disponible', etat: 'Occasion', km: '8k km', annee: '2022', carburant: 'Essence' },
+            { img: 'p4.jpg', nom: 'Panamera Turbo', prix: 'Rs 8.4M', mot: 'V8 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'p5.jpg', nom: 'Macan GTS', prix: 'Rs 4.7M', mot: 'V6 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'p6.jpg', nom: '918 Spyder', prix: 'Rs 72M', mot: 'V8 Hybrid', dispo: 'Collection', etat: 'Occasion', km: '2k km', annee: '2015', carburant: 'Hybride' }
         ];
 
-        injectCars('row-bmw', bmw);
-        injectCars('row-merc', merc);
-        injectCars('row-porsche', porsche);
+        inject('row-bmw', bmw);
+        inject('row-merc', merc);
+        inject('row-porsche', porsche);
     </script>
 </body>
 </html>
