@@ -79,12 +79,18 @@
             pointer-events: none;
         }
 
-        .car-card .hover-specs { left: 102%; box-shadow: 15px 0 30px rgba(0,0,0,0.3); }
+        /* POSITIONNEMENT PAR DÉFAUT (À DROITE) */
+        .car-card .hover-specs { 
+            left: 102%; 
+            box-shadow: 15px 0 30px rgba(0,0,0,0.3); 
+        }
 
+        /* POSITIONNEMENT EXTRÉMITÉ (AU MILIEU DE LA CARTE) */
         .car-card.pos-last .hover-specs { 
-            left: auto;
-            right: 102%; 
-            box-shadow: -15px 0 30px rgba(0,0,0,0.3);
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            width: 90%; /* Ajusté pour rester dans le cadre de la carte */
         }
 
         .car-card:hover { transform: scale(1.02); z-index: 500; }
