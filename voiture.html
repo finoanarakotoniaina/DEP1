@@ -11,208 +11,199 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        :root { --crimson: #b91c1c; }
-
-        /* --- STRUCTURE & OVERFLOW --- */
+        /* --- STRUCTURE DE BASE (RESPECTE TON CSS EXTERNE) --- */
         .row-wrapper {
             position: relative;
-            padding: 0 60px;
-            margin-bottom: 60px;
-            /* On s'assure que rien ne coupe le zoom ou le panneau */
-            overflow: visible !important;
+            padding: 0 40px;
+            margin-bottom: 50px;
+            overflow: visible !important; /* Pour ne pas couper le zoom */
         }
 
         .story-row {
             display: flex;
             overflow-x: auto;
             scroll-behavior: smooth;
-            gap: 30px;
-            padding: 40px 10px;
+            gap: 25px;
+            padding: 60px 20px;
             scrollbar-width: none;
-            overflow-y: visible !important; /* Très important pour le zoom */
+            overflow-y: visible !important;
         }
         .story-row::-webkit-scrollbar { display: none; }
 
-        /* --- CARTE & ZOOM --- */
+        /* --- CARTE VOITURE --- */
         .car-card {
-            min-width: 380px;
+            min-width: 350px;
             flex-shrink: 0;
             position: relative;
-            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: transform 0.4s ease;
             z-index: 10;
         }
 
-        /* Quand on survole, la carte passe devant tout (boutons inclus) */
-        .car-card:hover { 
-            transform: scale(1.05);
-            z-index: 2000 !important; 
-        }
-
-        /* --- PANNEAU INFOS (ROUGE) --- */
+        /* --- LE PANNEAU ROUGE (INFOS) --- */
         .hover-specs {
             position: absolute;
             top: 0;
-            width: 300px;
+            width: 280px;
             height: 100%;
-            background: var(--crimson);
+            background: #b91c1c; 
             color: white;
-            padding: 35px;
+            padding: 30px;
             border-radius: 24px;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
+            z-index: 50;
             display: flex;
             flex-direction: column;
             justify-content: center;
             pointer-events: none;
-            box-shadow: 20px 0 50px rgba(0,0,0,0.5);
         }
 
-        /* Placement intelligent */
-        .car-card .hover-specs { left: 105%; }
-        .car-card.pos-last .hover-specs { left: auto !important; right: 105% !important; box-shadow: -20px 0 50px rgba(0,0,0,0.5); }
-        .car-card.pos-first .hover-specs { left: 105% !important; right: auto !important; }
+        /* POSITIONNEMENT INTELLIGENT */
+        .car-card .hover-specs { left: 105%; } /* Défaut : Droite */
+        
+        .car-card.pos-last .hover-specs { 
+            left: auto !important; 
+            right: 105% !important; 
+        } /* Dernière : Gauche */
 
-        .car-card:hover .hover-specs { opacity: 1; visibility: visible; }
+        /* --- EFFETS AU SURVOL --- */
+        .car-card:hover { 
+            transform: scale(1.08); 
+            z-index: 1000 !important; 
+        }
+
+        .car-card:hover .hover-specs { 
+            opacity: 1; 
+            visibility: visible; 
+        }
 
         .spec-item {
             display: flex;
             justify-content: space-between;
             border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding: 15px 0;
+            padding: 12px 0;
             font-size: 11px;
             text-transform: uppercase;
-            font-weight: 700;
         }
 
-        /* --- BOUTONS NAVIGATION CIRCULAIRES --- */
+        /* --- BOUTONS NAVIGATION PETITS & CIRCULAIRES --- */
         .nav-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.08); /* Transparent */
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 500;
-            backdrop-filter: blur(5px);
+            z-index: 100;
+            backdrop-filter: blur(4px);
+            transition: 0.3s;
         }
-        .nav-btn:hover {
-            background: white;
-            color: black;
-            border-color: white;
-        }
-        .btn-prev { left: 5px; }
-        .btn-next { right: 5px; }
+        .nav-btn:hover { background: white; color: black; }
+        .btn-prev { left: 0; }
+        .btn-next { right: 0; }
     </style>
 </head>
 <body class="split-bg">
 
-    <main class="pt-40">
-        <div class="px-24 mb-16">
-            <h1 class="font-title text-6xl text-white uppercase">Inventaire <span class="text-[#b91c1c]">Complet</span></h1>
-        </div>
-
+    <main class="pt-32">
         <section>
-            <h2 class="font-title text-xl px-24 mb-2 text-white opacity-40 uppercase">BMW Performance</h2>
+            <h2 class="font-title text-xl px-24 mb-4 text-white opacity-40 uppercase tracking-widest">BMW</h2>
             <div class="row-wrapper">
-                <button class="nav-btn btn-prev" onclick="scrollR('row-bmw', -1)">❮</button>
+                <button class="nav-btn btn-prev" onclick="move('row-bmw', -1)">❮</button>
                 <div class="story-row" id="row-bmw"></div>
-                <button class="nav-btn btn-next" onclick="scrollR('row-bmw', 1)">❯</button>
+                <button class="nav-btn btn-next" onclick="move('row-bmw', 1)">❯</button>
             </div>
         </section>
 
         <section>
-            <h2 class="font-title text-xl px-24 mb-2 text-white opacity-40 uppercase">Mercedes AMG</h2>
+            <h2 class="font-title text-xl px-24 mb-4 text-white opacity-40 uppercase tracking-widest">Mercedes</h2>
             <div class="row-wrapper">
-                <button class="nav-btn btn-prev" onclick="scrollR('row-merc', -1)">❮</button>
+                <button class="nav-btn btn-prev" onclick="move('row-merc', -1)">❮</button>
                 <div class="story-row" id="row-merc"></div>
-                <button class="nav-btn btn-next" onclick="scrollR('row-merc', 1)">❯</button>
+                <button class="nav-btn btn-next" onclick="move('row-merc', 1)">❯</button>
             </div>
         </section>
 
         <section>
-            <h2 class="font-title text-xl px-24 mb-2 text-white opacity-40 uppercase">Porsche Kolektion</h2>
+            <h2 class="font-title text-xl px-24 mb-4 text-white opacity-40 uppercase tracking-widest">Porsche</h2>
             <div class="row-wrapper">
-                <button class="nav-btn btn-prev" onclick="scrollR('row-porsche', -1)">❮</button>
+                <button class="nav-btn btn-prev" onclick="move('row-porsche', -1)">❮</button>
                 <div class="story-row" id="row-porsche"></div>
-                <button class="nav-btn btn-next" onclick="scrollR('row-porsche', 1)">❯</button>
+                <button class="nav-btn btn-next" onclick="move('row-porsche', 1)">❯</button>
             </div>
         </section>
     </main>
 
     <script>
-        function inject(id, data) {
+        function render(id, data) {
             const container = document.getElementById(id);
             container.innerHTML = data.map((car, index) => {
-                let edge = "";
-                if (index === 0) edge = "pos-first";
-                if (index === data.length - 1) edge = "pos-last";
-
+                let edge = (index === data.length - 1) ? "pos-last" : "";
                 return `
                 <div class="car-card ${edge}">
                     <div class="hover-specs">
-                        <p class="font-title text-[11px] mb-6 border-b border-white/30 pb-3 text-center uppercase tracking-widest">Spécifications</p>
+                        <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase">Specs</p>
                         <div class="spec-item"><span>État</span> <span>${car.etat}</span></div>
-                        <div class="spec-item"><span>KM</span> <span>${car.km}</span></div>
+                        <div class="spec-item"><span>Kilométrage</span> <span>${car.km}</span></div>
                         <div class="spec-item"><span>Année</span> <span>${car.annee}</span></div>
-                        <div class="spec-item"><span>Carburant</span> <span>${car.carburant}</span></div>
+                        <div class="spec-item"><span>Énergie</span> <span>${car.carburant}</span></div>
                     </div>
-                    <img src="${car.img}" class="w-full h-72 object-cover rounded-t-[24px]">
+                    <img src="${car.img}" class="w-full h-64 object-cover rounded-t-[24px]">
                     <div class="p-8 bg-white/5 rounded-b-[24px]">
-                        <div class="flex justify-between items-center mb-3">
+                        <div class="flex justify-between items-center mb-2">
                             <span class="text-[#b91c1c] font-bold text-[10px] uppercase">${car.dispo}</span>
-                            <span class="text-gray-400 text-[10px] uppercase font-bold">${car.mot}</span>
+                            <span class="text-gray-500 text-[10px] font-bold">${car.mot}</span>
                         </div>
-                        <h3 class="font-title text-xl mb-4 text-white uppercase">${car.nom}</h3>
-                        <p class="font-bold text-3xl text-white">${car.prix}</p>
+                        <h3 class="font-title text-lg mb-4 text-white uppercase">${car.nom}</h3>
+                        <p class="font-bold text-2xl text-white">${car.prix}</p>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        function scrollR(id, dir) {
-            document.getElementById(id).scrollBy({ left: dir * 420, behavior: 'smooth' });
+        function move(id, dir) {
+            document.getElementById(id).scrollBy({ left: dir * 400, behavior: 'smooth' });
         }
 
-        // LES 18 VÉHICULES (6 PAR MARQUE)
-        const bmw = [
-            { img: 'bmw1.jpg', nom: 'M4 Competition', prix: 'Rs 5.2M', mot: 'V6 Biturbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'bmw2.jpg', nom: 'M5 CS', prix: 'Rs 7.8M', mot: 'V8 Twin', dispo: 'Limitée', etat: 'Occasion', km: '12k km', annee: '2022', carburant: 'Essence' },
-            { img: 'bmw3.jpg', nom: 'M8 Gran Coupe', prix: 'Rs 8.5M', mot: 'V8 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2023', carburant: 'Essence' },
-            { img: 'bmw4.jpg', nom: 'X6 M', prix: 'Rs 6.5M', mot: 'V8 Biturbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'bmw5.jpg', nom: 'M3 Touring', prix: 'Rs 5.5M', mot: 'L6 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'bmw6.jpg', nom: 'Z4 M40i', prix: 'Rs 3.8M', mot: 'L6 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' }
+        // --- TES DONNÉES (18 VOITURES) ---
+        const b = [
+            { img: 'bmw1.jpg', nom: 'M4 Comp', prix: 'Rs 5.2M', mot: 'V6', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Essence' },
+            { img: 'bmw2.jpg', nom: 'M5 CS', prix: 'Rs 7.8M', mot: 'V8', dispo: 'Rare', etat: 'Occasion', km: '12k', annee: '22', carburant: 'Essence' },
+            { img: 'bmw3.jpg', nom: 'M8 GC', prix: 'Rs 8.5M', mot: 'V8', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '23', carburant: 'Essence' },
+            { img: 'bmw4.jpg', nom: 'X6 M', prix: 'Rs 6.9M', mot: 'V8', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Essence' },
+            { img: 'bmw5.jpg', nom: 'M2 Coupe', prix: 'Rs 4.5M', mot: 'L6', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Essence' },
+            { img: 'bmw6.jpg', nom: 'i7 M70', prix: 'Rs 9.8M', mot: 'Elec', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Elec' }
         ];
 
-        const merc = [
-            { img: 'merc1.jpg', nom: 'AMG GT 63 S', prix: 'Rs 10.2M', mot: 'V8 Twin', dispo: 'En Stock', etat: 'Neuf', km: '100 km', annee: '2023', carburant: 'Essence' },
-            { img: 'merc2.jpg', nom: 'AMG G 63', prix: 'Rs 9.5M', mot: 'V8 Biturbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'merc3.jpg', nom: 'AMG SL 63', prix: 'Rs 11.2M', mot: 'V8 Biturbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'merc4.jpg', nom: 'EQS 53 AMG', prix: 'Rs 8.5M', mot: 'Électrique', dispo: 'Disponible', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Élec' },
-            { img: 'merc5.jpg', nom: 'C63 S AMG', prix: 'Rs 5.8M', mot: 'Hybride E', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Hybride' },
-            { img: 'merc6.jpg', nom: 'AMG One', prix: 'Rs 135M', mot: 'F1 V6 Hybrid', dispo: 'Rare', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' }
+        const m = [
+            { img: 'merc1.jpg', nom: 'GT 63 S', prix: 'Rs 10M', mot: 'V8', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '23', carburant: 'Essence' },
+            { img: 'merc2.jpg', nom: 'G 63', prix: 'Rs 9.5M', mot: 'V8', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Essence' },
+            { img: 'merc3.jpg', nom: 'EQS 53', prix: 'Rs 8.9M', mot: 'Elec', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Elec' },
+            { img: 'merc4.jpg', nom: 'SL 63', prix: 'Rs 11M', mot: 'V8', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Essence' },
+            { img: 'merc5.jpg', nom: 'C 63 S', prix: 'Rs 5.9M', mot: 'Hyb', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Hybride' },
+            { img: 'merc6.jpg', nom: 'AMG One', prix: 'Rs 130M', mot: 'F1', dispo: 'Rare', etat: 'Neuf', km: '0', annee: '24', carburant: 'Essence' }
         ];
 
-        const porsche = [
-            { img: 'p1.jpg', nom: '911 GT3 RS', prix: 'Rs 15.2M', mot: '6 Cyl Flat', dispo: 'Rare', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'p2.jpg', nom: 'Taycan Turbo S', prix: 'Rs 9.8M', mot: 'Électrique', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Élec' },
-            { img: 'p3.jpg', nom: '718 Cayman GT4', prix: 'Rs 6.5M', mot: 'Flat 6', dispo: 'Disponible', etat: 'Occasion', km: '8k km', annee: '2022', carburant: 'Essence' },
-            { img: 'p4.jpg', nom: '911 Turbo S', prix: 'Rs 13.5M', mot: 'Flat 6 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'p5.jpg', nom: 'Macan GTS', prix: 'Rs 4.8M', mot: 'V6 Turbo', dispo: 'En Stock', etat: 'Neuf', km: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'p6.jpg', nom: '918 Spyder', prix: 'Rs 72M', mot: 'V8 Hybrid', dispo: 'Collection', etat: 'Occasion', km: '2k km', annee: '2015', carburant: 'Hybride' }
+        const p = [
+            { img: 'p1.jpg', nom: '911 GT3', prix: 'Rs 15M', mot: 'F6', dispo: 'Rare', etat: 'Neuf', km: '0', annee: '24', carburant: 'Essence' },
+            { img: 'p2.jpg', nom: 'Taycan S', prix: 'Rs 9.8M', mot: 'Elec', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Elec' },
+            { img: 'p3.jpg', nom: '718 GT4', prix: 'Rs 6.5M', mot: 'F6', dispo: 'Stock', etat: 'Occasion', km: '8k', annee: '22', carburant: 'Essence' },
+            { img: 'p4.jpg', nom: '911 Turbo', prix: 'Rs 13M', mot: 'F6', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Essence' },
+            { img: 'p5.jpg', nom: 'Macan GTS', prix: 'Rs 4.9M', mot: 'V6', dispo: 'Stock', etat: 'Neuf', km: '0', annee: '24', carburant: 'Essence' },
+            { img: 'p6.jpg', nom: '918 Spyder', prix: 'Rs 78M', mot: 'V8', dispo: 'Rare', etat: 'Occasion', km: '2k', annee: '15', carburant: 'Hybride' }
         ];
 
-        inject('row-bmw', bmw);
-        inject('row-merc', merc);
-        inject('row-porsche', porsche);
+        render('row-bmw', b);
+        render('row-merc', m);
+        render('row-porsche', p);
     </script>
 </body>
 </html>
