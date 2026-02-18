@@ -79,19 +79,21 @@
             pointer-events: none;
         }
 
-        /* POSITION NORMALE : À DROITE */
+        /* POSITION PAR DÉFAUT (À DROITE) */
         .car-card .hover-specs { 
             left: 105%; 
             box-shadow: 15px 0 30px rgba(0,0,0,0.3); 
         }
 
-        /* POSITION DERNIÈRE VOITURE : REVIENT AU MILIEU (SUR LA CARTE) */
-        /* C'est ici que l'on corrige le problème de l'écran */
+        /* CORRECTION : MILIEU POUR LA PREMIÈRE ET LA DERNIÈRE VOITURE */
+        .car-card.pos-first .hover-specs,
         .car-card.pos-last .hover-specs { 
-            left: 50% !important;
-            transform: translateX(-50%);
-            width: 100%; /* Prend toute la largeur de la carte pour être centré */
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            left: 0 !important;
+            right: 0 !important;
+            margin: 0 auto;
+            width: 100%;
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
+            transform: none;
         }
 
         .car-card:hover { transform: scale(1.02); z-index: 500; }
@@ -130,7 +132,7 @@
         </div>
 
         <section>
-            <h2 class="font-title text-xl px-6 lg:px-24 mb-4 opacity-40 tracking-widest text-white">BMW</h2>
+            <h2 class="font-title text-xl px-6 lg:px-24 mb-4 opacity-40 tracking-widest text-white uppercase">BMW</h2>
             <div class="row-wrapper">
                 <button class="nav-btn btn-prev" onclick="scrollRow('row-bmw', -1)">❮</button>
                 <div class="story-row" id="row-bmw"></div>
@@ -139,7 +141,7 @@
         </section>
 
         <section>
-            <h2 class="font-title text-xl px-6 lg:px-24 mb-4 opacity-40 tracking-widest text-white">MERCEDES BENZ</h2>
+            <h2 class="font-title text-xl px-6 lg:px-24 mb-4 opacity-40 tracking-widest text-white uppercase">MERCEDES BENZ</h2>
             <div class="row-wrapper">
                 <button class="nav-btn btn-prev" onclick="scrollRow('row-mercedes', -1)">❮</button>
                 <div class="story-row" id="row-mercedes"></div>
@@ -148,7 +150,7 @@
         </section>
 
         <section>
-            <h2 class="font-title text-xl px-6 lg:px-24 mb-4 opacity-40 tracking-widest text-white">PORSCHE</h2>
+            <h2 class="font-title text-xl px-6 lg:px-24 mb-4 opacity-40 tracking-widest text-white uppercase">PORSCHE</h2>
             <div class="row-wrapper">
                 <button class="nav-btn btn-prev" onclick="scrollRow('row-porsche', -1)">❮</button>
                 <div class="story-row" id="row-porsche"></div>
@@ -162,8 +164,11 @@
             const row = document.getElementById(rowId);
             let html = '';
             carList.forEach((car, index) => {
-                // Marque la dernière voiture pour recentrer les infos
-                const posClass = (index === carList.length - 1) ? "pos-last" : "";
+                // Détection de la première et de la dernière voiture
+                let posClass = "";
+                if (index === 0) posClass = "pos-first";
+                if (index === carList.length - 1) posClass = "pos-last";
+
                 html += `
                 <div class="car-card ${posClass}">
                     <div class="hover-specs">
@@ -193,32 +198,32 @@
             document.getElementById(rowId).scrollBy({ left: direction * 380, behavior: 'smooth' });
         }
 
-        // 6 voitures par marque
+        // DONNÉES (6 voitures par marque)
         const bmwData = [
             { img: 'bmw1.jpg', nom: 'M4 Competition', prix: 'Rs 5.2M', motorisation: 'V6 Biturbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
             { img: 'bmw2.jpg', nom: 'M5 CS', prix: 'Rs 7.8M', motorisation: 'V8 M-Twin', disponibilite: 'Limitée', etat: 'Occasion', kilometrage: '12k km', annee: '2022', carburant: 'Essence' },
             { img: 'bmw3.jpg', nom: 'M8 Gran Coupe', prix: 'Rs 8.5M', motorisation: 'V8 Turbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '200 km', annee: '2023', carburant: 'Essence' },
-            { img: 'bmw4.jpg', nom: 'X5 M', prix: 'Rs 6.2M', motorisation: 'V8 Turbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'bmw5.jpg', nom: 'M2 Coupe', prix: 'Rs 4.1M', motorisation: 'L6 Turbo', disponibilite: 'Disponible', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'bmw6.jpg', nom: 'i7 M70', prix: 'Rs 9.1M', motorisation: 'Électrique', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Élec' }
+            { img: 'bmw4.jpg', nom: 'X5 M Comp.', prix: 'Rs 6.5M', motorisation: 'V8 M-Twin', disponibilite: 'Disponible', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'bmw5.jpg', nom: 'M2 Coupe', prix: 'Rs 4.1M', motorisation: 'L6 Turbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'bmw6.jpg', nom: 'i7 M70', prix: 'Rs 9.2M', motorisation: 'Électrique', disponibilite: 'Rare', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Élec' }
         ];
 
         const mercedesData = [
             { img: 'merc1.jpg', nom: 'AMG GT 63 S', prix: 'Rs 10.2M', motorisation: 'V8 Twin-Turbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '100 km', annee: '2023', carburant: 'Essence' },
             { img: 'merc2.jpg', nom: 'AMG G 63', prix: 'Rs 9.5M', motorisation: 'V8 Biturbo', disponibilite: 'Sur Commande', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'merc3.jpg', nom: 'EQE 53 AMG', prix: 'Rs 8.9M', motorisation: 'Électrique', disponibilite: 'Disponible', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Électrique' },
-            { img: 'merc4.jpg', nom: 'SL 63 AMG', prix: 'Rs 11.0M', motorisation: 'V8 Turbo', disponibilite: 'Rare', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'merc5.jpg', nom: 'C63 AMG', prix: 'Rs 5.5M', motorisation: 'L4 Hybride', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Hybride' },
-            { img: 'merc6.jpg', nom: 'AMG One', prix: 'Rs 120M', motorisation: 'V6 F1', disponibilite: 'Collection', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' }
+            { img: 'merc3.jpg', nom: 'EQE 53 AMG', prix: 'Rs 8.9M', motorisation: 'Électrique', disponibilite: 'Disponible', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Élec' },
+            { img: 'merc4.jpg', nom: 'SL 63 AMG', prix: 'Rs 11.2M', motorisation: 'V8 Turbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'merc5.jpg', nom: 'C63 S E-Perf', prix: 'Rs 5.8M', motorisation: 'Hybride AMG', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Hybride' },
+            { img: 'merc6.jpg', nom: 'AMG GT Black', prix: 'Rs 18.5M', motorisation: 'V8 Biturbo', disponibilite: 'Collection', etat: 'Neuf', kilometrage: '0 km', annee: '2023', carburant: 'Essence' }
         ];
 
         const porscheData = [
             { img: 'p1.jpg', nom: '911 GT3 RS', prix: 'Rs 15.2M', motorisation: '6 Cyl. Flat', disponibilite: 'Rare', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
             { img: 'p2.jpg', nom: 'Taycan Turbo S', prix: 'Rs 9.8M', motorisation: 'Électrique', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Électrique' },
             { img: 'p3.jpg', nom: '718 Cayman GT4', prix: 'Rs 6.5M', motorisation: 'Flat 6', disponibilite: 'Disponible', etat: 'Occasion', kilometrage: '8k km', annee: '2022', carburant: 'Essence' },
-            { img: 'p4.jpg', nom: 'Panamera Turbo', prix: 'Rs 8.2M', motorisation: 'V8 Turbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'p5.jpg', nom: 'Macan GTS', prix: 'Rs 4.9M', motorisation: 'V6 Turbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
-            { img: 'p6.jpg', nom: '918 Spyder', prix: 'Rs 75M', motorisation: 'V8 Hybride', disponibilite: 'Collection', etat: 'Occasion', kilometrage: '2k km', annee: '2015', carburant: 'Hybride' }
+            { img: 'p4.jpg', nom: 'Panamera Turbo', prix: 'Rs 8.4M', motorisation: 'V8 Turbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'p5.jpg', nom: 'Macan GTS', prix: 'Rs 4.7M', motorisation: 'V6 Turbo', disponibilite: 'En Stock', etat: 'Neuf', kilometrage: '0 km', annee: '2024', carburant: 'Essence' },
+            { img: 'p6.jpg', nom: '918 Spyder', prix: 'Rs 72M', motorisation: 'V8 Hybride', disponibilite: 'Collection', etat: 'Occasion', kilometrage: '2k km', annee: '2015', carburant: 'Hybride' }
         ];
 
         injectCars('row-bmw', bmwData);
