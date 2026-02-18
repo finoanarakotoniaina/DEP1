@@ -1,0 +1,161 @@
+/* --- VARIABLES ET CONFIGURATION DE BASE --- */
+:root {
+    --crimson: #C1121F;
+    --varden: #FFF6D6;
+    --cosmos: #003049;
+    --marble: #669BBC;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--cosmos);
+    color: white;
+    scroll-behavior: smooth;
+    margin: 0;
+}
+
+/* --- CLASSES COMMUNES --- */
+.font-title { 
+    font-family: 'Syncopate', sans-serif; 
+}
+
+.split-bg {
+    background: linear-gradient(160deg, var(--cosmos) 60%, #001a2a 60.1%);
+}
+
+/* Adaptation du dégradé pour l'accueil */
+.home-bg {
+    background: linear-gradient(160deg, var(--cosmos) 80%, #001a2a 100%);
+}
+
+.outline-text {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.15);
+}
+
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+}
+
+/* --- COMPOSANTS DE FORMULAIRE --- */
+.floating-input {
+    background: rgba(255,255,255,0.03);
+    border-bottom: 2px solid rgba(102, 155, 188, 0.3);
+    transition: all 0.4s ease;
+}
+
+.floating-input:focus {
+    border-bottom-color: var(--crimson);
+    background: rgba(193, 18, 31, 0.05);
+    outline: none;
+}
+
+/* --- STYLES SPÉCIFIQUES (ACCUEIL) --- */
+.brand-card {
+    transition: all 0.5s ease;
+    border-left: 2px solid transparent;
+}
+
+.brand-card:hover {
+    border-left-color: var(--crimson);
+    background: rgba(255,255,255,0.05);
+    padding-left: 2rem;
+}
+
+.video-overlay {
+    background: rgba(0, 48, 73, 0.6);
+}
+
+/* --- STYLES SPÉCIFIQUES (SERVICES) --- */
+.service-card {
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.service-card:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: var(--crimson);
+    transform: translateY(-10px);
+}
+
+.service-image-mask {
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%);
+    transition: all 0.6s ease;
+}
+
+.service-card:hover .service-image-mask {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 100%);
+}
+
+/* --- STYLES SPÉCIFIQUES (VOITURES / INVENTAIRE) --- */
+.main-container:has(.car-card:hover) nav,
+.main-container:has(.car-card:hover) .section-header {
+    filter: blur(10px);
+    opacity: 0.3;
+}
+
+.story-row:hover .car-card {
+    filter: blur(8px);
+    opacity: 0.2;
+    transform: scale(0.95);
+}
+
+.story-row .car-card:hover {
+    filter: blur(0) !important;
+    opacity: 1 !important;
+    transform: scale(1.05) !important;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--crimson);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.extra-specs {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 260px;
+    background: var(--crimson);
+    padding: 25px;
+    border-radius: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+    z-index: 110;
+}
+
+.car-card .extra-specs { left: 105%; }
+.car-card.specs-left .extra-specs { left: auto; right: 105%; }
+.car-card:hover .extra-specs { opacity: 1; visibility: visible; }
+
+.story-row {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 2rem;
+    padding: 3rem 1rem;
+    width: 100%;
+    scrollbar-width: none;
+}
+
+.car-card {
+    flex: 0 0 calc((100% - 4rem) / 3);
+    min-width: 300px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+}
+
+/* --- STYLES CONNEXION ET CONTACT --- */
+.image-panel-mask {
+    clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.map-container {
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+}

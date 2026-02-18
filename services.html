@@ -6,54 +6,7 @@
     <title>SuperCar | Excellence Technique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --crimson: #C1121F;
-            --varden: #FFF6D6;
-            --cosmos: #003049;
-            --marble: #669BBC;
-        }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--cosmos);
-            color: white;
-            scroll-behavior: smooth;
-        }
-        .font-title { font-family: 'Syncopate', sans-serif; }
-        
-        .split-bg {
-            background: linear-gradient(160deg, var(--cosmos) 60%, #001a2a 60.1%);
-        }
-
-        .outline-text {
-            color: transparent;
-            -webkit-text-stroke: 1px rgba(255,255,255,0.15);
-        }
-
-        /* Cartes de service avec effet de découpe asymétrique */
-        .service-card {
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .service-card:hover {
-            background: rgba(255,255,255,0.03);
-            border-color: var(--crimson);
-            transform: translateY(-10px);
-        }
-
-        .service-image-mask {
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%);
-            transition: all 0.6s ease;
-        }
-        .service-card:hover .service-image-mask {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 100%);
-        }
-
-        .vertical-text {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="split-bg">
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
