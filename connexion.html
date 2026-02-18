@@ -6,46 +6,7 @@
     <title>SuperCar | Authentification</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --crimson: #C1121F;
-            --varden: #FFF6D6;
-            --cosmos: #003049;
-            --marble: #669BBC;
-        }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--cosmos);
-            color: white;
-            overflow: hidden;
-        }
-        .font-title { font-family: 'Syncopate', sans-serif; }
-        
-        .split-bg {
-            background: linear-gradient(160deg, var(--cosmos) 60%, #001a2a 60.1%);
-        }
-
-        /* Champ de saisie stylisé comme la page de services */
-        .floating-input {
-            background: rgba(255,255,255,0.03);
-            border-bottom: 2px solid rgba(102, 155, 188, 0.3);
-            transition: all 0.4s ease;
-        }
-        .floating-input:focus {
-            border-bottom-color: var(--crimson);
-            background: rgba(193, 18, 31, 0.05);
-            outline: none;
-        }
-
-        .image-panel-mask {
-            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
-        }
-
-        .outline-text {
-            color: transparent;
-            -webkit-text-stroke: 1px rgba(255,255,255,0.1);
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="split-bg">
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
