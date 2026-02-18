@@ -7,26 +7,25 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* --- Styles des Boutons de Navigation (Ajoutés ici) --- */
+        /* --- Styles des Boutons de Navigation épurés --- */
         .row-wrapper {
             position: relative;
-            padding: 0 45px; /* Laisse de la place pour les flèches sur les côtés */
+            /* On augmente le padding pour laisser de la place au zoom des cartes */
+            padding: 0 60px; 
         }
 
         .story-row {
             display: flex;
             overflow-x: auto;
             scroll-behavior: smooth;
-            gap: 20px;
-            padding: 20px 0;
-            scrollbar-width: none; /* Cache le scroll sur Firefox */
+            gap: 25px;
+            padding: 30px 0; /* Plus d'espace vertical pour le zoom */
+            scrollbar-width: none;
         }
 
-        /* Cache le scroll sur Chrome, Safari et Edge */
         .story-row::-webkit-scrollbar {
             display: none;
         }
@@ -35,35 +34,45 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 50px;
-            height: 50px;
-            background-color: var(--crimson, #b91c1c); /* Utilise ta variable ou rouge par défaut */
+            /* Taille réduite */
+            width: 40px;
+            height: 40px;
+            /* Style transparent */
+            background-color: rgba(255, 255, 255, 0.1);
             color: white;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             cursor: pointer;
-            z-index: 30;
+            z-index: 40; /* Pour rester au-dessus mais sans gêner */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            font-size: 16px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(8px); /* Effet verre dépoli */
         }
 
         .nav-btn:hover {
-            background-color: white;
-            color: #b91c1c;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: black;
+            border-color: white;
             transform: translateY(-50%) scale(1.1);
         }
 
-        .btn-prev { left: 0; }
-        .btn-next { right: 0; }
+        /* Positionnement excentré pour ne pas superposer les voitures */
+        .btn-prev { left: 5px; }
+        .btn-next { right: 5px; }
 
-        /* Correction pour s'assurer que les cartes gardent leur taille dans le scroll */
         .car-card {
             min-width: 350px;
             flex-shrink: 0;
+            transition: transform 0.4s ease;
+        }
+
+        /* On s'assure que le zoom de la carte ne passe pas sous le bouton */
+        .car-card:hover {
+            transform: scale(1.02);
+            z-index: 10;
         }
     </style>
 </head>
@@ -72,7 +81,6 @@
     <div class="main-container">
         <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
             <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-            
             <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
                 <li><a href="acceuil.html" class="hover:text-[var(--crimson)] transition-colors">Accueil</a></li>
                 <li><a href="voiture.html" class="text-[var(--crimson)]">Voitures</a></li>
@@ -121,7 +129,6 @@
     </div>
 
     <script>
-        // Fonction pour injecter les voitures dans les rangées
         function injectCars(rowId, carList) {
             const row = document.getElementById(rowId);
             if (!row) return;
@@ -147,16 +154,15 @@
             row.innerHTML = html;
         }
 
-        // Fonction pour gérer le défilement horizontal
         function scrollRow(rowId, direction) {
             const row = document.getElementById(rowId);
-            const scrollAmount = 370; // Largeur d'une carte + le gap
+            const scrollAmount = 375; 
             row.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
         }
 
-        // --- Données : 6 voitures par marque ---
+        // --- Données ---
         const bmwData = [
-            { img: 'bmw1.jpg', name: 'M4 Competition', price: 'Rs 5.2M', tag: 'M-Series' },
+            { img: 'bmw1.jpg', name: 'M4 Competition', price: 'Rs 5.2M', tag: 'M-Power' },
             { img: 'bmw2.jpg', name: 'M5 CS', price: 'Rs 7.8M', tag: 'Limited' },
             { img: 'bmw3.jpg', name: 'M8 Gran Coupe', price: 'Rs 8.5M', tag: 'V8 Turbo' },
             { img: 'bmw4.jpg', name: 'Z4 M40i', price: 'Rs 3.9M', tag: 'Roadster' },
@@ -182,7 +188,6 @@
             { img: 'p6.jpg', name: '918 Spyder', price: 'Rs 65M', tag: 'Iconic' }
         ];
 
-        // Initialisation de la page
         injectCars('row-bmw', bmwData);
         injectCars('row-mercedes', mercedesData);
         injectCars('row-porsche', porscheData);
