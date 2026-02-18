@@ -10,11 +10,12 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* --- Styles des Boutons de Navigation épurés --- */
+        /* --- Styles des Boutons de Navigation --- */
         .row-wrapper {
             position: relative;
-            /* On augmente le padding pour laisser de la place au zoom des cartes */
-            padding: 0 60px; 
+            /* Padding latéral pour les boutons et vertical pour éviter la coupure du zoom */
+            padding: 40px 60px; 
+            margin-top: -40px; /* Compense le padding pour l'alignement */
         }
 
         .story-row {
@@ -22,8 +23,11 @@
             overflow-x: auto;
             scroll-behavior: smooth;
             gap: 25px;
-            padding: 30px 0; /* Plus d'espace vertical pour le zoom */
+            /* IMPORTANT : On ajoute du padding en haut et bas pour que le zoom ne soit pas coupé par l'overflow */
+            padding: 30px 10px; 
             scrollbar-width: none;
+            /* Permet aux éléments enfants de déborder visuellement sans être coupés immédiatement */
+            clip-path: inset(-100px 0px -100px 0px); 
         }
 
         .story-row::-webkit-scrollbar {
@@ -34,45 +38,49 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            /* Taille réduite */
-            width: 40px;
-            height: 40px;
-            /* Style transparent */
-            background-color: rgba(255, 255, 255, 0.1);
+            width: 45px;
+            height: 45px;
+            background-color: rgba(255, 255, 255, 0.05);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             cursor: pointer;
-            z-index: 40; /* Pour rester au-dessus mais sans gêner */
+            z-index: 50;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            backdrop-filter: blur(8px); /* Effet verre dépoli */
+            font-size: 18px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         .nav-btn:hover {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: white;
             color: black;
-            border-color: white;
             transform: translateY(-50%) scale(1.1);
         }
 
-        /* Positionnement excentré pour ne pas superposer les voitures */
-        .btn-prev { left: 5px; }
-        .btn-next { right: 5px; }
+        .btn-prev { left: 10px; }
+        .btn-next { right: 10px; }
 
+        /* --- Style de la Carte avec Zoom corrigé --- */
         .car-card {
             min-width: 350px;
             flex-shrink: 0;
-            transition: transform 0.4s ease;
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+            position: relative;
         }
 
-        /* On s'assure que le zoom de la carte ne passe pas sous le bouton */
         .car-card:hover {
-            transform: scale(1.02);
-            z-index: 10;
+            /* Un zoom plus doux qui ne sort pas des limites grâce au padding parent */
+            transform: scale(1.05); 
+            z-index: 20;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        /* Empêche les images de déborder de l'arrondi de la carte lors du zoom */
+        .car-card img {
+            transition: transform 0.4s ease;
         }
     </style>
 </head>
@@ -92,14 +100,14 @@
         </nav>
 
         <main class="pt-40">
-            <div class="section-header px-6 lg:px-24 mb-16 relative">
+            <div class="section-header px-6 lg:px-24 mb-10 relative">
                 <div class="absolute left-0 -top-10 outline-text font-title text-8xl opacity-10 select-none uppercase">Inventaire</div>
                 <span class="text-[var(--marble)] font-bold tracking-[0.5em] uppercase mb-2 block">Collection Exclusive</span>
                 <h1 class="font-title text-5xl md:text-7xl mb-4">NOS <span class="text-[var(--crimson)]">MODÈLES</span></h1>
                 <div class="w-32 h-1 bg-[var(--crimson)]"></div>
             </div>
 
-            <section class="mb-20">
+            <section class="mb-10">
                 <h2 class="font-title text-xl px-6 lg:px-24 mb-4 opacity-40 tracking-widest">BMW</h2>
                 <div class="row-wrapper">
                     <button class="nav-btn btn-prev" onclick="scrollRow('row-bmw', -1)">❮</button>
@@ -108,7 +116,7 @@
                 </div>
             </section>
 
-            <section class="mb-20">
+            <section class="mb-10">
                 <h2 class="font-title text-xl px-6 lg:px-24 mb-4 opacity-40 tracking-widest">Mercedes Benz</h2>
                 <div class="row-wrapper">
                     <button class="nav-btn btn-prev" onclick="scrollRow('row-mercedes', -1)">❮</button>
@@ -117,7 +125,7 @@
                 </div>
             </section>
 
-            <section class="mb-20">
+            <section class="mb-10">
                 <h2 class="font-title text-xl px-6 lg:px-24 mb-4 opacity-40 tracking-widest">Porsche</h2>
                 <div class="row-wrapper">
                     <button class="nav-btn btn-prev" onclick="scrollRow('row-porsche', -1)">❮</button>
@@ -160,7 +168,7 @@
             row.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
         }
 
-        // --- Données ---
+        // --- Données (6 voitures par marque) ---
         const bmwData = [
             { img: 'bmw1.jpg', name: 'M4 Competition', price: 'Rs 5.2M', tag: 'M-Power' },
             { img: 'bmw2.jpg', name: 'M5 CS', price: 'Rs 7.8M', tag: 'Limited' },
@@ -172,7 +180,7 @@
 
         const mercedesData = [
             { img: 'merc1.jpg', nom: 'AMG CLA 45 S', prix: 'Rs 3.5M', tag: 'AMG' },
-            { img: 'merc2.jpg', nom: 'AMG G 63', prix: 'Rs 9.3M', tag: 'V8 Legend' },
+            { img: 'merc2.jpg', nom: 'AMG G 63', prix: 'Rs 9.3M', tag: 'Legend' },
             { img: 'merc3.jpg', nom: 'AMG EQE Berline', prix: 'Rs 9.2M', tag: 'Electric' },
             { img: 'merc4.jpg', nom: 'AMG SL Roadster', prix: 'Rs 8.1M', tag: 'Luxury' },
             { img: 'merc5.jpg', nom: 'AMG GT 63 S', prix: 'Rs 10.5M', tag: 'Biturbo' },
