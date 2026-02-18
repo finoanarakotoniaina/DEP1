@@ -6,6 +6,27 @@
     --marble: #669BBC;
 }
 
+/* --- NAVIGATION (LA CORRECTION EST ICI) --- */
+.nav-link {
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.nav-link:hover {
+    color: var(--crimson);
+    opacity: 1;
+}
+
+/* Cette classe doit être déplacée manuellement dans chaque fichier HTML */
+.nav-link.active {
+    color: var(--crimson) !important;
+    opacity: 1;
+    font-weight: bold;
+}
+
+/* --- BASE --- */
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-color: var(--cosmos);
@@ -23,7 +44,6 @@ body {
     background: linear-gradient(160deg, var(--cosmos) 60%, #001a2a 60.1%);
 }
 
-/* Adaptation du dégradé pour l'accueil */
 .home-bg {
     background: linear-gradient(160deg, var(--cosmos) 80%, #001a2a 100%);
 }
