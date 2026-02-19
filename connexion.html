@@ -8,16 +8,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* L'image prend tout l'écran en arrière-plan */
+        /* L'image de fond remplit tout l'écran */
         body {
             background: url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2070') no-repeat center center fixed;
             background-size: cover;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: white;
         }
 
-        .font-title { font-family: 'Syncopate', sans-serif; }
-
-        /* Effet Glassmorphism pour le panneau latéral */
+        /* Panneau Glassmorphism latéral sans bordure de boîte */
         .glass-panel {
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(25px);
@@ -25,16 +23,19 @@
             border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .font-title { font-family: 'Syncopate', sans-serif; }
+        
         .outline-text {
             -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
             color: transparent;
         }
 
-        /* Style des inputs sans majuscules forcées */
+        /* Input personnalisé sans 'uppercase' forcé */
         .floating-input {
             background: rgba(255, 255, 255, 0.05);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
+            outline: none;
         }
 
         .floating-input:focus {
@@ -46,62 +47,51 @@
 
 <body class="h-screen w-full flex overflow-hidden">
 
-    <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5 text-white">
+    <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson, #dc143c)]">CAR</span></div>
+        
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-<<<<<<< HEAD
             <li><a href="accueil.html" class="hover:text-[var(--crimson, #dc143c)] transition">Accueil</a></li>
             <li><a href="voiture.html" class="hover:text-[var(--crimson, #dc143c)] transition">Voitures</a></li>
-            <li><a href="demande.html" class="hover:text-[var(--crimson, #dc143c)] transition text-[var(--crimson, #dc143c)]">Connexion</a></li>
+            <li><a href="demande.html" class="hover:text-[var(--crimson, #dc143c)] transition">Essai</a></li>
+            <li><a href="services.html" class="hover:text-[var(--crimson, #dc143c)] transition">Services</a></li>
             <li><a href="contact.html" class="hover:text-[var(--crimson, #dc143c)] transition">Contact</a></li>
-=======
-<<<<<<< HEAD
-            <li><a href="acceuil.html" class="nav-link">Accueil</a></li>
-            <li><a href="voiture.html" class="nav-link">Voitures</a></li>
-=======
-            <li><a href="accueil.html" class="nav-link">Accueil</a></li>
-            <li><a href="voiture.html" class="nav-link active">Voitures</a></li>
->>>>>>> 33583e8a651fb180444266e94cbcc92a37fa5a4d
-            <li><a href="demande.html" class="nav-link">Essai</a></li>
-            <li><a href="services.html" class="nav-link">Services</a></li>
-            <li><a href="contact.html" class="nav-link">Contact</a></li>
-            <li><a href="connexion.html">Connexion</a></li>
->>>>>>> 7a9eb6bfd67af23cbc85eaf0410a08c88ab7d1da
+            <li><a href="connexion.html" class="text-[var(--crimson, #dc143c)]">Connexion</a></li>
         </ul>
     </nav>
 
     <main class="flex w-full h-full">
         
-        <div class="glass-panel w-full lg:w-1/2 h-full flex flex-col justify-center px-12 md:px-24 relative z-10 shadow-2xl">
+        <div class="glass-panel w-full lg:w-1/2 h-full flex flex-col justify-center px-12 md:px-24 relative">
             
-            <div class="absolute top-1/4 left-10 outline-text font-title text-8xl md:text-9xl select-none opacity-10 pointer-events-none">
+            <div class="absolute top-1/4 left-10 outline-text font-title text-8xl select-none opacity-10 pointer-events-none">
                 ACCÈS
             </div>
             
-            <div class="z-20">
-                <h2 class="font-title text-4xl md:text-5xl mb-2 tracking-tighter text-white">
+            <div class="z-10">
+                <h2 class="font-title text-4xl mb-2 tracking-tighter">
                     CONNEXION <br> <span class="text-[var(--crimson, #dc143c)]">PILOTE</span>
                 </h2>
-                <div class="w-20 h-1 bg-[var(--crimson, #dc143c)] mb-12"></div>
+                <div class="w-16 h-1 bg-[var(--crimson, #dc143c)] mb-12"></div>
 
-                <form class="space-y-10 max-w-md">
+                <form class="space-y-8 max-w-md">
                     <div class="space-y-2">
                         <label class="text-[10px] uppercase tracking-[0.4em] text-gray-300 font-bold">Identifiant</label>
                         <input type="email" placeholder="votre@email.com" required 
-                            class="floating-input w-full p-4 text-sm tracking-widest text-white outline-none">
+                            class="floating-input w-full p-4 text-xs tracking-widest text-white">
                     </div>
 
                     <div class="space-y-2">
                         <label class="text-[10px] uppercase tracking-[0.4em] text-gray-300 font-bold">Mot de passe</label>
                         <input type="password" placeholder="••••••••••••" required 
-                            class="floating-input w-full p-4 text-sm tracking-widest text-white outline-none">
+                            class="floating-input w-full p-4 text-xs tracking-widest text-white">
                     </div>
 
                     <div class="flex flex-col gap-6 pt-6">
-                        <button type="submit" class="bg-[var(--crimson, #dc143c)] py-5 font-title text-[11px] tracking-[0.5em] uppercase text-white hover:bg-white hover:text-black transition-all duration-500 shadow-lg">
+                        <button type="submit" class="bg-[var(--crimson, #dc143c)] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500 text-white shadow-xl">
                             VALIDER L'ACCÈS
                         </button>
-                        <a href="#" class="text-white font-bold text-[10px] uppercase tracking-[0.2em] hover:text-[var(--crimson, #dc143c)] transition-colors text-center lg:text-left">
+                        <a href="#" class="text-gray-300 font-bold text-xs uppercase tracking-[0.2em] hover:text-[var(--crimson, #dc143c)] transition-colors">
                             Créer un profil membre
                         </a>
                     </div>
@@ -110,6 +100,7 @@
         </div>
 
         <div class="hidden lg:block lg:w-1/2"></div>
+
     </main>
 
 </body>
