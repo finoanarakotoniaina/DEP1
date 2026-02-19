@@ -18,16 +18,16 @@
 
 <body class="split-bg h-screen w-full flex flex-col overflow-hidden">
 
-    <nav class="w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
+    <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
         
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
             <li><a href="accueil.html" class="nav-link">Accueil</a></li>
-            <li><a href="voiture.html" class="nav-link active">Voitures</a></li>
+            <li><a href="voiture.html" class="nav-link">Voitures</a></li>
             <li><a href="demande.html" class="nav-link">Essai</a></li>
             <li><a href="services.html" class="nav-link">Services</a></li>
             <li><a href="contact.html" class="nav-link">Contact</a></li>
-            <li><a href="connexion.html">Connexion</a></li>
+            <li><a href="connexion.html" class="nav-link active">Connexion</a></li>
         </ul>
     </nav>
 
@@ -36,7 +36,7 @@
         <div class="flex flex-col justify-center px-12 md:px-24 lg:px-32 relative h-full">
             <div class="z-10 max-w-lg w-full">
                 <h2 class="font-title text-3xl md:text-5xl mb-2 tracking-tighter">
-                    CONNEXION <br> <span class="text-[var(--crimson)]">PILOTE</span>
+                     <br> <span class="text-[var(--crimson)]">CONNEXION</span>
                 </h2>
                 <div class="w-20 h-1 bg-[var(--crimson)] mb-12"></div>
 
@@ -55,7 +55,7 @@
 
                     <div class="flex flex-col gap-6 pt-6">
                         <button type="submit" class="bg-[var(--crimson)] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500">
-                            VALIDER L'ACCÈS
+                            Se connecter
                         </button>
                         <a href="#" class="text-[var(--varden)] font-bold text-[10px] uppercase tracking-[0.2em] hover:text-[var(--crimson)] transition-colors">
                             Créer un profil membre
