@@ -11,7 +11,7 @@
 
 <body class="split-bg h-screen flex items-center justify-center p-6 overflow-hidden">
 
-   <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
+    <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
         
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
@@ -38,16 +38,18 @@
                 <form class="space-y-8">
                     <div class="space-y-2">
                         <label class="text-[10px] uppercase tracking-[0.4em] text-[var(--marble)] font-bold">Identifiant</label>
-                        <input type="email" placeholder="VOTRE@EMAIL.COM" required class="floating-input w-full p-4 text-xs tracking-widest uppercase text-white">
+                        <input type="email" placeholder="votre@email.com" required 
+                            class="floating-input w-full p-4 text-xs tracking-widest text-white outline-none">
                     </div>
 
                     <div class="space-y-2">
                         <label class="text-[10px] uppercase tracking-[0.4em] text-[var(--marble)] font-bold">Mot de passe</label>
-                        <input type="password" placeholder="••••••••••••" required class="floating-input w-full p-4 text-xs tracking-widest uppercase text-white">
+                        <input type="password" placeholder="••••••••••••" required 
+                            class="floating-input w-full p-4 text-xs tracking-widest text-white outline-none">
                     </div>
 
                     <div class="flex flex-col gap-6 pt-6">
-                        <button type="submit" class="bg-[var(--crimson)] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500">
+                        <button type="submit" class="bg-[var(--crimson)] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500 text-white">
                             VALIDER L'ACCÈS
                         </button>
                         <a href="#" class="text-[var(--varden)] font-bold text-xs uppercase tracking-[0.2em] hover:text-[var(--crimson)] transition-colors">
@@ -59,4 +61,10 @@
         </div>
 
         <div class="hidden lg:block relative image-panel-mask">
-            <img src="
+            <img src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2070" 
+                 class="w-full h-full object-cover opacity-80" alt="Supercar">
+        </div>
+    </div>
+
+</body>
+</html>
