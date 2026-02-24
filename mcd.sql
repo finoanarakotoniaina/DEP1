@@ -40,7 +40,7 @@ CREATE TABLE voiture(
    id_marque VARCHAR(50) NOT NULL,
    PRIMARY KEY(id_voiture),
    FOREIGN KEY(id_service) REFERENCES service(id_service),
-   FOREIGN KEY(id_marque) REFERENCES marque_(id_marque)
+   FOREIGN KEY(id_marque) REFERENCES marque(id_marque)
 );
 
 CREATE TABLE client(
@@ -63,6 +63,6 @@ CREATE TABLE demande_essai(
    id_client VARCHAR(50) NOT NULL,
    id_voiture VARCHAR(50) NOT NULL,
    PRIMARY KEY(id_demande),
-   FOREIGN KEY(id_client) REFERENCES client_(id_client),
+   FOREIGN KEY(id_client) REFERENCES client(id_client),
    FOREIGN KEY(id_voiture) REFERENCES voiture(id_voiture)
 );
