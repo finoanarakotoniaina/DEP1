@@ -1,4 +1,4 @@
-CREATE TABLE marque_(
+CREATE TABLE marque(
    id_marque VARCHAR(50),
    nom_marque VARCHAR(50),
    PRIMARY KEY(id_marque)
@@ -43,7 +43,7 @@ CREATE TABLE voiture(
    FOREIGN KEY(id_marque) REFERENCES marque_(id_marque)
 );
 
-CREATE TABLE client_(
+CREATE TABLE client(
    id_client VARCHAR(50),
    nom VARCHAR(50),
    prenom VARCHAR(50),
