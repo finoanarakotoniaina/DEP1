@@ -8,15 +8,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Effet de fondu progressif sur l'image pour la confondre avec ton fond split-bg */
         .image-mask-gradient {
             mask-image: linear-gradient(to right, transparent, black 50%);
             -webkit-mask-image: linear-gradient(to right, transparent, black 50%);
         }
+        /* Style des champs type "Essai" sans la box */
+        .input-essai {
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: border-color 0.5s ease;
+            color: white;
+            border-radius: 0; /* Important pour enlever l'arrondi par défaut */
+        }
+        .input-essai:focus {
+            border-color: #C1121F; /* var(--crimson) */
+            outline: none;
+        }
     </style>
 </head>
 
-<body class="split-bg h-screen w-full flex flex-col overflow-hidden">
+<body class="split-bg h-screen w-full flex flex-col overflow-hidden text-white">
 
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
@@ -35,29 +50,29 @@
         
         <div class="flex flex-col justify-center px-12 md:px-24 lg:px-32 relative h-full">
             <div class="z-10 max-w-lg w-full">
-                <h2 class="font-title text-3xl md:text-5xl mb-2 tracking-tighter">
-                     <br> <span class="text-[var(--crimson)]">CONNEXION</span>
+                <h2 class="font-title text-3xl md:text-5xl mb-2 tracking-tighter uppercase">
+                    <span class="text-[var(--crimson)]">Connexion</span>
                 </h2>
                 <div class="w-20 h-1 bg-[var(--crimson)] mb-12"></div>
 
-                <form class="space-y-10">
-                    <div class="space-y-3">
-                        <label class="text-[10px] uppercase tracking-[0.4em] text-[var(--marble)] font-bold">Identifiant</label>
-                        <input type="email" placeholder="votre@email.com" required 
-                            class="floating-input w-full p-4 text-sm tracking-widest text-white outline-none">
+                <form class="space-y-8">
+                    <div class="flex flex-col">
+                        <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Identifiant</label>
+                        <input type="email" placeholder="VOTRE@EMAIL.COM" required 
+                            class="input-essai w-full">
                     </div>
 
-                    <div class="space-y-3">
-                        <label class="text-[10px] uppercase tracking-[0.4em] text-[var(--marble)] font-bold">Mot de passe</label>
+                    <div class="flex flex-col">
+                        <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Mot de passe</label>
                         <input type="password" placeholder="••••••••••••" required 
-                            class="floating-input w-full p-4 text-sm tracking-widest text-white outline-none">
+                            class="input-essai w-full">
                     </div>
 
-                    <div class="flex flex-col gap-6 pt-6">
+                    <div class="flex flex-col gap-6 pt-10">
                         <button type="submit" class="bg-[var(--crimson)] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500">
                             Se connecter
                         </button>
-                        <a href="#" class="text-[var(--varden)] font-bold text-[10px] uppercase tracking-[0.2em] hover:text-[var(--crimson)] transition-colors">
+                        <a href="#" class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:text-[var(--crimson)] transition-colors text-center md:text-left">
                             Créer un profil membre
                         </a>
                     </div>
