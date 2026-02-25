@@ -2,7 +2,7 @@ CREATE TABLE marque(
    id_marque VARCHAR(50),
    nom_marque VARCHAR(50),
    PRIMARY KEY(id_marque)
-);
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 CREATE TABLE service(
    id_service VARCHAR(50),
@@ -10,15 +10,15 @@ CREATE TABLE service(
    type VARCHAR(50),
    description VARCHAR(50),
    PRIMARY KEY(id_service)
-);
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 CREATE TABLE login(
    id_login VARCHAR(50),
    statut VARCHAR(50),
    login VARCHAR(50),
-   password VARCHAR(50),
+   password VARCHAR(250),
    PRIMARY KEY(id_login)
-);
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 CREATE TABLE contact(
    id_contact VARCHAR(50),
@@ -27,7 +27,7 @@ CREATE TABLE contact(
    nom VARCHAR(50),
    prenom VARCHAR(50),
    PRIMARY KEY(id_contact)
-);
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 CREATE TABLE voiture(
    id_voiture VARCHAR(50),
@@ -41,7 +41,7 @@ CREATE TABLE voiture(
    PRIMARY KEY(id_voiture),
    FOREIGN KEY(id_service) REFERENCES service(id_service),
    FOREIGN KEY(id_marque) REFERENCES marque(id_marque)
-);
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 CREATE TABLE client(
    id_client VARCHAR(50),
@@ -54,7 +54,7 @@ CREATE TABLE client(
    PRIMARY KEY(id_client),
    FOREIGN KEY(id_contact) REFERENCES contact(id_contact),
    FOREIGN KEY(id_login) REFERENCES login(id_login)
-);
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 CREATE TABLE demande_essai(
    id_demande VARCHAR(50),
@@ -65,4 +65,4 @@ CREATE TABLE demande_essai(
    PRIMARY KEY(id_demande),
    FOREIGN KEY(id_client) REFERENCES client(id_client),
    FOREIGN KEY(id_voiture) REFERENCES voiture(id_voiture)
-);
+) ENGINE=InnoDB CHARSET=utf8mb4;
