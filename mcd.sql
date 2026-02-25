@@ -1,3 +1,7 @@
+CREATE DATABASE supercar;
+
+USE supercar;
+
 CREATE TABLE marque(
    id_marque INT,
    nom_marque VARCHAR(50),
