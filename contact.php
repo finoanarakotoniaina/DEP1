@@ -84,12 +84,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-4 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.html" class="nav-link">Accueil</a></li>
-            <li><a href="voiture.html" class="nav-link">Voitures</a></li>
-            <li><a href="demande.html" class="nav-link">Essai</a></li>
-            <li><a href="services.html" class="nav-link">Services</a></li>
+            <li><a href="accueil.php" class="nav-link">Accueil</a></li>
+            <li><a href="voiture.php" class="nav-link">Voitures</a></li>
+            <li><a href="demande.php" class="nav-link">Essai</a></li>
+            <li><a href="services.php" class="nav-link">Services</a></li>
             <li><a href="contact.php" class="nav-link active">Contact</a></li>
-            <li><a href="connexion.html">Connexion</a></li>
+            <li><a href="connexion.php">Connexion</a></li>
         </ul>
     </nav>
 

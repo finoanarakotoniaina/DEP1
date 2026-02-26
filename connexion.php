@@ -1,5 +1,9 @@
 <?php
+<<<<<<< HEAD
 // 1. Liaison avec config.php (inclut session_start et la connexion $conn)
+=======
+// Liaison fichier configuration
+>>>>>>> c3d4c5406b3b52e2332dd557b1a99ad14029eaff
 include 'config.php'; 
 
 $message = ""; 
