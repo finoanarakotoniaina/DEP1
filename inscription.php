@@ -91,11 +91,7 @@ if (isset($_POST['inscription'])) {
             <li><a href="demande.php" class="nav-link">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
             <li><a href="contact.php" class="nav-link">Contact</a></li>
-<<<<<<< HEAD
-            <li><a href="connexion.php" class="nav-link">Connexion</a></li>
-=======
             <li><a href="connexion.php" class="nav-link active">Connexion</a></li>
->>>>>>> e0471f8d5df9e05fcde03d544658a0ff95b7f83f
         </ul>
     </nav>
 
@@ -108,9 +104,6 @@ if (isset($_POST['inscription'])) {
                 </h2>
                 <div class="w-20 h-1 bg-[var(--crimson)] mb-8"></div>
 
-<<<<<<< HEAD
-                <form action="traitement_inscription.php" method="POST" class="space-y-4">
-=======
                 <?php if($message != ""): ?>
                     <div class="mb-6 p-4 bg-white/5 border-l-2 border-[var(--crimson)] text-[10px] uppercase tracking-widest">
                         <?php echo $message; ?>
@@ -118,7 +111,6 @@ if (isset($_POST['inscription'])) {
                 <?php endif; ?>
 
                 <form action="inscription.php" method="POST" class="space-y-4">
->>>>>>> e0471f8d5df9e05fcde03d544658a0ff95b7f83f
                     <div class="grid grid-cols-2 gap-8">
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Prénom</label>
