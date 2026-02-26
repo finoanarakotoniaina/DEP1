@@ -18,7 +18,6 @@ CREATE TABLE service(
 
 CREATE TABLE login(
    id_login INT,
-   statut VARCHAR(50),
    login VARCHAR(50),
    password VARCHAR(255),
    PRIMARY KEY(id_login)
