@@ -18,7 +18,6 @@ include 'config.php';
             -webkit-mask-image: linear-gradient(to right, transparent, black 50%);
         }
         
-        /* Style des champs type "Essai" sans la box */
         .input-essai {
             background: transparent;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -30,7 +29,7 @@ include 'config.php';
             border-radius: 0; 
         }
         .input-essai:focus {
-            border-color: #C1121F; /* var(--crimson) */
+            border-color: #C1121F;
             outline: none;
         }
     </style>
@@ -42,12 +41,12 @@ include 'config.php';
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
        
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.html" class="nav-link">Accueil</a></li>
-            <li><a href="voiture.html" class="nav-link">Voitures</a></li>
-            <li><a href="demande.html" class="nav-link">Essai</a></li>
-            <li><a href="services.html" class="nav-link">Services</a></li>
-            <li><a href="contact.html" class="nav-link">Contact</a></li>
-            <li><a href="connexion.html" class="nav-link active">Connexion</a></li>
+            <li><a href="accueil.php" class="nav-link">Accueil</a></li>
+            <li><a href="voiture.php" class="nav-link">Voitures</a></li>
+            <li><a href="demande.php" class="nav-link">Essai</a></li>
+            <li><a href="services.php" class="nav-link">Services</a></li>
+            <li><a href="contact.php" class="nav-link">Contact</a></li>
+            <li><a href="connexion.php" class="nav-link">Connexion</a></li>
         </ul>
     </nav>
 
@@ -60,31 +59,31 @@ include 'config.php';
                 </h2>
                 <div class="w-20 h-1 bg-[#C1121F] mb-8"></div>
 
-                <form class="space-y-4">
+                <form action="traitement_inscription.php" method="POST" class="space-y-4">
                     <div class="grid grid-cols-2 gap-8">
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Prénom</label>
-                            <input type="text" placeholder="JEAN" required class="input-essai w-full">
+                            <input type="text" name="prenom" placeholder="JEAN" required class="input-essai w-full">
                         </div>
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Nom</label>
-                            <input type="text" placeholder="DUPONT" required class="input-essai w-full">
+                            <input type="text" name="nom" placeholder="DUPONT" required class="input-essai w-full">
                         </div>
                     </div>
 
                     <div class="flex flex-col">
-                        <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Identifiant</label>
-                        <input type="email" placeholder="VOTRE@EMAIL.COM" required class="input-essai w-full">
+                        <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Identifiant (Email)</label>
+                        <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required class="input-essai w-full">
                     </div>
 
                     <div class="grid grid-cols-2 gap-8">
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Mot de passe</label>
-                            <input type="password" placeholder="••••••••" required class="input-essai w-full">
+                            <input type="password" name="password" placeholder="••••••••" required class="input-essai w-full">
                         </div>
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Confirmation</label>
-                            <input type="password" placeholder="••••••••" required class="input-essai w-full">
+                            <input type="password" name="confirm_password" placeholder="••••••••" required class="input-essai w-full">
                         </div>
                     </div>
 
@@ -92,7 +91,7 @@ include 'config.php';
                         <button type="submit" class="bg-[#C1121F] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500">
                             Créer un profil membre
                         </button>
-                        <a href="connexion.html" class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:text-[#C1121F] transition-colors text-center md:text-left">
+                        <a href="connexion.php" class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:text-[#C1121F] transition-colors text-center md:text-left">
                             Déjà membre ? Se connecter
                         </a>
                     </div>

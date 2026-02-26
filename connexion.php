@@ -1,5 +1,5 @@
 <?php
-// Liaison fichier config
+// Liaison fichier configuration
 include 'config.php'; 
 ?>
 
