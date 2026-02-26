@@ -1,6 +1,52 @@
 <?php
-// Liaison fichier config
+// 1. Liaison avec la configuration (Session + Connexion $conn)
 include 'config.php'; 
+
+$message = ""; 
+
+// 2. Traitement du formulaire au clic sur le bouton
+if (isset($_POST['inscription'])) {
+    // Nettoyage des données
+    $prenom = htmlspecialchars($_POST['prenom']);
+    $nom    = htmlspecialchars($_POST['nom']);
+    $email  = htmlspecialchars($_POST['email']);
+    $tel    = htmlspecialchars($_POST['telephone']); 
+    $mdp    = $_POST['password'];
+    $mdp_confirm = $_POST['confirm_password'];
+
+    // Vérification des mots de passe
+    if ($mdp !== $mdp_confirm) {
+        $message = "Les mots de passe ne correspondent pas.";
+    } else {
+        // Hachage sécurisé du mot de passe
+        $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);
+
+        // --- ÉTAPE 1 : Insertion dans la table 'client' (avec téléphone) ---
+        $sql1 = "INSERT INTO client (nom, prenom, email, telephone) VALUES (?, ?, ?, ?)";
+        $stmt1 = $conn->prepare($sql1);
+        $stmt1->bind_param("ssss", $nom, $prenom, $email, $tel);
+
+        if ($stmt1->execute()) {
+            // On récupère l'ID du client qui vient d'être généré
+            $id_client_cree = $conn->insert_id;
+
+            // --- ÉTAPE 2 : Insertion dans la table 'login' (Relation Appartenir) ---
+            $sql2 = "INSERT INTO login (login, password, statut, id_client) VALUES (?, ?, 'membre', ?)";
+            $stmt2 = $conn->prepare($sql2);
+            $stmt2->bind_param("ssi", $email, $mdp_hash, $id_client_cree);
+
+            if ($stmt2->execute()) {
+                $message = "Inscription réussie ! Bienvenue chez SuperCar.";
+            } else {
+                $message = "Erreur lors de la création des identifiants.";
+            }
+            $stmt2->close();
+        } else {
+            $message = "Erreur : cet email est déjà utilisé ou les données sont invalides.";
+        }
+        $stmt1->close();
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -11,14 +57,12 @@ include 'config.php';
     <title>SuperCar | Inscription</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <style>
+        .split-bg { background-color: #0a0a0a; }
         .image-mask-gradient {
             mask-image: linear-gradient(to right, transparent, black 50%);
             -webkit-mask-image: linear-gradient(to right, transparent, black 50%);
         }
-        
-        /* Style des champs type "Essai" sans la box */
         .input-essai {
             background: transparent;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -30,29 +74,25 @@ include 'config.php';
             border-radius: 0; 
         }
         .input-essai:focus {
-            border-color: #C1121F; /* var(--crimson) */
+            border-color: #C1121F;
             outline: none;
         }
+        .font-title { font-family: 'Syncopate', sans-serif; }
     </style>
 </head>
 
 <body class="split-bg h-screen w-full flex flex-col overflow-hidden text-white">
 
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
-        <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-       
+        <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[#C1121F]">CAR</span></div>
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.html" class="nav-link">Accueil</a></li>
-            <li><a href="voiture.html" class="nav-link">Voitures</a></li>
-            <li><a href="demande.html" class="nav-link">Essai</a></li>
-            <li><a href="services.html" class="nav-link">Services</a></li>
-            <li><a href="contact.html" class="nav-link">Contact</a></li>
-            <li><a href="connexion.html" class="nav-link active">Connexion</a></li>
+            <li><a href="accueil.php">Accueil</a></li>
+            <li><a href="voiture.php">Voitures</a></li>
+            <li><a href="connexion.php" class="text-[#C1121F]">Connexion</a></li>
         </ul>
     </nav>
 
     <main class="flex-1 grid lg:grid-cols-2 w-full h-full">
-        
         <div class="flex flex-col justify-center px-12 md:px-24 lg:px-32 relative h-full pt-16">
             <div class="z-10 max-w-lg w-full">
                 <h2 class="font-title text-3xl md:text-5xl mb-2 tracking-tighter uppercase">
@@ -60,39 +100,51 @@ include 'config.php';
                 </h2>
                 <div class="w-20 h-1 bg-[#C1121F] mb-8"></div>
 
-                <form class="space-y-4">
+                <?php if($message != ""): ?>
+                    <div class="mb-6 p-4 bg-white/5 border-l-2 border-[#C1121F] text-[10px] uppercase tracking-widest">
+                        <?php echo $message; ?>
+                    </div>
+                <?php endif; ?>
+
+                <form action="inscription.php" method="POST" class="space-y-4">
                     <div class="grid grid-cols-2 gap-8">
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Prénom</label>
-                            <input type="text" placeholder="JEAN" required class="input-essai w-full">
+                            <input type="text" name="prenom" placeholder="JEAN" required class="input-essai w-full">
                         </div>
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Nom</label>
-                            <input type="text" placeholder="DUPONT" required class="input-essai w-full">
+                            <input type="text" name="nom" placeholder="DUPONT" required class="input-essai w-full">
                         </div>
                     </div>
 
-                    <div class="flex flex-col">
-                        <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Identifiant</label>
-                        <input type="email" placeholder="VOTRE@EMAIL.COM" required class="input-essai w-full">
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="flex flex-col">
+                            <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Email</label>
+                            <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required class="input-essai w-full">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Téléphone</label>
+                            <input type="tel" name="telephone" placeholder="06 00 00 00 00" required class="input-essai w-full">
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-8">
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Mot de passe</label>
-                            <input type="password" placeholder="••••••••" required class="input-essai w-full">
+                            <input type="password" name="password" placeholder="••••••••" required class="input-essai w-full">
                         </div>
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Confirmation</label>
-                            <input type="password" placeholder="••••••••" required class="input-essai w-full">
+                            <input type="password" name="confirm_password" placeholder="••••••••" required class="input-essai w-full">
                         </div>
                     </div>
 
                     <div class="flex flex-col gap-4 pt-6">
-                        <button type="submit" class="bg-[#C1121F] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500">
+                        <button type="submit" name="inscription" class="bg-[#C1121F] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500">
                             Créer un profil membre
                         </button>
-                        <a href="connexion.html" class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:text-[#C1121F] transition-colors text-center md:text-left">
+                        <a href="connexion.php" class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:text-[#C1121F] text-center md:text-left">
                             Déjà membre ? Se connecter
                         </a>
                     </div>
@@ -102,8 +154,7 @@ include 'config.php';
 
         <div class="hidden lg:block relative h-full">
             <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2070"
-                 class="w-full h-full object-cover image-mask-gradient" 
-                 alt="Ferrari SF90 Bleu">
+                 class="w-full h-full object-cover image-mask-gradient" alt="Ferrari">
         </div>
     </main>
 
