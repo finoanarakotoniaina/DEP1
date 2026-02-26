@@ -27,7 +27,8 @@ if (isset($_POST['inscription'])) {
             $id_client_cree = $conn->insert_id;
 
             // ÉTAPE 2 : Insertion dans la table 'login' (Lien via id_client)
-            $sql2 = "INSERT INTO login (login, password, statut, id_client) VALUES (?, ?, 'membre', ?)";
+            // Suppression de 'statut' dans la requête SQL et bind_param
+            $sql2 = "INSERT INTO login (login, password, id_client) VALUES (?, ?, ?)";
             $stmt2 = $conn->prepare($sql2);
             $stmt2->bind_param("ssi", $email, $mdp_hash, $id_client_cree);
 
@@ -57,7 +58,6 @@ if (isset($_POST['inscription'])) {
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* Styles spécifiques à cette page non présents dans le commun */
         .image-mask-gradient {
             mask-image: linear-gradient(to right, transparent, black 50%);
             -webkit-mask-image: linear-gradient(to right, transparent, black 50%);
@@ -84,7 +84,7 @@ if (isset($_POST['inscription'])) {
 
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-       
+        
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
             <li><a href="accueil.php" class="nav-link">Accueil</a></li>
             <li><a href="voiture.php" class="nav-link">Voitures</a></li>
@@ -129,7 +129,7 @@ if (isset($_POST['inscription'])) {
                         </div>
                         <div class="flex flex-col">
                             <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Téléphone</label>
-                            <input type="tel" name="telephone" placeholder="06..." required class="input-essai w-full">
+                            <input type="tel" name="telephone" placeholder="5000 0000" required class="input-essai w-full">
                         </div>
                     </div>
 
