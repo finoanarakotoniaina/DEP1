@@ -26,10 +26,10 @@ CREATE TABLE login(
 
 CREATE TABLE contact(
    id_contact INT,
-   email VARCHAR(100),
-   tel INT,
    nom VARCHAR(100),
    prenom VARCHAR(100),
+   email VARCHAR(100),
+   message TEXT,
    PRIMARY KEY(id_contact)
 ) ENGINE=InnoDB CHARSET=utf8mb4;
 
