@@ -1,10 +1,8 @@
 <?php
-// 1. Liaison avec la configuration (Session + Connexion $conn)
 include 'config.php'; 
 
 $message = ""; 
 
-// 2. Traitement du formulaire
 if (isset($_POST['inscription'])) {
     $prenom = htmlspecialchars($_POST['prenom']);
     $nom    = htmlspecialchars($_POST['nom']);
@@ -18,28 +16,28 @@ if (isset($_POST['inscription'])) {
     } else {
         $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);
 
-        // ÉTAPE 1 : Insertion dans la table 'client'
-        $sql1 = "INSERT INTO client (nom, prenom, email, telephone) VALUES (?, ?, ?, ?)";
+        // ÉTAPE 1 : On crée d'abord le LOGIN (car Client a besoin de l'id_login)
+        $sql1 = "INSERT INTO login (login, password) VALUES (?, ?)";
         $stmt1 = $conn->prepare($sql1);
-        $stmt1->bind_param("ssss", $nom, $prenom, $email, $tel);
+        $stmt1->bind_param("ss", $email, $mdp_hash);
 
         if ($stmt1->execute()) {
-            $id_client_cree = $conn->insert_id;
+            // On récupère l'ID du login qui vient d'être créé
+            $id_login_cree = $conn->insert_id;
 
-            // ÉTAPE 2 : Insertion dans la table 'login' (Lien via id_client)
-            // Suppression de 'statut' dans la requête SQL et bind_param
-            $sql2 = "INSERT INTO login (login, password, id_client) VALUES (?, ?, ?)";
+            // ÉTAPE 2 : On crée le CLIENT en y insérant l'id_login
+            $sql2 = "INSERT INTO client (nom, prenom, email, telephone, id_login) VALUES (?, ?, ?, ?, ?)";
             $stmt2 = $conn->prepare($sql2);
-            $stmt2->bind_param("ssi", $email, $mdp_hash, $id_client_cree);
+            $stmt2->bind_param("ssssi", $nom, $prenom, $email, $tel, $id_login_cree);
 
             if ($stmt2->execute()) {
-                $message = "Compte créé ! Bienvenue chez SuperCar.";
+                $message = "Compte créé avec succès !";
             } else {
-                $message = "Erreur lors de la création des identifiants.";
+                $message = "Erreur lors de la création du profil client.";
             }
             $stmt2->close();
         } else {
-            $message = "Erreur : cet email est déjà utilisé.";
+            $message = "Erreur : cet identifiant existe déjà.";
         }
         $stmt1->close();
     }
