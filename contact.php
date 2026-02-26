@@ -1,36 +1,25 @@
 <?php
-// 1. CONFIGURATION ET CONNEXION À LA BASE DE DONNÉES
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "supercar";
+// 1. Inclusion de la configuration (qui contient ta connexion $conn)
+include 'config.php'; 
 
-$conn = new mysqli($host, $user, $pass, $dbname);
+$message_envoi = "";
 
-// Vérification de la connexion
-if ($conn->connect_error) {
-    die("Échec de la connexion : " . $conn->connect_error);
-}
+// 2. Traitement des données quand le formulaire est soumis
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Récupération et sécurisation des données
+    $nom = mysqli_real_escape_string($conn, $_POST['nom']);
+    $prenom = mysqli_real_escape_string($conn, $_POST['prenom']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $message = mysqli_real_escape_string($conn, $_POST['message']);
 
-// 2. TRAITEMENT DU FORMULAIRE
-$status_message = "";
-if (isset($_POST['submit_contact'])) {
-    // Nettoyage des données pour éviter les failles XSS
-    $nom = htmlspecialchars($_POST['nom']);
-    $prenom = htmlspecialchars($_POST['prenom']);
-    $email = htmlspecialchars($_POST['email']);
-    $message = htmlspecialchars($_POST['message']);
+    // Requête d'insertion
+    $sql = "INSERT INTO contact (nom, prenom, email, message) VALUES ('$nom', '$prenom', '$email', '$message')";
 
-    // Requête préparée pour éviter les injections SQL
-    $stmt = $conn->prepare("INSERT INTO contact (nom, prenom, email, message) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $nom, $prenom, $email, $message);
-
-    if ($stmt->execute()) {
-        $status_message = "<div class='p-4 mb-4 text-sm text-green-400 bg-green-900/30 border border-green-500/50 rounded-lg'>Message envoyé avec succès !</div>";
+    if (mysqli_query($conn, $sql)) {
+        $message_envoi = "Votre message a été envoyé avec succès !";
     } else {
-        $status_message = "<div class='p-4 mb-4 text-sm text-red-400 bg-red-900/30 border border-red-500/50 rounded-lg'>Erreur : " . $conn->error . "</div>";
+        $message_envoi = "Erreur : " . mysqli_error($conn);
     }
-    $stmt->close();
 }
 ?>
 
@@ -42,33 +31,30 @@ if (isset($_POST['submit_contact'])) {
     <title>Contact | SuperCar Excellence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <style>
         :root {
             --crimson: #dc143c;
             --marble: #f5f5f5;
         }
-        body { 
-            padding-top: 80px; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .font-title { font-family: 'Syncopate', sans-serif; }
         .outline-text {
             -webkit-text-stroke: 1px rgba(255,255,255,0.2);
             color: transparent;
         }
+        body { padding-top: 80px; }
     </style>
 </head>
-<body class="min-h-screen bg-black text-white">
+<body class="split-bg min-h-screen bg-black text-white">
     
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-4 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
         
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.html" class="hover:text-[var(--crimson)] transition">Accueil</a></li>
-            <li><a href="voiture.html" class="hover:text-[var(--crimson)] transition">Voitures</a></li>
-            <li><a href="demande.html" class="hover:text-[var(--crimson)] transition">Essai</a></li>
-            <li><a href="services.html" class="hover:text-[var(--crimson)] transition">Services</a></li>
-            <li><a href="contact.php" class="text-[var(--crimson)]">Contact</a></li>
+            <li><a href="accueil.html" class="nav-link">Accueil</a></li>
+            <li><a href="voiture.html" class="nav-link">Voitures</a></li>
+            <li><a href="demande.html" class="nav-link">Essai</a></li>
+            <li><a href="services.html" class="nav-link">Services</a></li>
+            <li><a href="contact.php" class="nav-link active">Contact</a></li>
             <li><a href="connexion.html">Connexion</a></li>
         </ul>
     </nav>
@@ -76,7 +62,7 @@ if (isset($_POST['submit_contact'])) {
     <section class="relative pt-12 pb-10 px-6 lg:px-24 overflow-hidden">
         <div class="flex flex-col md:flex-row items-center justify-between w-full py-4 px-8">
             <div class="flex-1">
-                <p class="text-blue-400 tracking-[0.3em] font-bold mb-1 text-xs uppercase">Disponibilité 24/7</p>
+                <p class="text-blue-400 tracking-[0.3em] font-bold mb-1 text-xs">DISPONIBILITÉ 24/7</p>
                 <h1 class="font-title text-5xl md:text-6xl font-bold leading-none mb-0">
                     RESTONS <br> 
                     <span class="text-[var(--crimson)]">CONNECTÉS.</span>
@@ -94,20 +80,20 @@ if (isset($_POST['submit_contact'])) {
     <section class="px-6 lg:px-24 mb-10">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 border-y border-white/5 py-6">
             <div class="group flex items-baseline gap-2">
-                <span class="text-[var(--crimson)] font-title text-xs tracking-widest uppercase">Email :</span>
-                <p class="text-lg font-light">supercar@gmail.com</p>
+                <span class="text-[var(--crimson)] font-title text-xs tracking-widest uppercase whitespace-nowrap">Email :</span>
+                <p class="text-lg font-light group-hover:text-[var(--marble)] transition-colors">supercar@gmail.com</p>
             </div>
             <div class="group flex items-baseline gap-2">
-                <span class="text-[var(--crimson)] font-title text-xs tracking-widest uppercase">Tel :</span>
-                <p class="text-lg font-light">+230 454 8950</p>
+                <span class="text-[var(--crimson)] font-title text-xs tracking-widest uppercase whitespace-nowrap">Tel :</span>
+                <p class="text-lg font-light group-hover:text-[var(--marble)] transition-colors">+230 454 8950</p>
             </div>
-            <div class="group flex items-baseline gap-2">
-                <span class="text-[var(--crimson)] font-title text-xs tracking-widest uppercase">Siège :</span>
-                <p class="text-lg font-light">Ebène CyberCity</p>
+            <div class="group flex flex-col xl:flex-row xl:items-baseline gap-2">
+                <span class="text-[var(--crimson)] font-title text-xs tracking-widest uppercase whitespace-nowrap">Siège :</span>
+                <p class="text-lg font-light group-hover:text-[var(--marble)] transition-colors">Ebène CyberCity</p>
             </div>
-            <div class="group flex items-baseline gap-2">
-                <span class="text-[var(--crimson)] font-title text-xs tracking-widest uppercase">Directeur :</span>
-                <p class="text-lg font-light">M.Carter</p>
+            <div class="group flex flex-col xl:flex-row xl:items-baseline gap-2">
+                <span class="text-[var(--crimson)] font-title text-xs tracking-widest uppercase whitespace-nowrap">Responsable :</span>
+                <p class="text-lg font-light group-hover:text-[var(--marble)] transition-colors">M.Carter</p>
             </div>
         </div>
     </section>
@@ -120,9 +106,13 @@ if (isset($_POST['submit_contact'])) {
         <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 items-stretch">
             <div class="bg-white/5 p-8 lg:p-10 rounded-[40px] border border-white/10 backdrop-blur-sm">
                 
-                <?php echo $status_message; ?>
+                <?php if($message_envoi != ""): ?>
+                    <p class="mb-4 text-xs font-bold uppercase tracking-widest <?php echo strpos($message_envoi, 'Erreur') === false ? 'text-green-400' : 'text-red-500'; ?>">
+                        <?php echo $message_envoi; ?>
+                    </p>
+                <?php endif; ?>
 
-                <form method="POST" action="" class="space-y-6">
+                <form action="contact.php" method="POST" class="space-y-6">
                     <div class="grid grid-cols-2 gap-8">
                         <div class="space-y-1">
                             <label class="text-[10px] uppercase tracking-[0.3em] text-[var(--marble)]">Nom</label>
@@ -144,15 +134,15 @@ if (isset($_POST['submit_contact'])) {
                         <textarea name="message" rows="3" placeholder="COMMENT POUVONS-NOUS VOUS AIDER ?" required class="bg-transparent border-b border-white/20 w-full p-2 text-xs tracking-widest focus:border-[var(--crimson)] outline-none transition-colors"></textarea>
                     </div>
 
-                    <button type="submit" name="submit_contact" class="w-full bg-[var(--crimson)] py-4 font-title text-xs tracking-[0.4em] uppercase hover:bg-white hover:text-black transition-all duration-500 shadow-xl">
+                    <button type="submit" class="w-full bg-[var(--crimson)] py-4 font-title text-xs tracking-[0.4em] uppercase hover:bg-white hover:text-black transition-all duration-500 shadow-xl">
                         Envoyer la demande
                     </button>
                 </form>
             </div>
 
-            <div class="min-h-[400px] grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-700 bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10">
+            <div class="map-container min-h-[400px] grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-700 bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10">
                 <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3744.123456789!2d57.487!3d-20.245!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjDCsDE0JzQyLjAiUyA1N8KwMjknMTMuMiJF!5e0!3m2!1sfr!2smu!4v1234567890" 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3744.1543743515!2d57.4810!3d-20.2435!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x217c5af10!2sEbene+CyberCity!5e0!3m2!1sfr!2smu!4v1" 
                     class="w-full h-full min-h-[400px] border-none"
                     allowfullscreen="" 
                     loading="lazy">
