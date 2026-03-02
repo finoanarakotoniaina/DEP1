@@ -12,7 +12,7 @@ if (isset($_POST['connexion'])) {
     // Requête ajustée : on ne sélectionne plus 'statut'
     $sql = "SELECT l.password, c.id_client, c.prenom, c.nom 
             FROM login l
-            INNER JOIN client c ON l.id_client = c.id_client 
+            INNER JOIN client c ON l.id_login = c.id_login 
             WHERE l.login = ?";
             
     $stmt = $conn->prepare($sql);
@@ -30,7 +30,7 @@ if (isset($_POST['connexion'])) {
             $_SESSION['nom']       = $user['nom'];
 
             // Redirection vers l'accueil
-            header("Location: accueil.php");
+            header("Location: voiture.php");
             exit();
         } else {
             $message = "Mot de passe incorrect.";
