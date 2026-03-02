@@ -1,44 +1,47 @@
 <?php
-// 1. Liaison avec config.php (inclut session_start et la connexion $conn)
 include 'config.php'; 
+
+if (!isset($_SESSION['captcha_reponse'])) {
+    $n1 = rand(0, 3);
+    $n2 = rand(0, 3);
+    $_SESSION['captcha_reponse'] = $n1 + $n2;
+    $_SESSION['captcha_question'] = "$n1 + $n2";
+}
 
 $message = ""; 
 
-// 2. Traitement du formulaire
 if (isset($_POST['connexion'])) {
     $email_saisi = htmlspecialchars($_POST['email']);
     $mdp_saisi = $_POST['password'];
-
-    // Requête ajustée : on ne sélectionne plus 'statut'
-    $sql = "SELECT l.password, c.id_client, c.prenom, c.nom 
-            FROM login l
-            INNER JOIN client c ON l.id_login = c.id_login 
-            WHERE l.login = ?";
-            
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $email_saisi);
-    $stmt->execute();
-    $resultat = $stmt->get_result();
-
-    if ($user = $resultat->fetch_assoc()) {
-        // Vérification du mot de passe haché
-        if (password_verify($mdp_saisi, $user['password'])) {
-            
-            // Initialisation des variables de session (sans le statut)
-            $_SESSION['id_client'] = $user['id_client'];
-            $_SESSION['prenom']    = $user['prenom'];
-            $_SESSION['nom']       = $user['nom'];
-
-            // Redirection vers l'accueil
-            header("Location: voiture.php");
-            exit();
-        } else {
-            $message = "Mot de passe incorrect.";
-        }
+    $captcha_saisi = isset($_POST['captcha']) ? intval($_POST['captcha']) : -1;
+    
+    if ($captcha_saisi !== $_SESSION['captcha_reponse']) {
+        $message = "CAPTCHA incorrect.";
     } else {
-        $message = "Identifiant inconnu.";
+        // Correction de la jointure SQL selon ton erreur précédente
+        $sql = "SELECT l.password, c.id_client, c.prenom, c.nom 
+                FROM login l
+                INNER JOIN client c ON l.id_login = c.id_login 
+                WHERE l.login = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $email_saisi);
+        $stmt->execute();
+        $resultat = $stmt->get_result();
+
+        if ($user = $resultat->fetch_assoc()) {
+            if (password_verify($mdp_saisi, $user['password'])) {
+                $_SESSION['id_client'] = $user['id_client'];
+                $_SESSION['prenom']    = $user['prenom'];
+                $_SESSION['nom']       = $user['nom'];
+                header("Location: voiture.php");
+                exit();
+            } else { $message = "Mot de passe incorrect."; }
+        } else { $message = "Identifiant inconnu."; }
+        $stmt->close();
     }
-    $stmt->close();
+    $n1 = rand(0, 3); $n2 = rand(0, 3);
+    $_SESSION['captcha_reponse'] = $n1 + $n2;
+    $_SESSION['captcha_question'] = "$n1 + $n2";
 }
 ?>
 
@@ -50,32 +53,39 @@ if (isset($_POST['connexion'])) {
     <title>SuperCar | Connexion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
-
     <style>
+        :root { --crimson: #C1121F; }
+        
+        /* Force l'affichage sur une seule vue sans scroll */
+        body, html { height: 100vh; overflow: hidden; }
+        
         .image-mask-gradient {
             mask-image: linear-gradient(to right, transparent, black 50%);
             -webkit-mask-image: linear-gradient(to right, transparent, black 50%);
         }
+        
         .input-essai {
             background: transparent;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 1rem 0;
+            padding: 0.8rem 0;
             font-size: 0.75rem;
             letter-spacing: 0.1em;
-            transition: border-color 0.5s ease;
             color: white;
             border-radius: 0;
+            transition: border-color 0.4s;
         }
-        .input-essai:focus {
-            border-color: var(--crimson);
-            outline: none;
+        .input-essai:focus { border-color: var(--crimson); outline: none; }
+
+        /* Cache les flèches du champ nombre */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+            -webkit-appearance: none; margin: 0;
         }
+        input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
 
-<body class="split-bg h-screen w-full flex flex-col overflow-hidden text-white">
+<body class="split-bg flex flex-col text-white">
 
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
@@ -90,32 +100,38 @@ if (isset($_POST['connexion'])) {
         </ul>
     </nav>
 
-    <main class="flex-1 grid lg:grid-cols-2 w-full h-full">
-        <div class="flex flex-col justify-center px-12 md:px-24 lg:px-32 relative h-full">
+    <main class="flex-1 grid lg:grid-cols-2 w-full h-full overflow-hidden">
+        <div class="flex flex-col justify-center px-12 md:px-24 h-full pt-12">
             <div class="z-10 max-w-lg w-full">
                 <h2 class="font-title text-3xl md:text-5xl mb-2 tracking-tighter uppercase">
                     <span class="text-[var(--crimson)]">Connexion</span>
                 </h2>
-                <div class="w-20 h-1 bg-[var(--crimson)] mb-12"></div>
+                <div class="w-20 h-1 bg-[var(--crimson)] mb-8"></div>
 
                 <?php if($message != ""): ?>
-                    <div class="mb-6 p-4 bg-white/5 border-l-2 border-[var(--crimson)] text-[10px] uppercase tracking-widest">
+                    <div class="mb-4 p-4 bg-white/5 border-l-2 border-[var(--crimson)] text-[10px] uppercase tracking-widest text-red-400">
                         <?php echo $message; ?>
                     </div>
                 <?php endif; ?>
 
-                <form action="connexion.php" method="POST" class="space-y-8">
+                <form action="connexion.php" method="POST" class="space-y-6">
                     <div class="flex flex-col">
                         <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Identifiant (Email)</label>
                         <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required class="input-essai w-full">
                     </div>
 
-                    <div class="flex flex-col">
-                        <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Mot de passe</label>
-                        <input type="password" name="password" placeholder="••••••••••••" required class="input-essai w-full">
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="flex flex-col">
+                            <label class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold mb-1">Mot de passe</label>
+                            <input type="password" name="password" placeholder="••••••••" required class="input-essai w-full">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-[10px] uppercase tracking-[0.4em] text-[var(--crimson)] font-bold mb-1">Calcul : <?php echo $_SESSION['captcha_question']; ?></label>
+                            <input type="number" name="captcha" placeholder="RÉPONSE" required class="input-essai w-full">
+                        </div>
                     </div>
 
-                    <div class="flex flex-col gap-6 pt-10">
+                    <div class="flex flex-col gap-6 pt-4">
                         <button type="submit" name="connexion" class="bg-[var(--crimson)] py-5 font-title text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-500">
                             Se connecter
                         </button>
@@ -132,6 +148,5 @@ if (isset($_POST['connexion'])) {
                  class="w-full h-full object-cover image-mask-gradient" alt="Ferrari">
         </div>
     </main>
-
 </body>
 </html>
