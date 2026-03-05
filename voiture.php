@@ -139,6 +139,12 @@
 
     <main class="pt-32"> 
         <div class="px-6 lg:px-24 mb-12"> 
+            
+            <!-- BOUTON RETOUR (Rajouté ici) -->
+            <a href="accueil.php" id="back-to-home" style="display: none;" class="inline-flex items-center text-[10px] font-title uppercase tracking-[0.2em] text-gray-400 hover:text-[#C1121F] mb-8 transition-all group">
+                <span class="mr-3 transition-transform group-hover:-translate-x-1">❮</span> Retour vers l'accueil
+            </a>
+
             <h1 class="font-title text-3xl md:text-5xl font-bold leading-none uppercase tracking-tight">
                 NOS <span class="text-[#C1121F]">MODÈLES</span>
             </h1>
@@ -247,8 +253,15 @@
         }
 
         init();
-    </script>
 
+        // LOGIQUE D'AFFICHAGE DU BOUTON RETOUR
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('from') === 'accueil') {
+            const backBtn = document.getElementById('back-to-home');
+            if (backBtn) backBtn.style.display = 'flex';
+        }
+    </script>
+    
     <footer class="py-16 text-center border-t border-white/5 text-gray-500 text-[9px] tracking-[0.5em] font-title uppercase">
         &copy; 2026 SUPERCAR MAURITIUS - TOUS DROITS RÉSERVÉS
     </footer>
