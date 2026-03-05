@@ -1,7 +1,15 @@
 <?php
 session_start();
-// On vérifie si l'utilisateur est connecté pour afficher ou non la fenêtre
-$isLoggedIn = isset($_SESSION['user_id']); 
+
+// 1. On vérifie si l'utilisateur est connecté
+// Utilise la même variable que dans ton fichier connexion.php
+if (!isset($_SESSION['id_client'])) {
+    // 2. Si non connecté, on redirige immédiatement vers l'accueil
+    header("Location: accueil.php");
+    exit(); // Très important pour arrêter l'exécution du reste du code
+}
+
+// ... le reste de ton code pour la page demande.php ...
 ?>
 <!DOCTYPE html>
 <html lang="fr">

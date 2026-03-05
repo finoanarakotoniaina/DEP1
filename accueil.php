@@ -23,6 +23,12 @@
             <li><a href="connexion.php" class="nav-link ">Connexion</a></li>
         </ul>
     </nav>
+    <!-- Bouton Retour (caché par défaut) -->
+<div class="px-6 lg:px-24 pt-32 mb-6">
+    <a href="accueil.php" id="back-btn-contact" style="display: none;" class="inline-flex items-center text-[10px] font-title uppercase tracking-[0.2em] text-gray-400 hover:text-[#C1121F] transition-all group">
+        <span class="mr-3 transition-transform group-hover:-translate-x-1">❮</span> Retour vers l'accueil
+    </a>
+</div>
 
     <section class="relative h-screen w-full flex items-center px-6 lg:px-24 overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full z-0">
@@ -45,12 +51,13 @@
                 </p>
                 
                 <div class="flex flex-wrap gap-6">
-                    <a href="voiture.php" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">
-                        DÉCOUVRIR LE STOCK
-                    </a>
-                    <a href="contact.php" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">
-                        NOUS CONTACTER
-                    </a>
+                    <a href="voiture.php?from=accueil" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">
+    DÉCOUVRIR LE STOCK
+</a>
+                   <!-- Remplace ton lien actuel par celui-ci -->
+<a href="contact.php?from=accueil" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">
+    NOUS CONTACTER
+</a>
                 </div>
             </div>
         </div>

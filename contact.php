@@ -92,6 +92,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <li><a href="connexion.php">Connexion</a></li>
         </ul>
     </nav>
+    <!-- Bouton de retour spécifique pour Contact -->
+<div class="relative z-[60] px-6 lg:px-24 pt-32">
+    <a href="accueil.php" id="back-btn-contact" style="display: none;" class="inline-flex items-center text-[10px] font-title uppercase tracking-[0.2em] text-gray-400 hover:text-[#C1121F] transition-all group">
+        <span class="mr-3 transition-transform group-hover:-translate-x-1">❮</span> Retour vers l'accueil
+    </a>
+</div>
 
     <section class="relative pt-12 pb-10 px-6 lg:px-24 overflow-hidden">
         <div class="flex flex-col md:flex-row items-center justify-between w-full py-4 px-8">
