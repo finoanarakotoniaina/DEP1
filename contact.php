@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-     <style>
+    <style>
         :root {
             --crimson: #dc143c;
             --marble: #f5f5f5;
@@ -16,7 +16,6 @@
             -webkit-text-stroke: 1px rgba(255,255,255,0.2);
             color: transparent;
         }
-        body { padding-top: 80px; }
  
         /* Style de l'onglet de notification */
         #success-modal {
@@ -36,7 +35,6 @@
 </head>
 <body class="split-bg min-h-screen bg-black text-white">
     
-    <!-- MODAL NOTIFICATION -->
     <?php if (isset($show_modal) && $show_modal): ?>
     <div id="success-modal" style="display: block;">
         <div class="bg-black/80 border-l-4 border-[var(--crimson)] backdrop-blur-md p-6 shadow-2xl rounded-r-lg flex items-center gap-4 border border-white/10">
@@ -54,26 +52,24 @@
     </div>
     <?php endif; ?>
 
-    <nav class="fixed top-0 w-full z-[100] px-6 lg:px-10 py-4 flex justify-between items-center bg-black/80 border-b border-white/5">
-    <div class="font-title text-xl tracking-tighter uppercase">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-    <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-        <li><a href="accueil.php" class="nav-link">Accueil</a></li>
-        <li><a href="voiture.php" class="nav-link">Voitures</a></li>
-        <li><a href="demande.php" class="nav-link">Essai</a></li>
-        <li><a href="services.php" class="nav-link">Services</a></li>
-        <li><a href="contact.php" class="nav-link active">Contact</a></li>
-        <li><a href="connexion.php" class="nav-link">Connexion</a></li>
-    </ul>
-</nav>
-
-    <!-- BOUTON RETOUR : Réduit de pt-32 à pt-24 -->
-    <div class="relative z-[60] px-6 lg:px-24 pt-24">
+    <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
+        <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
+        
+        <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
+            <li><a href="accueil.php" class="nav-link">Accueil</a></li>
+            <li><a href="voiture.php" class="nav-link">Voitures</a></li>
+            <li><a href="demande.php" class="nav-link">Essai</a></li>
+            <li><a href="services.php" class="nav-link">Services</a></li>
+            <li><a href="contact.php" class="nav-link">Contact</a></li>
+            <li><a href="connexion.php" class="nav-link active">Connexion</a></li>
+        </ul>
+    </nav>
+    <div class="relative z-[60] px-6 lg:px-24 pt-10">
         <a href="accueil.php" id="back-btn-contact" style="display: none;" class="inline-flex items-center text-[10px] font-title uppercase tracking-[0.2em] text-gray-400 hover:text-[var(--crimson)] transition-all group">
             <span class="mr-3 transition-transform group-hover:-translate-x-1">❮</span> Retour vers l'accueil
         </a>
     </div>
 
-    <!-- SECTION TITRE : Réduit de pt-12 à pt-4 -->
     <section class="relative pt-4 pb-10 px-6 lg:px-24 overflow-hidden">
         <div class="flex flex-col md:flex-row items-center justify-between w-full py-4 px-8">
             <div class="flex-1">
@@ -91,7 +87,6 @@
         </div>
     </section>
 
-    <!-- INFOS CONTACT -->
     <section class="px-6 lg:px-24 mb-10">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 border-y border-white/5 py-8">
             <div class="group">
@@ -113,10 +108,8 @@
         </div>
     </section>
 
-    <!-- FORMULAIRE & MAP -->
     <section class="pb-24 px-6 lg:px-24 relative">
         <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-stretch">
-            <!-- Formulaire identique au tien -->
             <div class="bg-white/5 p-8 lg:p-12 rounded-[40px] border border-white/10 backdrop-blur-sm">
                 <form action="contact.php" method="POST" class="space-y-8">
                     <div class="grid grid-cols-2 gap-8">
