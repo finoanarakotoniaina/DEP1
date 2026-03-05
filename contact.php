@@ -181,16 +181,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </footer>
 
     <script>
-        <?php if($show_modal): ?>
-            const modal = document.getElementById('success-modal');
-            modal.style.display = 'block';
-            // L'onglet disparaît tout seul après 5 secondes
-            setTimeout(() => {
-                modal.style.opacity = '0';
-                setTimeout(() => modal.style.display = 'none', 500);
-            }, 5000);
-        <?php endif; ?>
-    </script>
-
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('from') === 'accueil') {
+            const btn = document.getElementById('back-btn-contact');
+            if (btn) {
+                btn.style.setProperty('display', 'flex', 'important');
+            }
+        }
+    });
+</script>
 </body>
+<!-- À mettre dans contact.php, juste après la balise <body> -->
+<div class="fixed top-28 left-6 lg:left-24 z-[100]">
+    <a href="accueil.php" id="back-btn-contact" style="display: none;" class="inline-flex items-center text-[10px] font-title uppercase tracking-[0.2em] text-white/70 hover:text-[#C1121F] transition-all group bg-black/20 backdrop-blur-sm p-2 rounded">
+        <span class="mr-3 transition-transform group-hover:-translate-x-1">❮</span> Retour vers l'accueil
+    </a>
+</div>
 </html>
