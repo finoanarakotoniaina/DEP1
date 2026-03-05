@@ -1,15 +1,7 @@
 <?php
 session_start();
-
-// 1. On vérifie si l'utilisateur est connecté
-// Utilise la même variable que dans ton fichier connexion.php
-if (!isset($_SESSION['id_client'])) {
-    // 2. Si non connecté, on redirige immédiatement vers l'accueil
-    header("Location: accueil.php");
-    exit(); // Très important pour arrêter l'exécution du reste du code
-}
-
-// ... le reste de ton code pour la page demande.php ...
+// On vérifie si l'utilisateur est connecté pour définir l'état du modal
+$isLoggedIn = isset($_SESSION['id_client']); 
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -21,18 +13,10 @@ if (!isset($_SESSION['id_client'])) {
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        :root {
-            --crimson: #C1121F;
-        }
-        .modal-blur {
-             --cosmos: #003049;
-            backdrop-filter: blur(10px);
-        }
-        /* Style pour l'icône calendrier/heure blanche */
+        :root { --crimson: #C1121F; }
+        .modal-blur { backdrop-filter: blur(10px); }
         input[type="date"]::-webkit-calendar-picker-indicator,
-        input[type="time"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-        }
+        input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); }
     </style>
 </head>
 <body class="split-bg text-white bg-[#0a0a0a]">
@@ -63,7 +47,7 @@ if (!isset($_SESSION['id_client'])) {
             <li><a href="demande.php" class="nav-link active">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
             <li><a href="contact.php" class="nav-link">Contact</a></li>
-            <li><a href="connexion.php" class="nav-link ">Connexion</a></li>
+            <li><a href="connexion.php" class="nav-link">Connexion</a></li>
         </ul>
     </nav>
 
@@ -110,9 +94,7 @@ if (!isset($_SESSION['id_client'])) {
                     <input type="text" name="nom" placeholder="NOM" required class="bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none uppercase">
                     <input type="text" name="prenom" placeholder="PRÉNOM" required class="bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none uppercase">
                 </div>
-
                 <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required class="w-full bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none">
-
                 <div class="grid grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Modèle</label>
@@ -127,7 +109,6 @@ if (!isset($_SESSION['id_client'])) {
                         <input type="tel" name="mobile" placeholder="N° MOBILE" required class="bg-transparent border-b border-white/20 w-full p-4 text-xs focus:border-[var(--crimson)] outline-none">
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Date préférée</label>
@@ -138,7 +119,6 @@ if (!isset($_SESSION['id_client'])) {
                         <input type="time" name="heure_essai" min="08:00" max="17:00" required class="bg-transparent border border-white/10 rounded-lg w-full p-3 text-xs">
                     </div>
                 </div>
-
                 <button type="submit" class="w-full bg-[var(--crimson)] py-6 font-title text-xs tracking-[0.4em] uppercase hover:bg-white hover:text-black transition-all">Valider l'accès</button>
             </form>
         </div>
@@ -147,15 +127,16 @@ if (!isset($_SESSION['id_client'])) {
     <script>
         const modal = document.getElementById('authModal');
         
+        // Fonction pour fermer la modale et rediriger vers l'accueil
         function closeModal() {
-            modal.classList.add('hidden');
+            window.location.href = 'accueil.php';
         }
 
         // Bloquer les dates passées
         const dateIn = document.getElementById('d');
         if(dateIn) {
             const today = new Date();
-            today.setDate(today.getDate() + 1); // Interdire aujourd'hui, résa dès demain
+            today.setDate(today.getDate() + 1);
             dateIn.min = today.toISOString().split('T')[0];
         }
     </script>
