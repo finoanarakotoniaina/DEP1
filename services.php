@@ -17,9 +17,9 @@
             <li><a href="accueil.php" class="nav-link">Accueil</a></li>
             <li><a href="voiture.php" class="nav-link">Voitures</a></li>
             <li><a href="demande.php" class="nav-link">Essai</a></li>
-            <li><a href="services.php" class="nav-link">Services</a></li>
+            <li><a href="services.php" class="nav-link active ">Services</a></li>
             <li><a href="contact.php" class="nav-link">Contact</a></li>
-            <li><a href="connexion.php" class="nav-link active">Connexion</a></li>
+            <li><a href="connexion.php" class="nav-link ">Connexion</a></li>
         </ul>
     </nav>
  

@@ -52,10 +52,10 @@ $isLoggedIn = isset($_SESSION['user_id']);
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
             <li><a href="accueil.php" class="nav-link">Accueil</a></li>
             <li><a href="voiture.php" class="nav-link">Voitures</a></li>
-            <li><a href="demande.php" class="nav-link">Essai</a></li>
+            <li><a href="demande.php" class="nav-link active">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
             <li><a href="contact.php" class="nav-link">Contact</a></li>
-            <li><a href="connexion.php" class="nav-link active">Connexion</a></li>
+            <li><a href="connexion.php" class="nav-link ">Connexion</a></li>
         </ul>
     </nav>
 

@@ -15,12 +15,12 @@
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
         
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.php" class="nav-link">Accueil</a></li>
+            <li><a href="accueil.php" class="nav-link active">Accueil</a></li>
             <li><a href="voiture.php" class="nav-link">Voitures</a></li>
             <li><a href="demande.php" class="nav-link">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
             <li><a href="contact.php" class="nav-link">Contact</a></li>
-            <li><a href="connexion.php" class="nav-link active">Connexion</a></li>
+            <li><a href="connexion.php" class="nav-link ">Connexion</a></li>
         </ul>
     </nav>
 
@@ -45,10 +45,10 @@
                 </p>
                 
                 <div class="flex flex-wrap gap-6">
-                    <a href="voiture.html" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">
+                    <a href="voiture.php" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">
                         DÉCOUVRIR LE STOCK
                     </a>
-                    <a href="contact.html" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">
+                    <a href="contact.php" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">
                         NOUS CONTACTER
                     </a>
                 </div>
