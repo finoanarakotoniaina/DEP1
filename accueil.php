@@ -45,17 +45,10 @@
                 </p>
                 
                 <div class="flex flex-wrap gap-6">
-<<<<<<< HEAD
                     <a href="voiture.php?from=accueil" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">
     DÉCOUVRIR LE STOCK
 </a>
                     <a href="contact.html" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">
-=======
-                    <a href="voiture.php" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">
-                        DÉCOUVRIR LE STOCK
-                    </a>
-                    <a href="contact.php" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">
->>>>>>> 6354031aaa26cf9a0362512bd0f693327f3aa8d7
                         NOUS CONTACTER
                     </a>
                 </div>
