@@ -45,9 +45,9 @@
                 </p>
                 
                 <div class="flex flex-wrap gap-6">
-                    <a href="voiture.html" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">
-                        DÉCOUVRIR LE STOCK
-                    </a>
+                    <a href="voiture.php?from=accueil" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">
+    DÉCOUVRIR LE STOCK
+</a>
                     <a href="contact.html" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">
                         NOUS CONTACTER
                     </a>
