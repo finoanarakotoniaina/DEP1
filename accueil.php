@@ -7,6 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Animations pour les entrées fluides */
+        .reveal-right { transform: translateX(100px); opacity: 0; transition: all 1s ease-out; }
+        .reveal-left { transform: translateX(-100px); opacity: 0; transition: all 1s ease-out; }
+        .reveal-active { transform: translateX(0); opacity: 1; }
+        
+        /* Police pour les descriptions */
+        .desc-font { font-family: 'Times New Roman', serif; }
+    </style>
 </head>
 
 <body class="home-bg">
@@ -33,25 +43,16 @@
         </div>
 
         <div class="relative z-20 w-full mt-20">
-            
-            
             <div class="max-w-3xl">
-                
                 <h1 class="font-title text-4xl md:text-7xl font-bold leading-none mb-8">
                     L'ÉLÉGANCE <br> <span class="text-[var(--crimson)]">CERTIFIEE.</span>
                 </h1>
                 <p class="text-lg text-gray-200 max-w-xl font-light leading-relaxed mb-10">
                     Votre partenaire de confiance à l'Île Maurice pour l'acquisition de véhicules d'exception importés d'Allemagne, du Japon et des USA.
                 </p>
-                
                 <div class="flex flex-wrap gap-6">
-                    <a href="voiture.php?from=accueil" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">
-    DÉCOUVRIR LE STOCK
-</a>
-                   <!-- Remplace ton lien actuel par celui-ci -->
-<a href="contact.php?from=accueil" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">
-    NOUS CONTACTER
-</a>
+                    <a href="voiture.php?from=accueil" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">DÉCOUVRIR LE STOCK</a>
+                    <a href="contact.php?from=accueil" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">NOUS CONTACTER</a>
                 </div>
             </div>
         </div>
@@ -67,20 +68,21 @@
             <div class="w-32 h-1 bg-[var(--crimson)]"></div>
         </div>
 
-        <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm">
+        <div class="relative z-10 flex flex-col gap-12 max-w-3xl mx-auto">
+            
+            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="0">
                 <h3 class="font-title text-[var(--marble)] text-2xl mb-4">BMW</h3>
-                <p class="text-gray-400 text-sm leading-relaxed uppercase tracking-widest">Le plaisir de conduire et le dynamisme à l'état pur.</p>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Bien que la marque se soit diversifiée, son cœur de métier reste la « driver’s car ». bmw se distingue par une ergonomie intérieure orientée vers le conducteur et une mise au point de châssis qui favorise la précision de conduite et l'agilité. contrairement à beaucoup de constructeurs, ils privilégient souvent une répartition des masses équilibrée et une direction communicative, cherchant à donner au conducteur l'impression de faire corps avec la machine, même sur des modèles familiaux."></p>
             </div>
             
-            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm">
+            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-left" data-delay="300">
                 <h3 class="font-title text-[var(--marble)] text-2xl mb-4">MERCEDES</h3>
-                <p class="text-gray-400 text-sm leading-relaxed uppercase tracking-widest">L'alliance parfaite entre le confort absolu et le prestige.</p>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Mercedes se positionne comme l'inventeur de l'automobile, et cela se ressent dans leur approche : tout est une question d'innovation au service du confort et de la sécurité. si bmw cherche la sportivité, mercedes cherche la sérénité. leur force réside dans une insonorisation de premier ordre, des suspensions souvent typées 'tapis volant' et une interface technologique (mbux) qui vise à réduire la fatigue au volant. c'est le choix de la rigueur et de la vie à bord apaisée."></p>
             </div>
             
-            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm">
+            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="600">
                 <h3 class="font-title text-[var(--marble)] text-2xl mb-4">PORSCHE</h3>
-                <p class="text-gray-400 text-sm leading-relaxed uppercase tracking-widest">La passion de la performance et de l'exclusivité sportive.</p>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Dire que porsche est juste « sportif » est un euphémisme. la marque est surtout une référence en ingénierie de précision. le tour de force de porsche est de proposer des voitures aux performances démoniaques (avec la 911 en icône absolue) qui restent paradoxalement utilisables au quotidien. leur fiabilité mécanique est souvent supérieure à la moyenne des voitures de sport, et ils excellent dans l'art de rendre une conduite complexe accessible et gratifiante, peu importe le niveau du pilote."></p>
             </div>
         </div>
     </section>
@@ -89,5 +91,44 @@
         &copy; 2024 SUPERCAR MAURITIUS - TOUS DROITS RÉSERVÉS
     </footer>
 
+    <script>
+        // 1. Animation d'entrée au scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const delay = entry.target.getAttribute('data-delay');
+                    setTimeout(() => {
+                        entry.target.classList.add('reveal-active');
+                    }, delay);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        document.querySelectorAll('.reveal-right, .reveal-left').forEach(el => observer.observe(el));
+
+        // 2. Animation machine à écrire au survol
+        document.querySelectorAll('.brand-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const textElement = this.querySelector('.typewriter-text');
+                // On ne lance l'animation que si elle n'a jamais été lancée
+                if (!textElement.dataset.hasTyped) {
+                    textElement.dataset.hasTyped = "true";
+                    textElement.classList.remove('opacity-0');
+                    textElement.classList.add('opacity-100');
+                    
+                    const text = textElement.getAttribute('data-text');
+                    let i = 0;
+                    function typing() {
+                        if (i < text.length) {
+                            textElement.textContent += text.charAt(i);
+                            i++;
+                            setTimeout(typing, 15); // Vitesse
+                        }
+                    }
+                    typing();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

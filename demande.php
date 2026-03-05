@@ -1,6 +1,5 @@
 <?php
 session_start();
-// On vérifie si l'utilisateur est connecté pour définir l'état du modal
 $isLoggedIn = isset($_SESSION['id_client']); 
 ?>
 <!DOCTYPE html>
@@ -17,11 +16,20 @@ $isLoggedIn = isset($_SESSION['id_client']);
         .modal-blur { backdrop-filter: blur(10px); }
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+        
+        /* Animation pour l'apparition fluide */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
     </style>
 </head>
 <body class="split-bg text-white bg-[#0a0a0a]">
 
-    <div id="authModal" class="<?php echo $isLoggedIn ? 'hidden' : ''; ?> fixed inset-0 z-[100] flex items-center justify-center modal-blur px-6">
+    <div id="authModal" class="<?php echo $isLoggedIn ? 'hidden' : 'flex'; ?> fixed inset-0 z-[100] items-center justify-center modal-blur px-6 animate-fade-in">
         <div class="bg-[#0a0a0a] border border-white/10 p-10 rounded-[20px] max-w-md w-full text-center relative shadow-2xl">
             <button onclick="closeModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,12 +135,10 @@ $isLoggedIn = isset($_SESSION['id_client']);
     <script>
         const modal = document.getElementById('authModal');
         
-        // Fonction pour fermer la modale et rediriger vers l'accueil
         function closeModal() {
             window.location.href = 'accueil.php';
         }
 
-        // Bloquer les dates passées
         const dateIn = document.getElementById('d');
         if(dateIn) {
             const today = new Date();
