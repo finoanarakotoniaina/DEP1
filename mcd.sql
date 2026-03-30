@@ -39,6 +39,7 @@ CREATE TABLE voiture(
    annee INT,
    etat VARCHAR (25),
    type VARCHAR (25),
+   kilometrage INT,
    disponibilite BOOLEAN,
    description TEXT,
    image_url VARCHAR(200),
