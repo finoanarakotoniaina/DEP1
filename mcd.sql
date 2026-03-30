@@ -104,5 +104,5 @@ INSERT INTO voiture (modele, prix, annee, description, image_url, id_service, id
 ('Mercedes-Benz 280 SL Pagode', 120000, 1968, 'Icône d\'élégance avec son toit rigide concave caractéristique.', '280SLPagode(W113).webp', NULL, 3),
 ('Mercedes-Benz 450 SLC (C107)', 35000, 1978, 'Coupé de luxe vintage, parfait mélange de confort et de style classique.', '280SE3.5Coupé(W111).jpeg', NULL, 3),
 ('Mercedes-Benz 300 SL Gullwing', 1500000, 1955, 'Légende mondiale avec ses portières papillon et son moteur mythique.', '300SLGullwing(W198).jpeg', NULL, 3),
-('Mercedes-Benz S 350 (W221)', 12000, 2007, 'Berline de luxe moderne offrant un confort et une technologie de pointe.', 'S350(W221).jfif', NULL, 3),
+('Mercedes-Benz S 350 (W221)', 12000, 2007, 'Berline de luxe moderne offrant un confort et une technologie de pointe.', 'S350(W221).jpg', NULL, 3),
 ('Mercedes-Benz 190 SL Roadster', 110000, 1960, 'Roadster classique décapotable, petit frère de la 300 SL.', '190SL(W121).jpg', NULL, 3);
