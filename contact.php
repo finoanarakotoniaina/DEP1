@@ -66,7 +66,7 @@
     </nav>
     <div class="relative z-[60] px-6 lg:px-24 pt-10">
         <a href="accueil.php" id="back-btn-contact" style="display: none;" class="inline-flex items-center text-[10px] font-title uppercase tracking-[0.2em] text-gray-400 hover:text-[var(--crimson)] transition-all group">
-            <span class="mr-3 transition-transform group-hover:-translate-x-1">❮</span> Retour vers l'accueil
+            <span class="mr-3 transition-transform group-hover:-translate-x-1"></span> Retour vers l'accueil
         </a>
     </div>
 
