@@ -37,6 +37,9 @@ CREATE TABLE voiture(
    modele VARCHAR(50),
    prix INT,
    annee INT,
+   etat VARCHAR (25),
+   type VARCHAR (25),
+   disponibilite BOOLEAN,
    description TEXT,
    image_url VARCHAR(200),
    id_service INT,
@@ -69,3 +72,6 @@ CREATE TABLE demande_essai(
    FOREIGN KEY(id_client) REFERENCES client(id_client),
    FOREIGN KEY(id_voiture) REFERENCES voiture(id_voiture)
 ) ENGINE=InnoDB CHARSET=utf8mb4;
+
+INSERT INTO marque (nom_marque) VALUES
+('BMW'), ('Mercedes'), ('Porsche')
