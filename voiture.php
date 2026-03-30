@@ -1,3 +1,34 @@
+<?php
+// --- CONFIGURATION ET CONNEXION BDD ---
+$host = 'localhost';
+$dbname = 'supercar';
+$user = 'root'; 
+$pass = '';
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Erreur de connexion : " . $e->getMessage());
+}
+
+// --- RÉCUPÉRATION DES DONNÉES ---
+// On récupère tout de 'voiture' + le nom de la marque depuis la table 'marque'
+$query = "SELECT v.*, m.nom_marque 
+          FROM voiture v 
+          LEFT JOIN marque m ON v.id_marque = m.id_marque 
+          ORDER BY m.nom_marque, v.modele";
+$stmt = $pdo->query($query);
+$toutes_voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// On organise les voitures par marque dans un tableau associatif
+$voituresParMarque = [];
+foreach ($toutes_voitures as $v) {
+    $nomM = !empty($v['nom_marque']) ? $v['nom_marque'] : 'Autres';
+    $voituresParMarque[$nomM][] = $v;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,242 +38,105 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* --- STRUCTURE DU SCROLL --- */
-        .row-wrapper {
-            position: relative;
-            padding: 0 40px;
-            margin-bottom: 60px;
-            overflow: visible !important;
-        }
-
-        .story-row {
-            display: flex;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            gap: 25px;
-            padding: 20px 10px; 
-            scrollbar-width: none;
-            overflow-y: visible !important;
+        .row-wrapper { position: relative; padding: 0 40px; margin-bottom: 60px; overflow: visible !important; }
+        .story-row { 
+            display: flex; overflow-x: auto; scroll-behavior: smooth; gap: 25px; 
+            padding: 20px 10px; scrollbar-width: none; overflow-y: visible !important; 
             scroll-snap-type: x mandatory; 
         }
         .story-row::-webkit-scrollbar { display: none; }
-
-        /* --- TA BOX VOITURE --- */
-        .car-card {
-            min-width: calc(33.333% - 20px); 
-            flex-shrink: 0;
-            position: relative;
-            transition: transform 0.4s ease;
-            z-index: 10;
-            scroll-snap-align: start;
+        .car-card { 
+            min-width: calc(33.333% - 20px); flex-shrink: 0; position: relative; 
+            transition: transform 0.4s ease; z-index: 10; scroll-snap-align: start; 
         }
-
-        /* --- PANNEAU INFOS ADAPTATIF --- */
         .hover-specs {
-            position: absolute;
-            top: 0;
-            width: 280px;
-            height: 100%;
-            background: #C1121F; 
-            color: white;
-            padding: 30px;
-            border-radius: 24px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            pointer-events: none;
+            position: absolute; top: 0; width: 280px; height: 100%; background: #C1121F; 
+            color: white; padding: 30px; border-radius: 24px; opacity: 0; visibility: hidden;
+            transition: all 0.4s ease; display: flex; flex-direction: column; 
+            justify-content: center; pointer-events: none;
         }
-
         .car-card .hover-specs { left: 105%; }
-
-        .car-card:nth-child(3n) .hover-specs {
-            left: auto !important;
-            right: 105% !important;
-        }
-
+        .car-card:nth-child(3n) .hover-specs { left: auto !important; right: 105% !important; }
         .car-card:hover { transform: scale(1.05); z-index: 1000 !important; }
         .car-card:hover .hover-specs { opacity: 1; visibility: visible; }
-
         .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 100;
-            backdrop-filter: blur(5px);
-            transition: 0.3s;
-            font-size: 12px;
+            position: absolute; top: 50%; transform: translateY(-50%); width: 35px; height: 35px;
+            border-radius: 50%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            z-index: 100; backdrop-filter: blur(5px); transition: 0.3s; font-size: 12px;
         }
         .nav-btn:hover { background: white; color: black; border-color: white; }
-        .btn-prev { left: 0; }
-        .btn-next { right: 0; }
-
-        .spec-item {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding: 12px 0;
-            font-size: 11px;
-            text-transform: uppercase;
-        }
-
-        .btn-details {
-            padding: 8px 18px;
-            background: #C1121F;
-            border: 1px solid #C1121F;
-            color: white;
-            font-size: 10px;
-            text-transform: uppercase;
-            font-weight: 800;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            border-radius: 6px;
-        }
-        .btn-details:hover {
-            background: white;
-            color: #C1121F;
-            border-color: white;
-            transform: translateY(-2px);
-        }
+        .btn-prev { left: 0; } .btn-next { right: 0; }
+        .spec-item { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.2); padding: 12px 0; font-size: 11px; text-transform: uppercase; }
+        .btn-details { padding: 8px 18px; background: #C1121F; border: 1px solid #C1121F; color: white; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; transition: all 0.3s ease; border-radius: 6px; }
+        .btn-details:hover { background: white; color: #C1121F; border-color: white; transform: translateY(-2px); }
     </style>
 </head>
 <body class="split-bg text-white">
 
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
-        <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-        
+        <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[#C1121F]">CAR</span></div>
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.php" class="nav-link ">Accueil</a></li>
-            <li><a href="voiture.php" class="nav-link active ">Voitures</a></li>
+            <li><a href="accueil.php" class="nav-link">Accueil</a></li>
+            <li><a href="voiture.php" class="nav-link active">Voitures</a></li>
             <li><a href="demande.php" class="nav-link">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
             <li><a href="contact.php" class="nav-link">Contact</a></li>
-            <li><a href="connexion.php" class="nav-link ">Connexion</a></li>
+            <li><a href="connexion.php" class="nav-link">Connexion</a></li>
         </ul>
     </nav>
 
     <main class="pt-32"> 
         <div class="px-6 lg:px-24 mb-12"> 
-            
-            <!-- BOUTON RETOUR (Rajouté ici) -->
-            <a href="accueil.php" id="back-to-home" style="display: none;" class="inline-flex items-center text-[10px] font-title uppercase tracking-[0.2em] text-gray-400 hover:text-[#C1121F] mb-8 transition-all group">
+            <a href="accueil.php" id="back-to-home" style="display: <?php echo (isset($_GET['from']) && $_GET['from'] == 'accueil') ? 'flex' : 'none'; ?>;" class="inline-flex items-center text-[10px] font-title uppercase tracking-[0.2em] text-gray-400 hover:text-[#C1121F] mb-8 transition-all group">
                 <span class="mr-3 transition-transform group-hover:-translate-x-1">❮</span> Retour vers l'accueil
             </a>
-
             <h1 class="font-title text-3xl md:text-5xl font-bold leading-none uppercase tracking-tight">
                 NOS <span class="text-[#C1121F]">MODÈLES</span>
             </h1>
             <div class="w-20 h-1 bg-[#C1121F] mt-4"></div>
         </div>
 
+        <?php foreach ($voituresParMarque as $nomMarque => $voitures): ?>
         <section class="mb-10"> 
-            <h2 class="font-title text-sm px-6 lg:px-24 mb-4 text-gray-500 uppercase tracking-[0.3em]">BMW</h2>
+            <h2 class="font-title text-sm px-6 lg:px-24 mb-4 text-gray-500 uppercase tracking-[0.3em]"><?php echo htmlspecialchars($nomMarque); ?></h2>
             <div class="row-wrapper">
-                <button class="nav-btn btn-prev" onclick="scrollByThree('row-bmw', -1)">❮</button>
-                <div class="story-row" id="row-bmw"></div>
-                <button class="nav-btn btn-next" onclick="scrollByThree('row-bmw', 1)">❯</button>
-            </div>
-        </section>
-
-        <section class="mb-10">
-            <h2 class="font-title text-sm px-6 lg:px-24 mb-4 text-gray-500 uppercase tracking-[0.3em]">Mercedes Benz</h2>
-            <div class="row-wrapper">
-                <button class="nav-btn btn-prev" onclick="scrollByThree('row-merc', -1)">❮</button>
-                <div class="story-row" id="row-merc"></div>
-                <button class="nav-btn btn-next" onclick="scrollByThree('row-merc', 1)">❯</button>
-            </div>
-        </section>
-
-        <section class="mb-10">
-            <h2 class="font-title text-sm px-6 lg:px-24 mb-4 text-gray-500 uppercase tracking-[0.3em]">Porsche</h2>
-            <div class="row-wrapper">
-                <button class="nav-btn btn-prev" onclick="scrollByThree('row-porsche', -1)">❮</button>
-                <div class="story-row" id="row-porsche"></div>
-                <button class="nav-btn btn-next" onclick="scrollByThree('row-porsche', 1)">❯</button>
-            </div>
-        </section>
-    </main>
-
-    <script>
-        const commonSpecs = { etat: "Neuf", km: "0 km", annee: "2024" };
-
-        const brands = {
-            'row-bmw': [
-                { id: 'bmw-m4', model: 'BMW M4 Competition', motor: 'Thermique', price: 'Rs 5,200,000', stock: 'Disponible' },
-                { id: 'bmw-m5', model: 'BMW M5 CS', motor: 'Thermique', price: 'Rs 7,800,000', stock: 'Disponible' },
-                { id: 'bmw-i7', model: 'BMW i7 M70', motor: 'Électrique', price: 'Rs 8,500,000', stock: 'Non Disponible' },
-                { id: 'bmw-x6', model: 'BMW X6 M', motor: 'Thermique', price: 'Rs 6,100,000', stock: 'Disponible' },
-                { id: 'bmw-m2', model: 'BMW M2 Coupe', motor: 'Thermique', price: 'Rs 4,200,000', stock: 'Disponible' },
-                { id: 'bmw-ix', model: 'BMW iX M60', motor: 'Électrique', price: 'Rs 5,900,000', stock: 'Disponible' }
-            ],
-            'row-merc': [
-                { id: 'merc-eqe', model: 'Mercedes-AMG EQE 53 4MATIC+', motor: 'Électrique', price: 'Rs 3,500,000', stock: 'Disponible' },
-                { id: 'merc-gt63', model: 'Mercedes-AMG GT 63 S', motor: 'Thermique', price: 'Rs 9,200,000', stock: 'Disponible' },
-                { id: 'merc-g63', model: 'Mercedes-AMG G 63', motor: 'Thermique', price: 'Rs 11,000,000', stock: 'Non Disponible' },
-                { id: 'merc-eqs', model: 'Mercedes EQS 53', motor: 'Électrique', price: 'Rs 6,800,000', stock: 'Disponible' },
-                { id: 'merc-sl63', model: 'Mercedes SL 63', motor: 'Thermique', price: 'Rs 8,400,000', stock: 'Disponible' },
-                { id: 'merc-one', model: 'AMG One', motor: 'Hybride', price: 'Sur Demande', stock: 'Non Disponible' }
-            ],
-            'row-porsche': [
-                { id: 'porsche-gt3', model: 'Porsche 911 GT3 RS', motor: 'Thermique', price: 'Rs 12,500,000', stock: 'Disponible' },
-                { id: 'porsche-taycan', model: 'Porsche Taycan Turbo S', motor: 'Électrique', price: 'Rs 7,200,000', stock: 'Disponible' },
-                { id: 'porsche-gt4', model: 'Porsche 718 GT4', motor: 'Thermique', price: 'Rs 4,800,000', stock: 'Disponible' },
-                { id: 'porsche-turbo', model: 'Porsche 911 Turbo', motor: 'Thermique', price: 'Rs 9,500,000', stock: 'Disponible' },
-                { id: 'porsche-macan', model: 'Porsche Macan GTS', motor: 'Thermique', price: 'Rs 3,900,000', stock: 'Disponible' },
-                { id: 'porsche-spyder', model: 'Porsche 918 Spyder', motor: 'Hybride', price: 'Sur Demande', stock: 'Non Disponible' }
-            ]
-        };
-
-        function init() {
-            for (let id in brands) {
-                const row = document.getElementById(id);
-                if(row) {
-                    row.innerHTML = brands[id].map((car, index) => `
+                <?php $rowId = "row-" . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $nomMarque)); ?>
+                <button class="nav-btn btn-prev" onclick="scrollByThree('<?php echo $rowId; ?>', -1)">❮</button>
+                <div class="story-row" id="<?php echo $rowId; ?>">
+                    <?php foreach ($voitures as $car): ?>
                         <div class="car-card">
                             <div class="hover-specs">
                                 <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase">Fiche Technique</p>
-                                <div class="spec-item"><span>État</span> <span>${commonSpecs.etat}</span></div>
-                                <div class="spec-item"><span>Kilométrage</span> <span>${commonSpecs.km}</span></div>
-                                <div class="spec-item"><span>Année</span> <span>${commonSpecs.annee}</span></div>
-                                <div class="spec-item"><span>Type</span> <span>${car.motor}</span></div>
+                                <div class="spec-item"><span>Année</span> <span><?php echo $car['annee']; ?></span></div>
+                                <div class="spec-item"><span>Prix</span> <span><?php echo number_format($car['prix'], 0, '.', ' '); ?> Rs</span></div>
+                                <div class="spec-item"><span>ID</span> <span>#<?php echo $car['id_voiture']; ?></span></div>
                             </div>
-                            <img src="${id.split('-')[1]}${index+1}.jpg" class="w-full h-64 object-cover rounded-t-[24px]" alt="${car.model}">
+                            <img src="image_url/<?php echo htmlspecialchars($car['image_url']); ?>" class="w-full h-64 object-cover rounded-t-[24px]" alt="<?php echo htmlspecialchars($car['modele']); ?>">
                             <div class="p-8 bg-white/5 rounded-b-[24px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="${car.stock === 'Disponible' ? 'text-[#C1121F]' : 'text-gray-500'} font-bold text-[10px] uppercase">
-                                        ${car.stock}
-                                    </span>
-                                    <span class="text-gray-400 text-[10px] font-bold uppercase">${car.motor}</span>
+                                    <span class="text-[#C1121F] font-bold text-[10px] uppercase">Disponible</span>
+                                    <span class="text-gray-400 text-[10px] font-bold uppercase">Luxe</span>
                                 </div>
-                                <h3 class="font-title text-[13px] mb-4 text-white uppercase h-10 leading-tight">${car.model}</h3>
-                                
+                                <h3 class="font-title text-[13px] mb-4 text-white uppercase h-10 leading-tight"><?php echo htmlspecialchars($car['modele']); ?></h3>
                                 <div class="flex justify-between items-center mt-4">
-                                    <p class="font-bold text-xl text-white">${car.price}</p>
-                                    <a href="details.html?car=${car.id}" class="btn-details">Détails</a>
+                                    <p class="font-bold text-xl text-white"><?php echo number_format($car['prix'], 0, '.', ' '); ?> Rs</p>
+                                    <a href="details.php?id=<?php echo $car['id_voiture']; ?>" class="btn-details">Détails</a>
                                 </div>
                             </div>
                         </div>
-                    `).join('');
-                }
-            }
-        }
+                    <?php endforeach; ?>
+                </div>
+                <button class="nav-btn btn-next" onclick="scrollByThree('<?php echo $rowId; ?>', 1)">❯</button>
+            </div>
+        </section>
+        <?php endforeach; ?>
+    </main>
 
+    <script>
         function scrollByThree(id, direction) {
             const container = document.getElementById(id);
             const card = container.querySelector('.car-card');
@@ -251,20 +145,10 @@
                 container.scrollBy({ left: direction * (cardWidth * 3), behavior: 'smooth' });
             }
         }
-
-        init();
-
-        // LOGIQUE D'AFFICHAGE DU BOUTON RETOUR
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('from') === 'accueil') {
-            const backBtn = document.getElementById('back-to-home');
-            if (backBtn) backBtn.style.display = 'flex';
-        }
     </script>
     
     <footer class="py-16 text-center border-t border-white/5 text-gray-500 text-[9px] tracking-[0.5em] font-title uppercase">
         &copy; 2026 SUPERCAR MAURITIUS - TOUS DROITS RÉSERVÉS
     </footer>
-
 </body>
 </html>
