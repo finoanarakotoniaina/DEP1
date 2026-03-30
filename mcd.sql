@@ -100,9 +100,9 @@ INSERT INTO voiture (modele, prix, annee, description, image_url, id_service, id
 ('Z1', 60000, 1990, 'Cabriolet futuriste célèbre pour ses portières escamotables verticalement.', 'bmwZ1.jpg', NULL, 2),
 ('Z3 Coupé', 45000, 1999, 'Le fameux \"Shooting Brake\" au design audacieux et aux ailes larges.', 'bmwZ3.jpg', NULL, 2),
 
-('Mercedes-Benz S 500 (W140)', 15000, 1997, 'La \"Cathédrale\", symbole du luxe absolu des années 90, moteur V8.', 'S500(W140).jfif', NULL, 3),
-('Mercedes-Benz 280 SL Pagode', 120000, 1968, 'Icône d\'élégance avec son toit rigide concave caractéristique.', '280SLPagode(W113).jfif', NULL, 3),
-('Mercedes-Benz 450 SLC (C107)', 35000, 1978, 'Coupé de luxe vintage, parfait mélange de confort et de style classique.', '280SE3.5Coupé(W111).png', NULL, 3),
-('Mercedes-Benz 300 SL Gullwing', 1500000, 1955, 'Légende mondiale avec ses portières papillon et son moteur mythique.', '300SLGullwing(W198).jfif', NULL, 3),
+('Mercedes-Benz S 500 (W140)', 15000, 1997, 'La \"Cathédrale\", symbole du luxe absolu des années 90, moteur V8.', 'S500(W140).jpeg', NULL, 3),
+('Mercedes-Benz 280 SL Pagode', 120000, 1968, 'Icône d\'élégance avec son toit rigide concave caractéristique.', '280SLPagode(W113).webp', NULL, 3),
+('Mercedes-Benz 450 SLC (C107)', 35000, 1978, 'Coupé de luxe vintage, parfait mélange de confort et de style classique.', '280SE3.5Coupé(W111).jpeg', NULL, 3),
+('Mercedes-Benz 300 SL Gullwing', 1500000, 1955, 'Légende mondiale avec ses portières papillon et son moteur mythique.', '300SLGullwing(W198).jpeg', NULL, 3),
 ('Mercedes-Benz S 350 (W221)', 12000, 2007, 'Berline de luxe moderne offrant un confort et une technologie de pointe.', 'S350(W221).jfif', NULL, 3),
-('Mercedes-Benz 190 SL Roadster', 110000, 1960, 'Roadster classique décapotable, petit frère de la 300 SL.', '190SL(W121).jfif', NULL, 3);
+('Mercedes-Benz 190 SL Roadster', 110000, 1960, 'Roadster classique décapotable, petit frère de la 300 SL.', '190SL(W121).jpg', NULL, 3);
