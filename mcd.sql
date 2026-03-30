@@ -40,7 +40,7 @@ CREATE TABLE voiture(
    etat VARCHAR (25),
    type VARCHAR (25),
    kilometrage INT,
-   disponibilite BOOLEAN,
+   disponibilite BOOLEAN DEFAULT TRUE,
    description TEXT,
    image_url VARCHAR(200),
    id_service INT,
