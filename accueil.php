@@ -82,7 +82,7 @@
             
             <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="0">
                 <h3 class="font-title text-[var(--marble)] text-2xl mb-4">BMW</h3>
-                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Bien que la marque se soit diversifiée, son cœur de métier reste la « driver’s car ». bmw se distingue par une ergonomie intérieure orientée vers le conducteur et une mise au point de châssis qui favorise la précision de conduite et l'agilité. contrairement à beaucoup de constructeurs, ils privilégient souvent une répartition des masses équilibrée et une direction communicative, cherchant à donner au conducteur l'impression de faire corps avec la machine, même sur des modèles familiaux."></p>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Bien que la marque se soit diversifiée, son cœur de métier reste la « driver’s car ». BMW se distingue par une ergonomie intérieure orientée vers le conducteur et une mise au point de châssis qui favorise la précision de conduite et l'agilité. contrairement à beaucoup de constructeurs, ils privilégient souvent une répartition des masses équilibrée et une direction communicative, cherchant à donner au conducteur l'impression de faire corps avec la machine, même sur des modèles familiaux."></p>
             </div>
             
             <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-left" data-delay="300">
