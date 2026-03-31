@@ -1,3 +1,4 @@
+<?php include 'config.php'; ?>
 <?php
 // 1. CONFIGURATION DE LA CONNEXION
 $host = 'localhost';

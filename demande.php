@@ -1,3 +1,4 @@
+<?php include 'config.php'; ?>
 <?php
 session_start();
 $isLoggedIn = isset($_SESSION['id_client']); 

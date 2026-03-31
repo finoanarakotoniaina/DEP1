@@ -1,3 +1,4 @@
+<?php include 'config.php'; ?>
 <?php
 // --- CONFIGURATION ET CONNEXION BDD ---
 $host = 'localhost';
