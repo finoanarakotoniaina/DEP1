@@ -113,8 +113,8 @@ foreach ($toutes_voitures as $v) {
                                 <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase">Fiche Technique</p>
                                 <div class="spec-item"><span>Année</span> <span><?php echo $car['annee']; ?></span></div>
                                 <div class="spec-item"><span>Prix</span> <span><?php echo number_format($car['prix'], 0, '.', ' '); ?> Rs</span></div>
-                                <div class="spec-item"><span>Etat</span> <span>#<?php echo $car['etat']; ?></span></div>
-                                <div class="spec-item"><span>Kilometrage</span> <span>#<?php echo $car['kilometrage']; ?></span></div>
+                                <div class="spec-item"><span>Etat</span> <span><?php echo $car['etat']; ?></span></div>
+                                <div class="spec-item"><span>Kilometrage</span> <span><?php echo $car['kilometrage']; ?></span></div>
                             </div>
                             <img src="image_url/<?php echo htmlspecialchars($car['image_url']); ?>" class="w-full h-64 object-cover rounded-t-[24px]" alt="<?php echo htmlspecialchars($car['modele']); ?>">
                             <div class="p-8 bg-white/5 rounded-b-[24px]">
