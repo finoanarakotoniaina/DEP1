@@ -47,17 +47,27 @@ $isLoggedIn = isset($_SESSION['id_client']);
         </div>
     </div>
 
-    <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
-        <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-        <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.php" class="nav-link">Accueil</a></li>
-            <li><a href="voiture.php" class="nav-link">Voitures</a></li>
-            <li><a href="demande.php" class="nav-link active">Essai</a></li>
-            <li><a href="services.php" class="nav-link">Services</a></li>
-            <li><a href="contact.php" class="nav-link">Contact</a></li>
-            <li><a href="connexion.php" class="nav-link">Connexion</a></li>
-        </ul>
-    </nav>
+        <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
+            <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
+            
+            <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
+                <li><a href="accueil.php" class="nav-link">Accueil</a></li>
+                <li><a href="voiture.php" class="nav-link">Voitures</a></li>
+                <li><a href="demande.php" class="nav-link active">Essai</a></li>
+                <li><a href="services.php" class="nav-link">Services</a></li>
+                <li><a href="contact.php" class="nav-link">Contact</a></li>
+
+                <?php if (isset($_SESSION['id_client'])): ?>
+                    <li>
+                        <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300">
+                            Déconnexion
+                        </a>
+                    </li>
+                <?php else: ?>
+                    <li><a href="connexion.php" class="nav-link">Connexion</a></li>
+                <?php endif; ?>
+            </ul>
+        </nav>
 
     <section class="relative h-screen flex items-center px-6 lg:px-24 overflow-hidden">
         <div class="z-10 max-w-4xl relative">
