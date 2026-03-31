@@ -124,7 +124,7 @@ foreach ($toutes_voitures as $v) {
                                 <h3 class="font-title text-[13px] mb-4 text-white uppercase h-10 leading-tight"><?php echo htmlspecialchars($car['modele']); ?></h3>
                                 <div class="flex justify-between items-center mt-4">
                                     <p class="font-bold text-xl text-white"><?php echo number_format($car['prix'], 0, '.', ' '); ?> Rs</p>
-                                    <a href="details.php?id=<?php echo $car['id_voiture']; ?>" class="btn-details">Détails</a>
+                                  
                                 </div>
                             </div>
                         </div>
