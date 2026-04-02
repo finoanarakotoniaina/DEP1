@@ -101,6 +101,11 @@
                 <h3 class="font-title text-[var(--marble)] text-2xl mb-4">PORSCHE</h3>
                 <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Dire que porsche est juste « sportif » est un euphémisme. la marque est surtout une référence en ingénierie de précision. le tour de force de porsche est de proposer des voitures aux performances démoniaques (avec la 911 en icône absolue) qui restent paradoxalement utilisables au quotidien. leur fiabilité mécanique est souvent supérieure à la moyenne des voitures de sport, et ils excellent dans l'art de rendre une conduite complexe accessible et gratifiante, peu importe le niveau du pilote."></p>
             </div>
+           
+            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="450">
+                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">AUDI</h3>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Audi incarne l'équilibre parfait entre haute technologie et sobriété esthétique. Leur philosophie « Vorsprung durch Technik » (l'avance par la technologie) se traduit par une qualité de finition intérieure inégalée et l'excellence de leur transmission intégrale Quattro. Contrairement à ses rivaux, Audi mise sur une élégance discrète mais redoutablement efficace, offrant une expérience de conduite sécurisante et ultra-connectée, idéale pour ceux qui recherchent le luxe sans l'ostentation."></p>
+            </div>
         </div>
     </section>
 

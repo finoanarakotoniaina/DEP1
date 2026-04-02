@@ -1,4 +1,5 @@
 <?php
+session_start(); // OBLIGATOIRE pour utiliser les sessions !
 include 'config.php'; 
 
 if (!isset($_SESSION['captcha_reponse'])) {
@@ -18,7 +19,6 @@ if (isset($_POST['connexion'])) {
     if ($captcha_saisi !== $_SESSION['captcha_reponse']) {
         $message = "CAPTCHA incorrect.";
     } else {
-        // Correction de la jointure SQL selon ton erreur précédente
         $sql = "SELECT l.password, c.id_client, c.prenom, c.nom 
                 FROM login l
                 INNER JOIN client c ON l.id_login = c.id_login 
@@ -30,15 +30,31 @@ if (isset($_POST['connexion'])) {
 
         if ($user = $resultat->fetch_assoc()) {
             if (password_verify($mdp_saisi, $user['password'])) {
+                // On stocke les infos de base
                 $_SESSION['id_client'] = $user['id_client'];
                 $_SESSION['prenom']    = $user['prenom'];
                 $_SESSION['nom']       = $user['nom'];
+
+                // RÉCUPÉRATION DE L'EMAIL ET DU TÉLÉPHONE
+                $sql_info = "SELECT email, telephone FROM client WHERE id_client = ?";
+                $stmt_info = $conn->prepare($sql_info);
+                $stmt_info->bind_param("i", $user['id_client']);
+                $stmt_info->execute();
+                $res_info = $stmt_info->get_result();
+                $info = $res_info->fetch_assoc();
+
+                $_SESSION['email']     = $info['email'];
+                $_SESSION['telephone'] = $info['telephone'];
+                
+                $stmt_info->close(); // On ferme la petite requête
+
                 header("Location: accueil.php");
                 exit();
             } else { $message = "Mot de passe incorrect."; }
         } else { $message = "Identifiant inconnu."; }
         $stmt->close();
     }
+    // Régénération du captcha en cas d'erreur
     $n1 = rand(0, 3); $n2 = rand(0, 3);
     $_SESSION['captcha_reponse'] = $n1 + $n2;
     $_SESSION['captcha_question'] = "$n1 + $n2";
