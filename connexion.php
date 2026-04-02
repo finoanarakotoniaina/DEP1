@@ -33,7 +33,7 @@ if (isset($_POST['connexion'])) {
                 $_SESSION['id_client'] = $user['id_client'];
                 $_SESSION['prenom']    = $user['prenom'];
                 $_SESSION['nom']       = $user['nom'];
-                header("Location: voiture.php");
+                header("Location: accueil.php");
                 exit();
             } else { $message = "Mot de passe incorrect."; }
         } else { $message = "Identifiant inconnu."; }
