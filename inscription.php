@@ -88,8 +88,13 @@ if (isset($_POST['inscription'])) {
             <li><a href="voiture.php" class="nav-link">Voitures</a></li>
             <li><a href="demande.php" class="nav-link">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
-            <li><a href="contact.php" class="nav-link">Contact</a></li>
-            <li><a href="connexion.php" class="nav-link active">Connexion</a></li>
+            <li><a href="contact.php" class="nav-link">Contact</a></li> |
+            <li><strong>
+                <a href="connexion.php" class="nav-link active flex items-center gap-2">
+                <i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion
+                </a>
+                </strong>
+            </li>
         </ul>
     </nav>
 

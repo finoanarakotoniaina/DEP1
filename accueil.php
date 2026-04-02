@@ -7,6 +7,7 @@
     <title>SuperCar | L'Élégance d'Occasion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     
     <style>
@@ -30,16 +31,22 @@
             <li><a href="voiture.php" class="nav-link">Voitures</a></li>
             <li><a href="demande.php" class="nav-link">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
-            <li><a href="contact.php" class="nav-link">Contact</a></li>
+            <li><a href="contact.php" class="nav-link">Contact</a></li> |
 
             <?php if (isset($_SESSION['id_client'])): ?>
                 <li>
-                    <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300">
-                        Déconnexion
+                    <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2">
+                        <i class="fa-solid fa-door-open text-[18px]"></i> Déconnexion
                     </a>
                 </li>
             <?php else: ?>
-                <li><a href="connexion.php" class="nav-link">Connexion</a></li>
+                <li>
+                    <strong>
+                        <a href="connexion.php" class="nav-link flex items-center gap-2">
+                            <i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion
+                        </a>
+                    </strong>
+                </li>
             <?php endif; ?>
         </ul>
     </nav>
@@ -93,6 +100,11 @@
             <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="600">
                 <h3 class="font-title text-[var(--marble)] text-2xl mb-4">PORSCHE</h3>
                 <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Dire que porsche est juste « sportif » est un euphémisme. la marque est surtout une référence en ingénierie de précision. le tour de force de porsche est de proposer des voitures aux performances démoniaques (avec la 911 en icône absolue) qui restent paradoxalement utilisables au quotidien. leur fiabilité mécanique est souvent supérieure à la moyenne des voitures de sport, et ils excellent dans l'art de rendre une conduite complexe accessible et gratifiante, peu importe le niveau du pilote."></p>
+            </div>
+           
+            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="450">
+                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">AUDI</h3>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Audi incarne l'équilibre parfait entre haute technologie et sobriété esthétique. Leur philosophie « Vorsprung durch Technik » (l'avance par la technologie) se traduit par une qualité de finition intérieure inégalée et l'excellence de leur transmission intégrale Quattro. Contrairement à ses rivaux, Audi mise sur une élégance discrète mais redoutablement efficace, offrant une expérience de conduite sécurisante et ultra-connectée, idéale pour ceux qui recherchent le luxe sans l'ostentation."></p>
             </div>
         </div>
     </section>

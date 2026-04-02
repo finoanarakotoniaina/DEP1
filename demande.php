@@ -15,6 +15,7 @@ $isLoggedIn = isset($_SESSION['id_client']);
     <title>SuperCar | L'Inévitable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
         :root { --crimson: #C1121F; }
@@ -22,7 +23,6 @@ $isLoggedIn = isset($_SESSION['id_client']);
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); }
         
-        /* Animation pour l'apparition fluide */
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
@@ -30,9 +30,10 @@ $isLoggedIn = isset($_SESSION['id_client']);
         .animate-fade-in {
             animation: fadeIn 0.6s ease-out forwards;
         }
+        body, html { background-color: #0a0a0a; }
     </style>
 </head>
-<body class="split-bg text-white bg-[#0a0a0a]">
+<body class="split-bg text-white">
 
     <div id="authModal" class="<?php echo $isLoggedIn ? 'hidden' : 'flex'; ?> fixed inset-0 z-[100] items-center justify-center modal-blur px-6 animate-fade-in">
         <div class="bg-[#0a0a0a] border border-white/10 p-10 rounded-[20px] max-w-md w-full text-center relative shadow-2xl">
@@ -52,27 +53,34 @@ $isLoggedIn = isset($_SESSION['id_client']);
         </div>
     </div>
 
-        <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
-            <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-            
-            <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-                <li><a href="accueil.php" class="nav-link">Accueil</a></li>
-                <li><a href="voiture.php" class="nav-link">Voitures</a></li>
-                <li><a href="demande.php" class="nav-link active">Essai</a></li>
-                <li><a href="services.php" class="nav-link">Services</a></li>
-                <li><a href="contact.php" class="nav-link">Contact</a></li>
+    
+    <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
+        <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
+        
+        <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
+            <li><a href="accueil.php" class="nav-link">Accueil</a></li>
+            <li><a href="voiture.php" class="nav-link">Voitures</a></li>
+            <li><a href="demande.php" class="nav-link active">Essai</a></li>
+            <li><a href="services.php" class="nav-link">Services</a></li>
+            <li><a href="contact.php" class="nav-link">Contact</a></li> |
 
-                <?php if (isset($_SESSION['id_client'])): ?>
-                    <li>
-                        <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300">
-                            Déconnexion
+            <?php if (isset($_SESSION['id_client'])): ?>
+                <li>
+                    <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2">
+                        <i class="fa-solid fa-door-open text-[18px]"></i> Déconnexion
+                    </a>
+                </li>
+            <?php else: ?>
+                <li>
+                    <strong>
+                        <a href="connexion.php" class="nav-link flex items-center gap-2">
+                            <i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion
                         </a>
-                    </li>
-                <?php else: ?>
-                    <li><a href="connexion.php" class="nav-link">Connexion</a></li>
-                <?php endif; ?>
-            </ul>
-        </nav>
+                    </strong>
+                </li>
+            <?php endif; ?>
+        </ul>
+    </nav>
 
     <section class="relative h-screen flex items-center px-6 lg:px-24 overflow-hidden">
         <div class="z-10 max-w-4xl relative">
@@ -99,7 +107,7 @@ $isLoggedIn = isset($_SESSION['id_client']);
 
     <section id="booking" class="min-h-screen pt-10 pb-24 px-6 lg:px-24 flex flex-col justify-center relative border-t border-white/5">
         <div class="absolute left-0 top-0 h-full w-24 border-r border-white/5 flex items-center justify-center">
-            <span class="vertical-text tracking-[1em] text-xs text-gray-600 font-bold uppercase">Reservation Form</span>
+            <span class="vertical-text tracking-[1em] text-xs text-gray-600 font-bold uppercase" style="writing-mode: vertical-rl; transform: rotate(180deg);">Reservation Form</span>
         </div>
         <div class="max-w-5xl mx-auto w-full grid lg:grid-cols-2 gap-20 items-start">
             <div class="space-y-12">
@@ -114,10 +122,19 @@ $isLoggedIn = isset($_SESSION['id_client']);
 
             <form id="mainForm" action="traitement_demande.php" method="POST" class="space-y-8 bg-white/5 p-10 rounded-[40px] border border-white/10 backdrop-blur-sm">
                 <div class="grid grid-cols-2 gap-6">
-                    <input type="text" name="nom" placeholder="NOM" required class="bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none uppercase">
-                    <input type="text" name="prenom" placeholder="PRÉNOM" required class="bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none uppercase">
+                    <input type="text" name="nom" placeholder="NOM" required 
+                           value="<?php echo $_SESSION['nom'] ?? ''; ?>" 
+                           class="bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none uppercase">
+                    
+                    <input type="text" name="prenom" placeholder="PRÉNOM" required 
+                           value="<?php echo $_SESSION['prenom'] ?? ''; ?>" 
+                           class="bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none uppercase">
                 </div>
-                <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required class="w-full bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none">
+
+                <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required 
+                       value="<?php echo $_SESSION['email'] ?? ''; ?>" 
+                       class="w-full bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none">
+
                 <div class="grid grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Modèle</label>
@@ -129,9 +146,12 @@ $isLoggedIn = isset($_SESSION['id_client']);
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Mobile</label>
-                        <input type="tel" name="mobile" placeholder="N° MOBILE" required class="bg-transparent border-b border-white/20 w-full p-4 text-xs focus:border-[var(--crimson)] outline-none">
+                        <input type="tel" name="mobile" placeholder="N° MOBILE" required 
+                               value="<?php echo $_SESSION['telephone'] ?? ''; ?>" 
+                               class="bg-transparent border-b border-white/20 w-full p-4 text-xs focus:border-[var(--crimson)] outline-none">
                     </div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Date préférée</label>
