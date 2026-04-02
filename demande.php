@@ -1,8 +1,12 @@
 <?php 
 include 'config.php'; 
-session_start(); // OBLIGATOIRE pour lire les infos de connexion
+session_start();
+
+// On vérifie si l'utilisateur est connecté
 $isLoggedIn = isset($_SESSION['id_client']); 
 ?>
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -43,7 +47,7 @@ $isLoggedIn = isset($_SESSION['id_client']);
                 Pour réserver un essai exclusif, veuillez vous identifier ou rejoindre le cercle SuperCar.
             </p>
             <div class="flex flex-col gap-4">
-                <a href="connexion.php?redirect=demande.php" class="bg-[var(--crimson)] py-4 font-title text-[10px] tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all text-center">Connexion</a>
+                <a href="connexion.php?from=demande" class="bg-[var(--crimson)] py-4 font-title text-[10px] tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all text-center">Connexion</a>
                 <a href="inscription.php" class="border border-white/20 py-4 font-title text-[10px] tracking-[0.2em] uppercase hover:border-[var(--crimson)] hover:text-[var(--crimson)] transition-all text-center">Inscription</a>
             </div>
         </div>
@@ -164,15 +168,15 @@ $isLoggedIn = isset($_SESSION['id_client']);
     </section>
 
     <script>
-        function closeModal() {
-            window.location.href = 'accueil.php';
-        }
-
+        // Exemple de lien ou redirection vers login
+        
+        function closeModal() { window.location.href = 'accueil.php'; }
         const dateIn = document.getElementById('d');
         if(dateIn) {
             const today = new Date();
             today.setDate(today.getDate() + 1);
             dateIn.min = today.toISOString().split('T')[0];
+            
         }
     </script>
 </body>
