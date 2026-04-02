@@ -107,3 +107,22 @@ INSERT INTO voiture (modele, prix, annee, etat, type, kilometrage, disponibilite
 ('Mercedes-Benz 300 SL Gullwing', 1000000, 1955, 'Exceptionnel', 'thermique', 32000, true, 'Légende mondiale avec ses portières papillon.', '300SLGullwing(W198).jpeg', NULL, 3),
 ('Mercedes-Benz S 350 (W221)', 320000, 2007, 'Bon', 'thermique', 198000, true, 'Berline de luxe moderne offrant un grand confort.', 'S350(W221).jpg', NULL, 3),
 ('Mercedes-Benz 190 SL Roadster', 780000, 1960, 'Bon', 'thermique', 76000, true, 'Roadster classique décapotable.', '190SL(W121).jpg', NULL, 3);
+
+-- Audi --
+INSERT INTO `marque` (`id_marque`, `nom_marque`) 
+VALUES (4, 'Audi');
+
+INSERT INTO `voiture` (`id_voiture`, `modele`, `prix`, `annee`, `etat`, `type`, `kilometrage`, `disponibilite`, `description`, `image_url`, `id_marque`) VALUES
+
+(19, 'Audi A3 Sportback', 350000, 2011, 'Très Bon', 'thermique', 120000, 1, 'Compacte premium polyvalente et élégante.', 'A3(8P).jpg', 4),
+
+(20, 'Audi A4 B8', 480000, 2013, 'Excellent', 'thermique', 95000, 1, 'Berline confortable au design intemporel.', 'A4(B8).jpg', 4),
+
+(21, 'Audi Q3', 750000, 2015, 'Bon', 'thermique', 88000, 1, 'SUV compact idéal pour la ville et la route.', 'Q3.jpg', 4),
+
+(22, 'Audi TT 8J', 550000, 2009, 'Très Bon', 'thermique', 110000, 1, 'Coupé sportif iconique au design épuré.', 'AUDI_TT(8J).jpg', 4),
+
+(23, 'Audi A6 C7', 620000, 2014, 'Bon', 'thermique', 140000, 1, 'Grande berline de luxe avec finitions soignées.', 'A6(C7).jpg', 4),
+
+(24, 'Audi Q5', 580000, 2012, 'Bon', 'thermique', 155000, 1, 'SUV familial robuste et performant.', 'AUDI_Q5.jpg', 4);
+ 
