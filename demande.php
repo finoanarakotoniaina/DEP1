@@ -1,6 +1,6 @@
 <?php 
 include 'config.php'; 
-session_start();
+
 
 // On vérifie si l'utilisateur est connecté
 $isLoggedIn = isset($_SESSION['id_client']); 
