@@ -1,37 +1,31 @@
-<?php include 'config.php'; ?>
-<?php
+<?php 
+include 'config.php'; 
+session_start(); // AJOUT : Nécessaire pour accéder aux infos de l'utilisateur connecté
+
 // 1. CONFIGURATION DE LA CONNEXION
 $host = 'localhost';
 $dbname = 'supercar';
-$username = 'root'; // Utilisateur par défaut sur XAMPP/WAMP
-$password = '';     // Mot de passe vide par défaut sur XAMPP/WAMP
+$username = 'root'; 
+$password = ''; 
 
 $message_envoi = "";
 $show_modal = false;
 
 try {
-    // Connexion à MySQL avec PDO
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    // Configuration pour afficher les erreurs SQL si elles surviennent
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // 2. TRAITEMENT DU FORMULAIRE (Si la méthode est POST)
+    // 2. TRAITEMENT DU FORMULAIRE
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        
-        // Récupération sécurisée des données du formulaire
         $nom = htmlspecialchars($_POST['nom']);
         $prenom = htmlspecialchars($_POST['prenom']);
         $email = htmlspecialchars($_POST['email']);
         $message = htmlspecialchars($_POST['message']);
 
-        // Vérification que les champs ne sont pas vides
         if (!empty($nom) && !empty($prenom) && !empty($email) && !empty($message)) {
-            
-            // Préparation de la requête SQL (Protection contre les injections SQL)
             $sql = "INSERT INTO contact (nom, prenom, email, message) VALUES (:nom, :prenom, :email, :message)";
             $stmt = $pdo->prepare($sql);
             
-            // Exécution avec les données nettoyées
             $stmt->execute([
                 ':nom'    => $nom,
                 ':prenom' => $prenom,
@@ -39,13 +33,11 @@ try {
                 ':message' => $message
             ]);
 
-            // Paramètres pour afficher la notification de succès
             $message_envoi = "Votre message a bien été enregistré dans la base de données !";
             $show_modal = true;
         }
     }
 } catch (PDOException $e) {
-    // En cas d'erreur de connexion, on l'affiche
     die("Erreur de connexion à la base de données : " . $e->getMessage());
 }
 ?>
@@ -69,7 +61,6 @@ try {
             color: transparent;
         }
 
-        /* Style de l'onglet de notification */
         #success-modal {
             display: none;
             position: fixed;
@@ -176,16 +167,22 @@ try {
                     <div class="grid grid-cols-2 gap-8">
                         <div class="space-y-2">
                             <label class="text-[10px] uppercase tracking-[0.3em] text-gray-500">Nom</label>
-                            <input type="text" name="nom" placeholder="VOTRE NOM" required class="bg-transparent border-b border-white/20 w-full py-2 text-xs tracking-widest focus:border-[var(--crimson)] outline-none transition-colors">
+                            <input type="text" name="nom" placeholder="VOTRE NOM" required 
+                                   value="<?php echo isset($_SESSION['nom']) ? $_SESSION['nom'] : ''; ?>" 
+                                   class="bg-transparent border-b border-white/20 w-full py-2 text-xs tracking-widest focus:border-[var(--crimson)] outline-none transition-colors">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] uppercase tracking-[0.3em] text-gray-500">Prénom</label>
-                            <input type="text" name="prenom" placeholder="VOTRE PRÉNOM" required class="bg-transparent border-b border-white/20 w-full py-2 text-xs tracking-widest focus:border-[var(--crimson)] outline-none transition-colors">
+                            <input type="text" name="prenom" placeholder="VOTRE PRÉNOM" required 
+                                   value="<?php echo isset($_SESSION['prenom']) ? $_SESSION['prenom'] : ''; ?>" 
+                                   class="bg-transparent border-b border-white/20 w-full py-2 text-xs tracking-widest focus:border-[var(--crimson)] outline-none transition-colors">
                         </div>
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] uppercase tracking-[0.3em] text-gray-500">Email</label>
-                        <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required class="bg-transparent border-b border-white/20 w-full py-2 text-xs tracking-widest focus:border-[var(--crimson)] outline-none transition-colors">
+                        <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required 
+                               value="<?php echo isset($_SESSION['email']) ? $_SESSION['email'] : ''; ?>" 
+                               class="bg-transparent border-b border-white/20 w-full py-2 text-xs tracking-widest focus:border-[var(--crimson)] outline-none transition-colors">
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] uppercase tracking-[0.3em] text-gray-500">Message</label>

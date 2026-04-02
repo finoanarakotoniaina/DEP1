@@ -1,5 +1,5 @@
 <?php
-session_start(); // OBLIGATOIRE pour utiliser les sessions !
+session_start(); 
 include 'config.php'; 
 
 if (!isset($_SESSION['captcha_reponse'])) {
@@ -46,7 +46,7 @@ if (isset($_POST['connexion'])) {
                 $_SESSION['email']     = $info['email'];
                 $_SESSION['telephone'] = $info['telephone'];
                 
-                $stmt_info->close(); // On ferme la petite requête
+                $stmt_info->close(); 
 
                 header("Location: accueil.php");
                 exit();
