@@ -33,7 +33,7 @@ if (isset($_POST['connexion'])) {
                 $_SESSION['id_client'] = $user['id_client'];
                 $_SESSION['prenom']    = $user['prenom'];
                 $_SESSION['nom']       = $user['nom'];
-                header("Location: voiture.php");
+                header("Location: accueil.php");
                 exit();
             } else { $message = "Mot de passe incorrect."; }
         } else { $message = "Identifiant inconnu."; }
@@ -81,7 +81,7 @@ if (isset($_POST['connexion'])) {
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
             -webkit-appearance: none; margin: 0;
         }
-        input[type=number] { -moz-appearance: textfield; }
+        input[type=number] { -moz-appearance: textfield; appearance: none; }
     </style>
 </head>
 
@@ -144,7 +144,7 @@ if (isset($_POST['connexion'])) {
         </div>
 
         <div class="hidden lg:block relative h-full">
-            <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2070"
+            <img src="connexionimg.jpg"
                  class="w-full h-full object-cover image-mask-gradient" alt="Ferrari">
         </div>
     </main>

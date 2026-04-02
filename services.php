@@ -67,7 +67,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             
-            <!-- CARTE 01 : VIDANGE -->
+            <!-- VIDANGE -->
             <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl group transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 hover:z-50 hover:bg-[#051622] hover:border-[var(--crimson)]/50 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
                 <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900">
                     <img src="vidange.webp" alt="Vidange" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
@@ -79,7 +79,7 @@
                 </p>
             </div>
             
-            <!-- CARTE 02 : PNEUS -->
+            <!-- PNEUS -->
             <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl group transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 hover:z-50 hover:bg-[#051622] hover:border-[var(--crimson)]/50 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
                 <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900">
                     <img src="pneux.jpg" alt="Pneus" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
@@ -91,7 +91,7 @@
                 </p>
             </div>
 
-            <!-- CARTE 03 : DIAGNOSTIC -->
+            <!-- DIAGNOSTIC -->
             <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl group transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 hover:z-50 hover:bg-[#051622] hover:border-[var(--crimson)]/50 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
                 <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900">
                     <img src="testdiagnostic.webp" alt="Diagnostic" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
@@ -103,7 +103,7 @@
                 </p>
             </div>
 
-            <!-- CARTE 04 : MOTEUR -->
+            <!-- MOTEUR -->
             <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl group transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 hover:z-50 hover:bg-[#051622] hover:border-[var(--crimson)]/50 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
                 <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900">
                     <img src="moteur.jpg" alt="Moteur" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
