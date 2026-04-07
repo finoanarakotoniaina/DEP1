@@ -2,8 +2,6 @@
 INSERT INTO marque (nom_marque) VALUES
 ('Porsche'), ('BMW'), ('Mercedes'), ('Audi');
 
-
-
 -- insertion voiture --
 INSERT INTO voiture (modele, prix, annee, etat, type, kilometrage, disponibilite, description, image_url, id_service, id_marque) VALUES
 
