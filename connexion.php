@@ -43,7 +43,7 @@ if (isset($_POST['connexion'])) {
 
                 if (isset($_SERVER['HTTP_REFERER'])) {
                     // Si l'URL précédente contient "demande.php"
-                    if (strpos($_SERVER['HTTP_REFERER'], 'connexion.php?from=demande') !== false) {
+                    if (strpos($_SERVER['HTTP_REFERER'], 'connexion.php?redirect=demande.php') !== false) {
                         $final_redirect = 'demande.php';
                     }
                 }
