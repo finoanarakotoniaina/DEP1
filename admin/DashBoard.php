@@ -1,130 +1,118 @@
-<?php
-// --- 1. CONNEXION À LA BASE DE DONNÉES ---
-$host = 'localhost'; 
-$db   = 'supercar'; 
-$user = 'root'; 
-$pass = ''; 
+<?php 
+/**
+ * SUPERCAR - Dashboard Administration (Version MySQLi)
+ */
+session_start();
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Erreur de connexion : " . $e->getMessage());
+// 1. Sécurité : Si Madison n'est pas connectée, retour au login
+if (!isset($_SESSION['admin_id'])) {
+    header('Location: LOGIN.php');
+    exit();
 }
 
-// --- 2. RÉCUPÉRATION DES STATISTIQUES ---
-// On compte dans la table 'voiture'
-$countCars = $pdo->query("SELECT COUNT(*) FROM voiture")->fetchColumn();
+$prenomAdmin = $_SESSION['prenom'] ?? 'Admin';
+$nomAdmin = $_SESSION['nom'] ?? '';
 
-// On compte dans la table 'client'
-$countClients = $pdo->query("SELECT COUNT(*) FROM client")->fetchColumn();
+// 2. Connexion à la base (config_admin.php doit contenir $conn)
+require_once 'config_admin.php'; 
 
-// On compte les messages dans la table 'contact'
-$countMessages = $pdo->query("SELECT COUNT(*) FROM contact")->fetchColumn();
+// On s'assure que la variable de connexion est la bonne
+$db = $conn; 
 
-// --- 3. RÉCUPÉRATION DES CLIENTS (POUR LE TABLEAU) ---
-// On récupère les 5 derniers clients inscrits avec leur téléphone
-$lastClients = $pdo->query("SELECT nom, prenom, email, telephone FROM client ORDER BY id_client DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+// 3. Statistiques (Version MySQLi)
+$countCars = $db->query("SELECT COUNT(*) FROM voiture")->fetch_row()[0] ?? 0;
+$countClients = $db->query("SELECT COUNT(*) FROM client")->fetch_row()[0] ?? 0;
+$countMessages = $db->query("SELECT COUNT(*) FROM contact")->fetch_row()[0] ?? 0;
+
+// 4. Récupération des 5 derniers clients pour le tableau
+$lastClientsRes = $db->query("SELECT nom, prenom, email FROM client ORDER BY id_client DESC LIMIT 5");
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SuperCar Admin - Dashboard</title>
+    <title>SuperCar Admin | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: #f4f7f6; color: #333; }
-        
-        /* Sidebar */
-        .sidebar { width: 260px; background: #1a1a1a; color: white; height: 100vh; position: fixed; padding: 25px; box-sizing: border-box; }
-        .sidebar h2 { color: #e31e24; font-size: 1.5em; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; }
-        .sidebar ul { list-style: none; padding: 0; }
-        .sidebar ul li { margin-bottom: 20px; }
-        .sidebar ul li a { color: #bbb; text-decoration: none; display: block; transition: 0.3s; }
-        .sidebar ul li a:hover { color: #e31e24; padding-left: 5px; }
-        .sidebar .logout { margin-top: 50px; border-top: 1px solid #333; padding-top: 20px; }
-        .sidebar .logout a { color: #ff4d4d; font-weight: bold; }
-
-        /* Main Content */
-        .main-content { margin-left: 260px; padding: 40px; width: 100%; box-sizing: border-box; }
-        header h1 { margin-bottom: 40px; font-size: 2em; }
-
-        /* Cards */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 50px; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-left: 6px solid #e31e24; }
-        .card h3 { margin: 0; font-size: 0.9em; color: #888; text-transform: uppercase; }
-        .card .value { font-size: 2.8em; font-weight: bold; margin-top: 10px; }
-
-        /* Tableau */
-        .table-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #666; font-size: 0.9em; }
-        td { padding: 15px; border-bottom: 1px solid #f9f9f9; }
-        .btn-view { color: #e31e24; text-decoration: none; font-weight: bold; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0a0a0a; color: white; }
+        .font-title { font-family: 'Syncopate', sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
     </style>
 </head>
-<body>
+<body class="flex min-h-screen">
 
-    <div class="sidebar">
-        <h2>SUPERCAR</h2>
-        <ul>
-            <li><a href="dashboard.php">📊 Accueil</a></li>
-            <li><a href="admin_voitures.php">🏎️ Voitures</a></li>
-            <li><a href="admin_demandes.php">📩 Demandes</a></li>
-            <li><a href="admin_services.php">🛠️ Services</a></li>
-            <li><a href="admin_contact.php">📞 Contact</a></li>
-            <li class="logout"><a href="logout.php">Déconnexion</a></li>
-        </ul>
-    </div>
+    <aside class="w-72 border-r border-white/5 flex flex-col bg-[#0d0d0d]">
+        <div class="p-8 font-title text-xl border-b border-white/5">
+            SUPER<span class="text-[#e31e24]">CAR</span>
+        </div>
+        <nav class="flex-1 p-4 mt-4">
+             <ul class="space-y-4 font-title text-[10px] tracking-widest uppercase">
+                <li><a href="dashboard.php" class="flex items-center gap-4 p-4 text-[#e31e24] bg-white/5 rounded"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="admin_voitures.php" class="flex items-center gap-4 p-4 hover:bg-white/5 rounded transition-all"><i class="fa-solid fa-car"></i> Stock</a></li>
+                <li><a href="admin_clients.php" class="flex items-center gap-4 p-4 hover:bg-white/5 rounded transition-all"><i class="fa-solid fa-users"></i> Clients</a></li>
+            </ul>
+        </nav>
+        <div class="p-8 border-t border-white/5">
+            <a href="logout.php" class="text-[10px] font-title text-gray-500 hover:text-[#e31e24] transition-all uppercase tracking-widest">
+                <i class="fa-solid fa-power-off mr-2"></i> Déconnexion
+            </a>
+        </div>
+    </aside>
 
-    <div class="main-content">
-        <header>
-            <h1>Tableau de Bord Administrateur</h1>
+    <main class="flex-1 p-16 overflow-y-auto">
+        <header class="flex justify-between items-start mb-16">
+            <div>
+                <h1 class="font-title text-4xl uppercase mb-2">Tableau de <span class="text-[#e31e24]">Bord</span></h1>
+                <p class="text-gray-400">Bienvenue, <?= htmlspecialchars($prenomAdmin . " " . $nomAdmin) ?>.</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#e31e24] to-[#ff4d4d] flex items-center justify-center border-2 border-white/10 shadow-lg shadow-red-500/20">
+                <i class="fa-solid fa-user text-white"></i>
+            </div>
         </header>
 
-        <div class="stats-grid">
-            <div class="card">
-                <h3>Total Voitures</h3>
-                <div class="value"><?php echo $countCars; ?></div>
+        <div class="grid grid-cols-3 gap-8 mb-16">
+            <div class="glass-card p-8 rounded-2xl">
+                <span class="text-xs font-title text-gray-500 block mb-2 uppercase">Total Stock</span>
+                <div class="text-5xl font-title font-bold"><?= $countCars ?></div>
             </div>
-            <div class="card">
-                <h3>Clients Inscrits</h3>
-                <div class="value"><?php echo $countClients; ?></div>
+            <div class="glass-card p-8 rounded-2xl border-b-2 border-[#e31e24]">
+                <span class="text-xs font-title text-gray-500 block mb-2 uppercase">Clients Inscrits</span>
+                <div class="text-5xl font-title font-bold"><?= $countClients ?></div>
             </div>
-            <div class="card">
-                <h3>Messages Reçus</h3>
-                <div class="value"><?php echo $countMessages; ?></div>
+            <div class="glass-card p-8 rounded-2xl">
+                <span class="text-xs font-title text-gray-500 block mb-2 uppercase">Messages</span>
+                <div class="text-5xl font-title font-bold"><?= $countMessages ?></div>
             </div>
         </div>
 
-        <div class="table-section">
-            <h2>Derniers clients enregistrés</h2>
-            <table>
-                <thead>
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="p-6 border-b border-white/5">
+                <h2 class="font-title text-[10px] text-[#e31e24] uppercase tracking-widest">Dernières Interactions</h2>
+            </div>
+            <table class="w-full text-left">
+                <thead class="text-[10px] font-title text-gray-500 uppercase">
                     <tr>
-                        <th>NOM / PRÉNOM</th>
-                        <th>EMAIL</th>
-                        <th>TÉLÉPHONE</th>
-                        <th>ACTION</th>
+                        <th class="p-6">Nom / Prénom</th>
+                        <th class="p-6">Email</th>
+                        <th class="p-6 text-right">Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php if (!empty($lastClients)): ?>
-                        <?php foreach($lastClients as $c): ?>
-                        <tr>
-                            <td><strong><?= htmlspecialchars($c['nom'] . ' ' . $c['prenom']) ?></strong></td>
-                            <td><?= htmlspecialchars($c['email']) ?></td>
-                            <td><?= htmlspecialchars($c['telephone']) ?></td>
-                            <td><a href="voir_client.php?id=<?= htmlspecialchars($c['email']) ?>" class="btn-view">Détails</a></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr><td colspan="4">Aucun client trouvé.</td></tr>
-                    <?php endif; ?>
+                <tbody class="text-sm text-gray-300">
+                    <?php while($row = $lastClientsRes->fetch_assoc()): ?>
+                    <tr class="border-t border-white/5 hover:bg-white/[0.02] transition-all">
+                        <td class="p-6 text-white font-semibold"><?= htmlspecialchars($row['nom'] . ' ' . $row['prenom']) ?></td>
+                        <td class="p-6 opacity-70"><?= htmlspecialchars($row['email']) ?></td>
+                        <td class="p-6 text-right">
+                            <span class="text-[9px] font-title px-3 py-1 border border-white/10 rounded-full text-gray-500">CLIENT</span>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
                 </tbody>
             </table>
         </div>
-    </div>
-
+    </main>
 </body>
 </html>

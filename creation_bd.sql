@@ -73,6 +73,9 @@ CREATE TABLE demande_essai(
    FOREIGN KEY(id_client) REFERENCES client(id_client),
    FOREIGN KEY(id_voiture) REFERENCES voiture(id_voiture)
 ) ENGINE=InnoDB CHARSET=utf8mb4;
+ 
+
+// COTE ADMIN 
 
 CREATE TABLE admin(
    id_admin INT(50),

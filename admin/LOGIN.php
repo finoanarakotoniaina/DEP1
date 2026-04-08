@@ -1,47 +1,58 @@
 <?php
+/**
+ * SUPERCAR - Page de Connexion Admin (Corrigée pour MySQLi)
+ */
 session_start();
-require 'config_admin.php'; // Vérifie que l'extension .php est bien présente sur le fichier
+require 'config_admin.php'; // On suppose que ce fichier crée la variable $conn
 
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    
-    // Récupération de la réponse du captcha
-    $recaptchaResponse = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : "";
+    // 1. Récupération des données du formulaire
+    // Note : on utilise 'username' car c'est le nom dans ton <input> plus bas
+    $input_user = $_POST['username'] ?? '';
+    $input_pass = $_POST['password'] ?? '';
+    $recaptchaResponse = $_POST['g-recaptcha-response'] ?? "";
 
-    // --- 1. VERIFICATION DU CAPTCHA ---
-    $secretKey = "6Lflz6ssAAAAAH-aWHXeAE1UH9EZSEVSJ8BmeBKP"; // <--- TA CLÉ SECRÈTE GOOGLE
+    // --- 2. VERIFICATION DU CAPTCHA ---
+    $secretKey = "6Lflz6ssAAAAAH-aWHXeAE1UH9EZSEVSJ8BmeBKP";
     $verifyUrl = "https://www.google.com/recaptcha/api/siteverify?secret=$secretKey&response=$recaptchaResponse";
     
+    // Utilisation de file_get_contents pour vérifier le captcha
     $response = file_get_contents($verifyUrl);
     $responseData = json_decode($response, true);
 
     if (!$responseData["success"]) {
         $error = "Veuillez valider le Captcha (Je ne suis pas un robot).";
     } else {
-        // --- 2. VERIFICATION DES IDENTIFIANTS ---
-        if (!empty($username) && !empty($password)) {
-            try {
-                // On cherche l'admin dans la table 'admins'
-                $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
-                $stmt->execute([$username]);
-                $admin = $stmt->fetch();
+        // --- 3. VERIFICATION DES IDENTIFIANTS ---
+        if (!empty($input_user) && !empty($input_pass)) {
+            
+            // CORRECTION : On utilise la table 'admin' et la colonne 'identifiant'
+            // On utilise $conn (MySQLi) au lieu de $pdo
+            $sql = "SELECT * FROM admin WHERE identifiant = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $input_user);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $admin = $result->fetch_assoc();
 
-                // On vérifie le mot de passe (doit être haché en BDD avec password_hash)
-                if ($admin && password_verify($password, $admin['password'])) {
-                    $_SESSION['admin_id'] = $admin['id'];
-                    $_SESSION['admin_name'] = $admin['username'];
-                    
-                    // Redirection (Vérifie bien que le fichier s'appelle DashBoard.php avec ces majuscules)
-                    header("Location: DashBoard.php");
-                    exit();
-                } else {
-                    $error = "Identifiants incorrects.";
-                }
-            } catch (PDOException $e) {
-                $error = "Erreur de base de données : " . $e->getMessage();
+            // Vérification du mot de passe
+            // Note : Comme 'didison' est en clair dans ta base, on compare directement.
+            // Si tu haches tes mots de passe plus tard, utilise password_verify().
+            if ($admin && $input_pass === $admin['motdepasse']) {
+                
+                // On stocke les infos de Madison en session
+                $_SESSION['admin_id'] = $admin['id_admin'];
+                $_SESSION['admin_name'] = $admin['identifiant'];
+                $_SESSION['nom'] = $admin['nom'];
+                $_SESSION['prenom'] = $admin['prenom'];
+                
+                // Redirection vers ton dashboard
+                header("Location: admin_accueil.php");
+                exit();
+            } else {
+                $error = "Identifiant ou mot de passe incorrect.";
             }
         } else {
             $error = "Veuillez remplir tous les champs.";
@@ -60,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #1a1a1a; 
+            background: #0a0a0a; 
             color: #fff;
             display: flex; 
             justify-content: center; 
@@ -69,43 +80,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin: 0;
         }
         .login-card { 
-            background: #2c2c2c; 
+            background: #161616; 
             padding: 2.5rem; 
             border-radius: 12px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+            border: 1px solid #333;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7); 
             width: 350px; 
         }
-        h2 { text-align: center; margin-bottom: 1.5rem; color: #e74c3c; text-transform: uppercase; letter-spacing: 2px; }
+        h2 { text-align: center; margin-bottom: 1.5rem; color: #e31e24; text-transform: uppercase; letter-spacing: 2px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #bbb; }
+        label { display: block; margin-bottom: 5px; font-size: 0.8rem; color: #888; text-transform: uppercase; }
         input { 
             width: 100%; 
             padding: 12px; 
-            border: 1px solid #444; 
+            border: 1px solid #333; 
             border-radius: 6px; 
-            background: #3d3d3d; 
+            background: #222; 
             color: white; 
             box-sizing: border-box; 
         }
-        input:focus { outline: none; border-color: #e74c3c; }
+        input:focus { outline: none; border-color: #e31e24; }
         .g-recaptcha { margin: 15px 0; display: flex; justify-content: center; }
         button { 
             width: 100%; 
-            padding: 12px; 
-            background: #e74c3c; 
+            padding: 14px; 
+            background: #e31e24; 
             color: white; 
             border: none; 
             border-radius: 6px; 
             font-weight: bold; 
             cursor: pointer; 
-            transition: background 0.3s;
+            transition: all 0.3s;
             text-transform: uppercase;
         }
-        button:hover { background: #c0392b; }
+        button:hover { background: #ff1e24; transform: translateY(-2px); }
         .error { 
-            background: #ff7675; 
-            color: #fff; 
+            background: rgba(227, 30, 36, 0.1); 
+            color: #ff4d4d; 
             padding: 10px; 
+            border: 1px solid rgba(227, 30, 36, 0.3);
             border-radius: 4px; 
             font-size: 0.85rem; 
             text-align: center; 
@@ -125,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form method="POST" action="">
         <div class="form-group">
             <label>Utilisateur</label>
-            <input type="text" name="username" required placeholder="Ex: admin">
+            <input type="text" name="username" required placeholder="Ex: MadisonCarter">
         </div>
         
         <div class="form-group">
@@ -133,7 +146,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="password" name="password" required placeholder="••••••••">
         </div>
 
-        <div class="g-recaptcha" data-sitekey="6Lflz6ssAAAAAO3BaSjjgVpCScOJTXDTAO7SExxy"></div> <button type="submit">Se connecter</button>
+        <div class="g-recaptcha" data-sitekey="6Lflz6ssAAAAAO3BaSjjgVpCScOJTXDTAO7SExxy"></div> 
+        
+        <button type="submit">Se connecter</button>
     </form>
 </div>
 
