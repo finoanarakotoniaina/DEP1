@@ -74,4 +74,12 @@ CREATE TABLE demande_essai(
    FOREIGN KEY(id_voiture) REFERENCES voiture(id_voiture)
 ) ENGINE=InnoDB CHARSET=utf8mb4;
 
+CREATE TABLE admin(
+   id_admin INT(50),
+   identifiant VARCHAR(50) NOT NULL UNIQUE,
+   nom VARCHAR(50) NOT NULL,
+   prenom VARCHAR(50) NOT NULL,
+   motdepasse VARCHAR(255) NOT NULL,
+   PRIMARY KEY(id_admin)
+);
 
