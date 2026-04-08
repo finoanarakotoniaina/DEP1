@@ -1,156 +1,131 @@
-<?php include 'config.php'; ?>
+<?php 
+// --- 1. CONNEXION & CONFIG ---
+// Assure-toi que ton fichier config.php contient bien la connexion $pdo
+include '../config.php'; 
+
+// --- 2. RÉCUPÉRATION DES STATISTIQUES (KPI) ---
+$countCars = $pdo->query("SELECT COUNT(*) FROM voiture")->fetchColumn();
+$countClients = $pdo->query("SELECT COUNT(*) FROM client")->fetchColumn();
+$countMessages = $pdo->query("SELECT COUNT(*) FROM contact")->fetchColumn();
+
+// --- 3. RÉCUPÉRATION DES INFOS CLIENTS ---
+$lastClients = $pdo->query("SELECT nom, prenom, email, telephone FROM client ORDER BY id_client DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperCar | L'Élégance d'Occasion</title>
+    <title>SuperCar Admin | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    
-    <style>
-        /* Animations pour les entrées fluides */
-        .reveal-right { transform: translateX(100px); opacity: 0; transition: all 1s ease-out; }
-        .reveal-left { transform: translateX(-100px); opacity: 0; transition: all 1s ease-out; }
-        .reveal-active { transform: translateX(0); opacity: 1; }
-        
-        /* Police pour les descriptions */
-        .desc-font { font-family: 'Times New Roman', serif; }
+    <link rel="stylesheet" href="../style.css"> <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0a0a0a; color: white; }
+        .font-title { font-family: 'Syncopate', sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .crimson-gradient { background: linear-gradient(135deg, #e31e24 0%, #8b0000 100%); }
+        .nav-sidebar-link:hover { background: rgba(227, 30, 36, 0.1); border-right: 3px solid #e31e24; }
     </style>
 </head>
 
-<body class="home-bg">
+<body class="flex min-h-screen overflow-hidden">
 
-    <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
-        <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-        
-        <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.php" class="nav-link active">Accueil</a></li>
-            <li><a href="voiture.php" class="nav-link">Voitures</a></li>
-            <li><a href="demande.php" class="nav-link">Essai</a></li>
-            <li><a href="services.php" class="nav-link">Services</a></li>
-            <li><a href="contact.php" class="nav-link">Contact</a></li> |
-
-            <?php if (isset($_SESSION['id_client'])): ?>
-                <li>
-                    <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2">
-                        <i class="fa-solid fa-door-open text-[18px]"></i> Déconnexion
-                    </a>
-                </li>
-            <?php else: ?>
-                <li>
-                    <strong>
-                        <a href="connexion.php" class="nav-link flex items-center gap-2">
-                            <i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion
-                        </a>
-                    </strong>
-                </li>
-            <?php endif; ?>
-        </ul>
-    </nav>
-
-    <section class="relative h-screen w-full flex items-center px-6 lg:px-24 overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-full z-0">
-            <div class="absolute inset-0 video-overlay z-10"></div>
-            <video autoplay muted loop playsinline class="w-full h-full object-cover">
-                <source src="mercedes.mp4" type="video/mp4">
-            </video>
+    <aside class="w-72 border-r border-white/5 flex flex-col z-50 bg-[#0d0d0d]">
+        <div class="p-8 font-title text-xl tracking-tighter border-b border-white/5">
+            SUPER<span class="text-[#e31e24]">CAR</span> <span class="text-[8px] block tracking-widest opacity-50 uppercase">Administration</span>
         </div>
+        
+        <nav class="flex-1 px-4 py-8">
+            <ul class="space-y-4 font-title text-[10px] tracking-[0.2em] uppercase">
+                <li><a href="Dashboard.php" class="flex items-center gap-4 p-4 rounded text-[#e31e24] bg-white/5 nav-sidebar-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="admin_voitures.php" class="flex items-center gap-4 p-4 rounded hover:text-white transition-all nav-sidebar-link"><i class="fa-solid fa-car"></i> Stock</a></li>
+                <li><a href="admin_clients.php" class="flex items-center gap-4 p-4 rounded hover:text-white transition-all nav-sidebar-link"><i class="fa-solid fa-users"></i> Clients</a></li>
+                <li><a href="admin_messages.php" class="flex items-center gap-4 p-4 rounded hover:text-white transition-all nav-sidebar-link"><i class="fa-solid fa-envelope"></i> Messages</a></li>
+            </ul>
+        </nav>
 
-        <div class="relative z-20 w-full mt-20">
-            <div class="max-w-3xl">
-                <h1 class="font-title text-4xl md:text-7xl font-bold leading-none mb-8">
-                    L'ÉLÉGANCE <br> <span class="text-[var(--crimson)]">CERTIFIEE.</span>
-                </h1>
-                <p class="text-lg text-gray-200 max-w-xl font-light leading-relaxed mb-10">
-                    Votre partenaire de confiance à l'Île Maurice pour l'acquisition de véhicules d'exception importés d'Allemagne, du Japon et des USA.
-                </p>
-                <div class="flex flex-wrap gap-6">
-                    <a href="voiture.php?from=accueil" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">DÉCOUVRIR LE STOCK</a>
-                    <a href="contact.php?from=accueil" class="border border-white/30 px-8 py-4 font-title text-xs tracking-widest hover:border-[var(--crimson)] transition-all">NOUS CONTACTER</a>
+        <div class="p-8 border-t border-white/5">
+            <a href="../deconnexion.php" class="flex items-center gap-4 font-title text-[10px] tracking-[0.2em] text-gray-500 hover:text-[#e31e24] transition-all">
+                <i class="fa-solid fa-power-off"></i> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-10 lg:p-16 relative">
+        <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-[#e31e24]/5 blur-[120px] -z-10 rounded-full"></div>
+
+        <header class="mb-16">
+            <h1 class="font-title text-4xl font-bold uppercase mb-2">Tableau de <span class="text-[#e31e24]">Bord</span></h1>
+            <p class="text-gray-400 font-light tracking-wide">Bienvenue, Magalie. Voici l'état actuel de votre parc automobile.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
+                <div class="relative z-10">
+                    <span class="text-xs font-title tracking-widest text-gray-500 block mb-4 uppercase">Total Stock</span>
+                    <div class="text-5xl font-title font-bold text-white group-hover:scale-110 transition-transform duration-500"><?= $countCars ?></div>
                 </div>
+                <i class="fa-solid fa-car absolute -right-4 -bottom-4 text-7xl opacity-5"></i>
+            </div>
+
+            <div class="glass-card p-8 rounded-2xl relative overflow-hidden group border-b-2 border-[#e31e24]">
+                <div class="relative z-10">
+                    <span class="text-xs font-title tracking-widest text-gray-500 block mb-4 uppercase">Clients Inscrits</span>
+                    <div class="text-5xl font-title font-bold text-white"><?= $countClients ?></div>
+                </div>
+                <i class="fa-solid fa-user-group absolute -right-4 -bottom-4 text-7xl opacity-5"></i>
+            </div>
+
+            <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
+                <div class="relative z-10">
+                    <span class="text-xs font-title tracking-widest text-gray-500 block mb-4 uppercase">Nouveaux Messages</span>
+                    <div class="text-5xl font-title font-bold text-white"><?= $countMessages ?></div>
+                </div>
+                <i class="fa-solid fa-paper-plane absolute -right-4 -bottom-4 text-7xl opacity-5"></i>
             </div>
         </div>
-    </section>
 
-    <section class="py-32 px-6 lg:px-24 relative overflow-hidden">
-        <div class="absolute right-[-5%] top-10 outline-text font-title text-[15vw] opacity-10 select-none leading-none">
-            GERMAN
-        </div>
-        
-        <div class="relative z-10 mb-20">
-            <h2 class="font-title text-4xl md:text-5xl mb-4 text-[var(--varden)]">NOS <span class="text-[var(--crimson)]">SÉLECTIONS</span></h2>
-            <div class="w-32 h-1 bg-[var(--crimson)]"></div>
-        </div>
-
-        <div class="relative z-10 flex flex-col gap-12 max-w-3xl mx-auto">
+        <section class="glass-card rounded-2xl overflow-hidden">
+            <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                <h2 class="font-title text-xs tracking-[0.3em] uppercase text-[#e31e24]">Dernières Interactions Clients</h2>
+                <a href="admin_clients.php" class="text-[10px] font-title tracking-widest text-gray-500 hover:text-white transition-all">VOIR TOUT <i class="fa-solid fa-chevron-right ml-2 text-[8px]"></i></a>
+            </div>
             
-            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="0">
-                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">BMW</h3>
-                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Bien que la marque se soit diversifiée, son cœur de métier reste la « driver’s car ». BMW se distingue par une ergonomie intérieure orientée vers le conducteur et une mise au point de châssis qui favorise la précision de conduite et l'agilité. contrairement à beaucoup de constructeurs, ils privilégient souvent une répartition des masses équilibrée et une direction communicative, cherchant à donner au conducteur l'impression de faire corps avec la machine, même sur des modèles familiaux."></p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="text-[10px] font-title tracking-widest text-gray-500 uppercase">
+                        <tr>
+                            <th class="p-8">Nom / Prénom</th>
+                            <th class="p-8">Email</th>
+                            <th class="p-8">Téléphone</th>
+                            <th class="p-8 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm font-light text-gray-300">
+                        <?php if (empty($lastClients)): ?>
+                            <tr><td colspan="4" class="p-8 text-center text-gray-600">Aucun client enregistré pour le moment.</td></tr>
+                        <?php else: ?>
+                            <?php foreach ($lastClients as $c): ?>
+                            <tr class="hover:bg-white/[0.02] transition-colors border-t border-white/5 group">
+                                <td class="p-8 text-white font-medium italic"><?= htmlspecialchars($c['nom'] . ' ' . $c['prenom']) ?></td>
+                                <td class="p-8"><?= htmlspecialchars($c['email']) ?></td>
+                                <td class="p-8"><?= htmlspecialchars($c['telephone']) ?></td>
+                                <td class="p-8 text-right">
+                                    <a href="fiche_client.php?email=<?= $c['email'] ?>" class="text-[10px] font-title tracking-widest px-4 py-2 border border-white/10 rounded hover:border-[#e31e24] hover:bg-[#e31e24] hover:text-white transition-all">PROFIL</a>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
-            
-            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-left" data-delay="300">
-                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">MERCEDES</h3>
-                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Mercedes se positionne comme l'inventeur de l'automobile, et cela se ressent dans leur approche : tout est une question d'innovation au service du confort et de la sécurité. si bmw cherche la sportivité, mercedes cherche la sérénité. leur force réside dans une insonorisation de premier ordre, des suspensions souvent typées 'tapis volant' et une interface technologique (mbux) qui vise à réduire la fatigue au volant. c'est le choix de la rigueur et de la vie à bord apaisée."></p>
-            </div>
-            
-            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="600">
-                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">PORSCHE</h3>
-                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Dire que porsche est juste « sportif » est un euphémisme. la marque est surtout une référence en ingénierie de précision. le tour de force de porsche est de proposer des voitures aux performances démoniaques (avec la 911 en icône absolue) qui restent paradoxalement utilisables au quotidien. leur fiabilité mécanique est souvent supérieure à la moyenne des voitures de sport, et ils excellent dans l'art de rendre une conduite complexe accessible et gratifiante, peu importe le niveau du pilote."></p>
-            </div>
-           
-            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="450">
-                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">AUDI</h3>
-                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Audi incarne l'équilibre parfait entre haute technologie et sobriété esthétique. Leur philosophie « Vorsprung durch Technik » (l'avance par la technologie) se traduit par une qualité de finition intérieure inégalée et l'excellence de leur transmission intégrale Quattro. Contrairement à ses rivaux, Audi mise sur une élégance discrète mais redoutablement efficace, offrant une expérience de conduite sécurisante et ultra-connectée, idéale pour ceux qui recherchent le luxe sans l'ostentation."></p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <footer class="py-10 text-center border-t border-white/5 text-gray-500 text-xs tracking-widest font-title">
-        &copy; 2024 SUPERCAR MAURITIUS - TOUS DROITS RÉSERVÉS
-    </footer>
-
-    <script>
-        // 1. Animation d'entrée au scroll
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const delay = entry.target.getAttribute('data-delay');
-                    setTimeout(() => {
-                        entry.target.classList.add('reveal-active');
-                    }, delay);
-                }
-            });
-        }, { threshold: 0.2 });
-
-        document.querySelectorAll('.reveal-right, .reveal-left').forEach(el => observer.observe(el));
-
-        // 2. Animation machine à écrire au survol
-        document.querySelectorAll('.brand-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                const textElement = this.querySelector('.typewriter-text');
-                // On ne lance l'animation que si elle n'a jamais été lancée
-                if (!textElement.dataset.hasTyped) {
-                    textElement.dataset.hasTyped = "true";
-                    textElement.classList.remove('opacity-0');
-                    textElement.classList.add('opacity-100');
-                    
-                    const text = textElement.getAttribute('data-text');
-                    let i = 0;
-                    function typing() {
-                        if (i < text.length) {
-                            textElement.textContent += text.charAt(i);
-                            i++;
-                            setTimeout(typing, 15); // Vitesse
-                        }
-                    }
-                    typing();
-                }
-            });
-        });
-    </script>
+        <footer class="mt-20 text-center text-[8px] font-title tracking-[0.4em] text-gray-600 uppercase">
+            &copy; 2024 SUPERCAR Mauritus - Admin Portal
+        </footer>
+    </main>
 </body>
 </html>
