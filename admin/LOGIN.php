@@ -1,4 +1,7 @@
 <?php
+/**
+ * SUPERCAR - Page de Connexion Admin (Corrigée pour MySQLi)
+ */
 session_start();
 require 'config_admin.php'; 
 
