@@ -1,6 +1,6 @@
 <?php
 // 1. On inclut la connexion
-include 'config2.php';
+include 'config.php';
 
 // 2. On vérifie la réception des données
 if (isset($_POST['id']) && isset($_POST['content'])) {
