@@ -1,6 +1,6 @@
 <?php
 session_start(); 
-include 'config.php'; 
+include 'config.php'; // Ce fichier définit $db comme un objet PDO
 
 if (!isset($_SESSION['captcha_reponse'])) {
     $n1 = rand(0, 3);
@@ -11,7 +11,6 @@ if (!isset($_SESSION['captcha_reponse'])) {
 
 $message = ""; 
 
-
 if (isset($_POST['connexion'])) {
     $email_saisi = htmlspecialchars($_POST['email']);
     $mdp_saisi = $_POST['password'];
@@ -20,43 +19,47 @@ if (isset($_POST['connexion'])) {
     if ($captcha_saisi !== $_SESSION['captcha_reponse']) {
         $message = "CAPTCHA incorrect.";
     } else {
-        // Préparation de la requête
-        $sql = "SELECT l.password, c.id_client, c.prenom, c.nom 
-                FROM login l
-                INNER JOIN client c ON l.id_login = c.id_login 
-                WHERE l.login = ?";
-        
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $email_saisi);
-        $stmt->execute();
-        $resultat = $stmt->get_result();
+        try {
+            // 1. Préparation de la requête avec PDO (on utilise $db)
+            $sql = "SELECT l.password, c.id_client, c.prenom, c.nom 
+                    FROM login l
+                    INNER JOIN client c ON l.id_login = c.id_login 
+                    WHERE l.login = ?";
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute([$email_saisi]);
+            
+            // 2. Récupération du résultat
+            $user = $stmt->fetch();
 
-        if ($user = $resultat->fetch_assoc()) {
-            if (password_verify($mdp_saisi, $user['password'])) {
-                // Initialisation de la session
-                $_SESSION['id_client'] = $user['id_client'];
-                $_SESSION['prenom']    = $user['prenom'];
-                $_SESSION['nom']       = $user['nom'];
+            if ($user) {
+                // 3. Vérification du mot de passe
+                if (password_verify($mdp_saisi, $user['password'])) {
+                    // Initialisation de la session
+                    $_SESSION['id_client'] = $user['id_client'];
+                    $_SESSION['prenom']    = $user['prenom'];
+                    $_SESSION['nom']       = $user['nom'];
 
-                // Logique de redirection
-                 $final_redirect = 'accueil.php';
+                    // Logique de redirection
+                    $final_redirect = 'accueil.php';
 
-                if (isset($_SERVER['HTTP_REFERER'])) {
-                    // Si l'URL précédente contient "demande.php"
-                    if (strpos($_SERVER['HTTP_REFERER'], 'connexion.php?redirect=demande.php') !== false) {
-                        $final_redirect = 'demande.php';
+                    if (isset($_SERVER['HTTP_REFERER'])) {
+                        if (strpos($_SERVER['HTTP_REFERER'], 'connexion.php?redirect=demande.php') !== false) {
+                            $final_redirect = 'demande.php';
+                        }
                     }
-                }
 
-                header("Location: " . $final_redirect);
-                exit();
+                    header("Location: " . $final_redirect);
+                    exit();
+                } else {
+                    $message = "Mot de passe incorrect.";
+                }
             } else {
-                $message = "Mot de passe incorrect.";
+                $message = "Identifiant inconnu.";
             }
-        } else {
-            $message = "Identifiant inconnu.";
+        } catch (PDOException $e) {
+            $message = "Erreur de base de données : " . $e->getMessage();
         }
-        $stmt->close();
     }
     
     // Régénération du captcha en cas d'échec
@@ -78,15 +81,11 @@ if (isset($_POST['connexion'])) {
     <link rel="stylesheet" href="style.css">
     <style>
         :root { --crimson: #C1121F; }
-        
-        /* Force l'affichage sur une seule vue sans scroll */
         body, html { height: 100vh; overflow: hidden; }
-        
         .image-mask-gradient {
             mask-image: linear-gradient(to right, transparent, black 50%);
             -webkit-mask-image: linear-gradient(to right, transparent, black 50%);
         }
-        
         .input-essai {
             background: transparent;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -98,8 +97,6 @@ if (isset($_POST['connexion'])) {
             transition: border-color 0.4s;
         }
         .input-essai:focus { border-color: var(--crimson); outline: none; }
-
-        /* Cache les flèches du champ nombre */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
             -webkit-appearance: none; margin: 0;
         }
@@ -171,8 +168,7 @@ if (isset($_POST['connexion'])) {
         </div>
 
         <div class="hidden lg:block relative h-full">
-            <img src="connexionimg.jpg"
-                 class="w-full h-full object-cover image-mask-gradient" alt="Ferrari">
+            <img src="connexionimg.jpg" class="w-full h-full object-cover image-mask-gradient" alt="Ferrari">
         </div>
     </main>
 </body>
