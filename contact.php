@@ -1,44 +1,54 @@
 <?php 
-include 'config.php'; 
-session_start(); // AJOUT : Nécessaire pour accéder aux infos de l'utilisateur connecté
+// 1. Démarrer la session pour récupérer les infos client
+session_start();
 
-// 1. CONFIGURATION DE LA CONNEXION
-$host = 'localhost';
-$dbname = 'supercar';
-$username = 'root'; 
-$password = ''; 
+// 2. Inclusion de la config (qui contient $db)
+include 'config.php'; 
+
+// --- NOUVEAU : RÉCUPÉRATION DES RÉGLAGES DYNAMIQUES ---
+try {
+    $stmt_settings = $db->query("SELECT cle, valeur FROM contact_settings");
+    $s = $stmt_settings->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch (Exception $e) {
+    // Valeurs de secours si la table n'existe pas encore
+    $s = [
+        'titre_principal' => 'RESTONS CONNECTÉS.',
+        'image_supercar' => 'mercedes.jfif',
+        'email_contact' => 'supercar@gmail.com',
+        'tel_contact' => '+230 454 8950',
+        'siege_contact' => 'Ebène CyberCity',
+        'responsable_contact' => 'M. Carter',
+        'map_iframe' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3743.766395692348!2d57.48366931535213!3d-20.247833086425713!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x217c5af34726e6f1%3A0xc47e3077755b76!2sEbene%20Cybercity!5e0!3m2!1sen!2smu!4v1647424000000!5m2!1sen!2smu'
+    ];
+}
 
 $message_envoi = "";
 $show_modal = false;
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// 3. TRAITEMENT DU FORMULAIRE
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nom = htmlspecialchars($_POST['nom']);
+    $prenom = htmlspecialchars($_POST['prenom']);
+    $email = htmlspecialchars($_POST['email']);
+    $message = htmlspecialchars($_POST['message']);
 
-    // 2. TRAITEMENT DU FORMULAIRE
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $nom = htmlspecialchars($_POST['nom']);
-        $prenom = htmlspecialchars($_POST['prenom']);
-        $email = htmlspecialchars($_POST['email']);
-        $message = htmlspecialchars($_POST['message']);
-
-        if (!empty($nom) && !empty($prenom) && !empty($email) && !empty($message)) {
+    if (!empty($nom) && !empty($prenom) && !empty($email) && !empty($message)) {
+        try {
             $sql = "INSERT INTO contact (nom, prenom, email, message) VALUES (:nom, :prenom, :email, :message)";
-            $stmt = $pdo->prepare($sql);
-            
+            $stmt = $db->prepare($sql);
             $stmt->execute([
-                ':nom'    => $nom,
-                ':prenom' => $prenom,
-                ':email'  => $email,
+                ':nom'     => $nom,
+                ':prenom'  => $prenom,
+                ':email'   => $email,
                 ':message' => $message
             ]);
 
-            $message_envoi = "Votre message a bien été enregistré dans la base de données !";
+            $message_envoi = "Votre message a bien été enregistré !";
             $show_modal = true;
+        } catch (PDOException $e) {
+            die("Erreur lors de l'enregistrement : " . $e->getMessage());
         }
     }
-} catch (PDOException $e) {
-    die("Erreur de connexion à la base de données : " . $e->getMessage());
 }
 ?>
 
@@ -134,13 +144,12 @@ try {
             <div class="flex-1">
                 <p class="text-blue-400 tracking-[0.3em] font-bold mb-2 text-[10px] uppercase">Disponibilité 24/7</p>
                 <h1 class="font-title text-5xl md:text-7xl font-bold leading-none mb-0 uppercase">
-                    RESTONS <br> 
-                    <span class="text-[var(--crimson)]">CONNECTÉS.</span>
+                    <?php echo nl2br($s['titre_principal']); ?>
                 </h1>
             </div>
             <div class="flex-1 flex justify-center md:justify-end mt-8 md:mt-0">
                 <div class="relative w-64 h-64 md:w-96 md:h-96 border-4 border-white/10 rounded-full overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-                    <img src="mercedes.jfif" alt="Supercar" class="w-full h-full object-cover"/>
+                    <img src="<?php echo $s['image_supercar']; ?>" alt="Supercar" class="w-full h-full object-cover"/>
                 </div>
             </div>
         </div>
@@ -150,19 +159,19 @@ try {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 border-y border-white/5 py-8">
             <div class="group">
                 <span class="text-[var(--crimson)] font-title text-[10px] tracking-widest uppercase block mb-1">Email</span>
-                <p class="text-base font-light">supercar@gmail.com</p>
+                <p class="text-base font-light"><?php echo $s['email_contact']; ?></p>
             </div>
             <div class="group">
                 <span class="text-[var(--crimson)] font-title text-[10px] tracking-widest uppercase block mb-1">Tel</span>
-                <p class="text-base font-light">+230 454 8950</p>
+                <p class="text-base font-light"><?php echo $s['tel_contact']; ?></p>
             </div>
             <div class="group">
                 <span class="text-[var(--crimson)] font-title text-[10px] tracking-widest uppercase block mb-1">Siège</span>
-                <p class="text-base font-light">Ebène CyberCity</p>
+                <p class="text-base font-light"><?php echo $s['siege_contact']; ?></p>
             </div>
             <div class="group">
                 <span class="text-[var(--crimson)] font-title text-[10px] tracking-widest uppercase block mb-1">Responsable</span>
-                <p class="text-base font-light">M. Carter</p>
+                <p class="text-base font-light"><?php echo $s['responsable_contact']; ?></p>
             </div>
         </div>
     </section>
@@ -202,7 +211,7 @@ try {
             </div>
 
             <div class="min-h-[450px] grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-1000 bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14975.000000000002!2d57.485!3d-20.245!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x217c5af569500001%3A0x6000000000000000!2sEbene!5e0!3m2!1sfr!2smu!4v1620000000000!5m2!1sfr!2smu" class="w-full h-full border-none" allowfullscreen="" loading="lazy"></iframe>
+                <iframe src="<?php echo $s['map_iframe']; ?>" class="w-full h-full border-none" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
     </section>
