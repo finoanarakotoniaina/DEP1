@@ -1,4 +1,11 @@
-<?php include 'config.php'; ?>
+<?php 
+include 'config2.php'; 
+
+// Petite fonction de sécurité pour l'affichage
+function e($string) {
+    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -11,12 +18,9 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
-        /* Animations pour les entrées fluides */
         .reveal-right { transform: translateX(100px); opacity: 0; transition: all 1s ease-out; }
         .reveal-left { transform: translateX(-100px); opacity: 0; transition: all 1s ease-out; }
         .reveal-active { transform: translateX(0); opacity: 1; }
-        
-        /* Police pour les descriptions */
         .desc-font { font-family: 'Times New Roman', serif; }
     </style>
 </head>
@@ -55,17 +59,17 @@
         <div class="absolute top-0 left-0 w-full h-full z-0">
             <div class="absolute inset-0 video-overlay z-10"></div>
             <video autoplay muted loop playsinline class="w-full h-full object-cover">
-                <source src="mercedes.mp4" type="video/mp4">
+                <source src="<?php echo e(getContent('hero_video')); ?>" type="video/mp4">
             </video>
         </div>
 
         <div class="relative z-20 w-full mt-20">
             <div class="max-w-3xl">
                 <h1 class="font-title text-4xl md:text-7xl font-bold leading-none mb-8">
-                    L'ÉLÉGANCE <br> <span class="text-[var(--crimson)]">CERTIFIEE.</span>
+                    <?php echo getContent('hero_title'); ?>
                 </h1>
                 <p class="text-lg text-gray-200 max-w-xl font-light leading-relaxed mb-10">
-                    Votre partenaire de confiance à l'Île Maurice pour l'acquisition de véhicules d'exception importés d'Allemagne, du Japon et des USA.
+                    <?php echo e(getContent('hero_subtitle')); ?>
                 </p>
                 <div class="flex flex-wrap gap-6">
                     <a href="voiture.php?from=accueil" class="bg-[var(--crimson)] px-8 py-4 font-title text-xs tracking-widest hover:bg-white hover:text-black transition-all">DÉCOUVRIR LE STOCK</a>
@@ -88,23 +92,27 @@
         <div class="relative z-10 flex flex-col gap-12 max-w-3xl mx-auto">
             
             <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="0">
-                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">BMW</h3>
-                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Bien que la marque se soit diversifiée, son cœur de métier reste la « driver’s car ». BMW se distingue par une ergonomie intérieure orientée vers le conducteur et une mise au point de châssis qui favorise la précision de conduite et l'agilité. contrairement à beaucoup de constructeurs, ils privilégient souvent une répartition des masses équilibrée et une direction communicative, cherchant à donner au conducteur l'impression de faire corps avec la machine, même sur des modèles familiaux."></p>
+                <h3 class="font-title text-[var(--marble)] text-2xl mb-4"><?php echo e(getContent('brand_1_name')); ?></h3>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" 
+                   data-text="<?php echo e(getContent('brand_1_desc')); ?>"></p>
             </div>
             
             <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-left" data-delay="300">
-                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">MERCEDES</h3>
-                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Mercedes se positionne comme l'inventeur de l'automobile, et cela se ressent dans leur approche : tout est une question d'innovation au service du confort et de la sécurité. si bmw cherche la sportivité, mercedes cherche la sérénité. leur force réside dans une insonorisation de premier ordre, des suspensions souvent typées 'tapis volant' et une interface technologique (mbux) qui vise à réduire la fatigue au volant. c'est le choix de la rigueur et de la vie à bord apaisée."></p>
+                <h3 class="font-title text-[var(--marble)] text-2xl mb-4"><?php echo e(getContent('brand_2_name')); ?></h3>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" 
+                   data-text="<?php echo e(getContent('brand_2_desc')); ?>"></p>
             </div>
             
             <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="600">
-                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">PORSCHE</h3>
-                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Dire que porsche est juste « sportif » est un euphémisme. la marque est surtout une référence en ingénierie de précision. le tour de force de porsche est de proposer des voitures aux performances démoniaques (avec la 911 en icône absolue) qui restent paradoxalement utilisables au quotidien. leur fiabilité mécanique est souvent supérieure à la moyenne des voitures de sport, et ils excellent dans l'art de rendre une conduite complexe accessible et gratifiante, peu importe le niveau du pilote."></p>
+                <h3 class="font-title text-[var(--marble)] text-2xl mb-4"><?php echo e(getContent('brand_3_name')); ?></h3>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" 
+                   data-text="<?php echo e(getContent('brand_3_desc')); ?>"></p>
             </div>
-           
+
             <div class="brand-card p-8 bg-white/5 backdrop-blur-sm reveal-right" data-delay="450">
-                <h3 class="font-title text-[var(--marble)] text-2xl mb-4">AUDI</h3>
-                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" data-text="Audi incarne l'équilibre parfait entre haute technologie et sobriété esthétique. Leur philosophie « Vorsprung durch Technik » (l'avance par la technologie) se traduit par une qualité de finition intérieure inégalée et l'excellence de leur transmission intégrale Quattro. Contrairement à ses rivaux, Audi mise sur une élégance discrète mais redoutablement efficace, offrant une expérience de conduite sécurisante et ultra-connectée, idéale pour ceux qui recherchent le luxe sans l'ostentation."></p>
+                <h3 class="font-title text-[var(--marble)] text-2xl mb-4"><?php echo e(getContent('brand_4_name')); ?></h3>
+                <p class="text-gray-300 text-lg leading-relaxed desc-font opacity-0 transition-opacity duration-300 typewriter-text" 
+                   data-text="<?php echo e(getContent('brand_4_desc')); ?>"></p>
             </div>
         </div>
     </section>
@@ -114,7 +122,6 @@
     </footer>
 
     <script>
-        // 1. Animation d'entrée au scroll
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -128,11 +135,9 @@
 
         document.querySelectorAll('.reveal-right, .reveal-left').forEach(el => observer.observe(el));
 
-        // 2. Animation machine à écrire au survol
         document.querySelectorAll('.brand-card').forEach(card => {
             card.addEventListener('mouseenter', function() {
                 const textElement = this.querySelector('.typewriter-text');
-                // On ne lance l'animation que si elle n'a jamais été lancée
                 if (!textElement.dataset.hasTyped) {
                     textElement.dataset.hasTyped = "true";
                     textElement.classList.remove('opacity-0');
@@ -144,7 +149,7 @@
                         if (i < text.length) {
                             textElement.textContent += text.charAt(i);
                             i++;
-                            setTimeout(typing, 15); // Vitesse
+                            setTimeout(typing, 15);
                         }
                     }
                     typing();
