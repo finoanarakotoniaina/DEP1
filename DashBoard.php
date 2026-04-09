@@ -1,26 +1,32 @@
-<?php 
+<?php
 /**
- * SUPERCAR - M5 Precision Telemetry v5.0
- * Design : BMW M5 Instrument Cluster
- * Structure : Rentable Navigation System
+ * SUPERCAR - Cockpit Precision Edition v5.0
+ * Fusion: Session Sécurisée + Télémétrie M5
  */
 session_start();
-require_once 'config.php'; 
 
-// Correction de la liaison PDO pour éviter l'erreur fetch_row
-$db = $pdo ?? $db ?? $conn; 
+// 1. Protection de la page : si pas de session, retour au login
+if (!isset($_SESSION['admin_id'])) {
+    header('Location: login.php');
+    exit();
+}
+
+require_once 'config.php';
+
+// On utilise la variable $db définie dans ton config.php
+$database = $db;
 
 try {
-    // Télémétrie en temps réel
-    $countCars = $db->query("SELECT COUNT(*) FROM voiture")->fetchColumn() ?: 0;
-    $countClients = $db->query("SELECT COUNT(*) FROM client")->fetchColumn() ?: 0;
-    $countMessages = $db->query("SELECT COUNT(*) FROM contact")->fetchColumn() ?: 0;
+    // 2. Statistiques (Comptage des entrées dans les tables)
+    $countCars = $database->query("SELECT COUNT(*) FROM voiture")->fetchColumn() ?: 0;
+    $countClients = $database->query("SELECT COUNT(*) FROM client")->fetchColumn() ?: 0;
+    $countMessages = $database->query("SELECT COUNT(*) FROM contact")->fetchColumn() ?: 0;
 
-    // Flux des pilotes récents
-    $stmt = $db->query("SELECT nom, prenom, email FROM client ORDER BY id_client DESC LIMIT 4");
-    $recentDrivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("ERREUR SYSTEME : Liaison satellite interrompue.");
+    // 3. Récupération des 5 derniers clients (Mission Logs)
+    $lastClientsStmt = $database->query("SELECT nom, prenom, email, id_client FROM client ORDER BY id_client DESC LIMIT 5");
+    $lastClients = $lastClientsStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $db_error = $e->getMessage();
 }
 ?>
 
@@ -28,14 +34,14 @@ try {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SuperCar | M5 Command Center</title>
+    <title>SuperCar | Telemetry Cockpit</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
         :root {
-            --m-red: #ff1e26; /* Rouge M-Sport exact */
+            --m-red: #ff1e26;
             --bg-deep: #050505;
             --bg-card: #0d0d10;
         }
@@ -150,21 +156,26 @@ try {
                 <h2 class="text-4xl font-m italic uppercase tracking-tighter">Command <span class="text-gray-600">Center</span></h2>
                 <div class="flex items-center gap-3 mt-2">
                     <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">System Online / Admin Root</span>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">System Online / ID: <?= $_SESSION['admin_id'] ?></span>
                 </div>
             </div>
             <button class="bg-red-600 text-white px-8 py-3 rounded-xl font-m text-[10px] uppercase shadow-[0_10px_30px_rgba(255,30,38,0.25)]">System Secure</button>
         </header>
 
+        <?php if(isset($db_error)): ?>
+            <div class="mb-6 p-4 bg-red-600/20 border border-red-600 rounded-xl text-xs font-mono text-red-500">
+                ⚠️ ALERTE TÉLÉMÉTRIE : <?= $db_error ?>
+            </div>
+        <?php endif; ?>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
-            
             <div class="glass-card p-10 flex flex-col items-center">
                 <div class="gauge-container" style="--v: <?= min($countCars, 100) ?>;">
                     <div class="gauge-ring"></div>
                     <div class="gauge-needle"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center pt-8">
                         <span class="text-5xl font-m font-black italic"><?= $countCars ?></span>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-2">Stock Actif</p>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-2">Voitures</p>
                     </div>
                 </div>
             </div>
@@ -190,35 +201,33 @@ try {
                     </div>
                 </div>
             </div>
-
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div class="lg:col-span-2 glass-card overflow-hidden">
                 <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
-                    <h3 class="text-xs font-m uppercase tracking-widest italic">Live Télémétrie Pilotes</h3>
-                    <a href="admin_contact.php" class="text-[9px] font-bold text-red-600 uppercase hover:text-white transition">Voir Tout</a>
+                    <h3 class="text-xs font-m uppercase tracking-widest italic">Mission Logs: Derniers Pilotes</h3>
                 </div>
                 <table class="w-full text-left">
                     <thead class="text-[9px] text-gray-600 uppercase font-black bg-black/40">
                         <tr>
-                            <th class="p-6">Identification</th>
-                            <th class="p-6">Communication Link</th>
-                            <th class="p-6 text-right">Statut</th>
+                            <th class="p-6">Conducteur</th>
+                            <th class="p-6">Communication</th>
+                            <th class="p-6 text-right">ID</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
-                        <?php foreach($recentDrivers as $driver): ?>
+                        <?php foreach($lastClients as $client): ?>
                         <tr class="hover:bg-red-600/[0.03] transition group">
                             <td class="p-6 flex items-center gap-5">
-                                <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-m text-red-600 group-hover:border-red-600/50 transition">
-                                    <?= strtoupper(substr($driver['nom'], 0, 1)) ?>
+                                <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-m text-red-600">
+                                    <?= strtoupper(substr($client['nom'], 0, 1)) ?>
                                 </div>
-                                <span class="text-xs font-bold uppercase italic"><?= htmlspecialchars($driver['nom'] . ' ' . $driver['prenom']) ?></span>
+                                <span class="text-xs font-bold uppercase italic"><?= htmlspecialchars($client['nom'] . ' ' . $client['prenom']) ?></span>
                             </td>
-                            <td class="p-6 font-mono text-xs text-gray-500"><?= htmlspecialchars($driver['email']) ?></td>
+                            <td class="p-6 font-mono text-xs text-gray-500"><?= htmlspecialchars($client['email']) ?></td>
                             <td class="p-6 text-right">
-                                <span class="px-3 py-1 bg-green-500/10 text-green-500 text-[8px] font-m uppercase rounded-full">Actif</span>
+                                <span class="text-[10px] font-m text-gray-600">#<?= $client['id_client'] ?></span>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -227,7 +236,7 @@ try {
             </div>
 
             <div class="glass-card p-8 border-t-2 border-red-600">
-                <h4 class="text-[10px] font-m uppercase text-gray-500 mb-6">Efficiency Level</h4>
+                <h4 class="text-[10px] font-m uppercase text-gray-500 mb-6">Performance HUD</h4>
                 <div class="flex items-baseline gap-2">
                     <span class="text-7xl font-m font-black italic tracking-tighter">98</span>
                     <span class="text-xl font-bold text-red-600">%</span>
@@ -235,9 +244,9 @@ try {
                 <div class="w-full bg-white/5 h-2 rounded-full mt-6 overflow-hidden">
                     <div class="h-full bg-red-600 shadow-[0_0_10px_#ff1e26]" style="width: 98%"></div>
                 </div>
+                <p class="text-[9px] text-gray-600 font-bold uppercase mt-4 text-right italic">Optimisation Satellite OK</p>
             </div>
         </div>
     </main>
-
 </body>
 </html>
