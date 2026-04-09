@@ -1,7 +1,8 @@
 <?php
 /**
- * SUPERCAR - Cockpit Precision Edition v5.0
- * Fusion: Session Sécurisée + Télémétrie M5
+ * SUPERCAR - Cockpit Precision HUD v6.0
+ * Fusion: Session Sécurisée + Télémétrie BMW M5
+ * Structure UI inspirée par Rentable
  */
 session_start();
 
@@ -17,15 +18,17 @@ require_once 'config.php';
 $database = $db;
 
 try {
-    // 2. Statistiques (Comptage des entrées dans les tables)
+    // 2. Statistiques réelles pour les cadrans
     $countCars = $database->query("SELECT COUNT(*) FROM voiture")->fetchColumn() ?: 0;
     $countClients = $database->query("SELECT COUNT(*) FROM client")->fetchColumn() ?: 0;
     $countMessages = $database->query("SELECT COUNT(*) FROM contact")->fetchColumn() ?: 0;
 
     // 3. Récupération des 5 derniers clients (Mission Logs)
+    // Correction fetch_row() -> fetchAll(PDO::FETCH_ASSOC)
     $lastClientsStmt = $database->query("SELECT nom, prenom, email, id_client FROM client ORDER BY id_client DESC LIMIT 5");
     $lastClients = $lastClientsStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
+    // En cas d'erreur de requête
     $db_error = $e->getMessage();
 }
 ?>
@@ -34,14 +37,14 @@ try {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SuperCar | Telemetry Cockpit</title>
+    <title>SuperCar | M5 Telemetry HUD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
         :root {
-            --m-red: #ff1e26;
+            --m-red: #ff1e26; /* Rouge M-Sport exact */
             --bg-deep: #050505;
             --bg-card: #0d0d10;
         }
@@ -56,16 +59,17 @@ try {
 
         .font-m { font-family: 'Orbitron', sans-serif; }
 
-        /* --- DESIGN DES CADRANS BMW M5 --- */
+        /* --- STYLISATION DES CADRANS BMW M5 (RÉALISTE) --- */
         .gauge-container {
             position: relative;
-            width: 210px; height: 210px;
+            width: 210px; height: 180px; /* Réduit pour l'ouverture du bas */
             display: flex; align-items: center; justify-content: center;
         }
 
+        /* L'arc gradué ouvert en bas (from -135deg to +135deg) */
         .gauge-ring {
             position: absolute;
-            width: 100%; height: 100%;
+            width: 200px; height: 200px;
             border-radius: 50%;
             background: conic-gradient(
                 from -135deg, 
@@ -75,22 +79,35 @@ try {
                 rgba(255,255,255,0.03) 270deg,
                 transparent 270deg
             );
+            /* Masque pour créer l'anneau ouvert en bas */
             -webkit-mask: radial-gradient(transparent 87%, black 88%);
             mask: radial-gradient(transparent 87%, black 88%);
         }
 
+        /* L'aiguille fine avec pointe blanche */
         .gauge-needle {
             position: absolute;
             width: 2px; height: 90px;
-            background: linear-gradient(to top, transparent, var(--c, var(--m-red)), #fff);
+            background: linear-gradient(to top, transparent 15%, var(--c, var(--m-red)) 80%, #fff 100%);
             bottom: 50%; left: 50%;
             transform-origin: bottom center;
+            /* Rotation calculée de -135° (min) à +135° (max) */
             transform: translateX(-50%) rotate(calc(-135deg + (var(--v) * 2.7deg)));
             transition: transform 1.5s cubic-bezier(0.1, 0.5, 0.2, 1);
             z-index: 10;
         }
 
-        /* --- SIDEBAR STYLE RENTABLE --- */
+        .gauge-center {
+            position: absolute;
+            width: 14px; height: 14px;
+            background: #000;
+            border: 2px solid var(--c, var(--m-red));
+            border-radius: 50%;
+            z-index: 20;
+            box-shadow: 0 0 10px #000;
+        }
+
+        /* --- UI RENTABLE STYLE --- */
         .nav-link {
             display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.25rem;
             border-radius: 14px; color: #555; transition: 0.3s; text-decoration: none;
@@ -105,7 +122,8 @@ try {
         .glass-card {
             background: var(--bg-card);
             border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 24px;
+            border-radius: 28px;
+            backdrop-filter: blur(10px);
         }
     </style>
 </head>
@@ -149,16 +167,17 @@ try {
         </div>
     </aside>
 
-    <main class="flex-1 p-12 overflow-y-auto">
+    <main class="flex-1 p-12 overflow-y-auto bg-[#080a0c]">
         
         <header class="flex justify-between items-center mb-12">
             <div>
-                <h2 class="text-4xl font-m italic uppercase tracking-tighter">Command <span class="text-gray-600">Center</span></h2>
+                <h2 class="text-4xl font-m italic uppercase tracking-tighter leading-none">Command <span class="text-gray-600">Center</span></h2>
                 <div class="flex items-center gap-3 mt-2">
                     <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">System Online / ID: <?= $_SESSION['admin_id'] ?></span>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-[2px]">Admin HUD / ID: <?= $_SESSION['admin_id'] ?></span>
                 </div>
             </div>
+            
             <button class="bg-red-600 text-white px-8 py-3 rounded-xl font-m text-[10px] uppercase shadow-[0_10px_30px_rgba(255,30,38,0.25)]">System Secure</button>
         </header>
 
@@ -169,14 +188,16 @@ try {
         <?php endif; ?>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+            
             <div class="glass-card p-10 flex flex-col items-center">
-                <div class="gauge-container" style="--v: <?= min($countCars, 100) ?>;">
+                <div class="gauge-container" style="--v: <?= min($countCars, 100) ?>; --c: var(--m-red);">
                     <div class="gauge-ring"></div>
                     <div class="gauge-needle"></div>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pt-8">
-                        <span class="text-5xl font-m font-black italic"><?= $countCars ?></span>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-2">Voitures</p>
-                    </div>
+                    <div class="gauge-center"></div>
+                </div>
+                <div class="text-center -mt-6 relative z-30">
+                    <span class="text-5xl font-m font-black italic block leading-none"><?= $countCars ?></span>
+                    <span class="text-[10px] text-gray-500 uppercase tracking-widest mt-2 block">Stock Actif</span>
                 </div>
             </div>
 
@@ -184,50 +205,57 @@ try {
                 <div class="gauge-container" style="--v: <?= min($countClients, 100) ?>; --c: #fff;">
                     <div class="gauge-ring"></div>
                     <div class="gauge-needle"></div>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pt-8">
-                        <span class="text-5xl font-m font-black italic"><?= $countClients ?></span>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-2">Pilotes</p>
-                    </div>
+                    <div class="gauge-center"></div>
+                </div>
+                <div class="text-center -mt-6 relative z-30">
+                    <span class="text-5xl font-m font-black italic block leading-none"><?= $countClients ?></span>
+                    <span class="text-[10px] text-gray-500 uppercase tracking-widest mt-2 block">Pilotes</span>
                 </div>
             </div>
 
             <div class="glass-card p-10 flex flex-col items-center">
-                <div class="gauge-container" style="--v: <?= min($countMessages * 10, 100) ?>;">
+                <div class="gauge-container" style="--v: <?= min($countMessages * 10, 100) ?>; --c: var(--m-red);">
                     <div class="gauge-ring"></div>
                     <div class="gauge-needle"></div>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pt-8">
-                        <span class="text-5xl font-m font-black italic"><?= $countMessages ?></span>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-2">Messages</p>
-                    </div>
+                    <div class="gauge-center"></div>
+                </div>
+                <div class="text-center -mt-6 relative z-30">
+                    <span class="text-5xl font-m font-black italic block leading-none"><?= $countMessages ?></span>
+                    <span class="text-[10px] text-gray-500 uppercase tracking-widest mt-2 block">Flux Messages</span>
                 </div>
             </div>
+
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div class="lg:col-span-2 glass-card overflow-hidden">
                 <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
-                    <h3 class="text-xs font-m uppercase tracking-widest italic">Mission Logs: Derniers Pilotes</h3>
+                    <h3 class="text-xs font-m uppercase tracking-widest italic">Mission Logs: Derniers Conducteurs</h3>
+                    <a href="admin_contact.php" class="text-[9px] font-bold text-red-600 uppercase hover:text-white transition">Voir Tout</a>
                 </div>
                 <table class="w-full text-left">
                     <thead class="text-[9px] text-gray-600 uppercase font-black bg-black/40">
                         <tr>
-                            <th class="p-6">Conducteur</th>
-                            <th class="p-6">Communication</th>
-                            <th class="p-6 text-right">ID</th>
+                            <th class="p-6">Conducteur Identify</th>
+                            <th class="p-6">Canal Link</th>
+                            <th class="p-6 text-right">Statut</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
                         <?php foreach($lastClients as $client): ?>
                         <tr class="hover:bg-red-600/[0.03] transition group">
                             <td class="p-6 flex items-center gap-5">
-                                <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-m text-red-600">
+                                <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-m text-red-600 group-hover:border-red-600/50 transition">
                                     <?= strtoupper(substr($client['nom'], 0, 1)) ?>
                                 </div>
-                                <span class="text-xs font-bold uppercase italic"><?= htmlspecialchars($client['nom'] . ' ' . $client['prenom']) ?></span>
+                                <div>
+                                    <p class="text-xs font-bold uppercase italic leading-none"><?= htmlspecialchars($client['nom'] . ' ' . $client['prenom']) ?></p>
+                                    <p class="text-[9px] text-gray-500 font-bold uppercase mt-1">Grade: Platinum</p>
+                                </div>
                             </td>
                             <td class="p-6 font-mono text-xs text-gray-500"><?= htmlspecialchars($client['email']) ?></td>
                             <td class="p-6 text-right">
-                                <span class="text-[10px] font-m text-gray-600">#<?= $client['id_client'] ?></span>
+                                <span class="px-3 py-1 bg-green-500/10 text-green-500 text-[8px] font-m uppercase rounded-full">Actif</span>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -235,16 +263,15 @@ try {
                 </table>
             </div>
 
-            <div class="glass-card p-8 border-t-2 border-red-600">
-                <h4 class="text-[10px] font-m uppercase text-gray-500 mb-6">Performance HUD</h4>
+            <div class="glass-card p-8 border-t-2 border-red-600 h-64 flex flex-col justify-center">
+                <h4 class="text-[10px] font-m uppercase text-gray-500 mb-6">Efficiency HUD</h4>
                 <div class="flex items-baseline gap-2">
                     <span class="text-7xl font-m font-black italic tracking-tighter">98</span>
                     <span class="text-xl font-bold text-red-600">%</span>
                 </div>
                 <div class="w-full bg-white/5 h-2 rounded-full mt-6 overflow-hidden">
-                    <div class="h-full bg-red-600 shadow-[0_0_10px_#ff1e26]" style="width: 98%"></div>
+                    <div class="h-full bg-red-600" style="width: 98%"></div>
                 </div>
-                <p class="text-[9px] text-gray-600 font-bold uppercase mt-4 text-right italic">Optimisation Satellite OK</p>
             </div>
         </div>
     </main>
