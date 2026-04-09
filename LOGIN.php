@@ -1,44 +1,70 @@
 <?php
 /**
- * SUPERCAR - Page de Connexion Admin 
+ * SUPERCAR - Page de Connexion Admin avec Captcha Aléatoire
  */
-session_start();
-require 'config_admin.php'; 
+require_once 'config.php'; 
+
+// 1. Redirection si déjà connecté
+if (isset($_SESSION['admin_id'])) {
+    header("Location: DashBoard.php");
+    exit();
+}
+
+// 2. Préparation des marques pour le captcha
+$marques = [
+    'porsche'  => 'Porsche',
+    'mercedes' => 'Mercedes',
+    'bmw'      => 'BMW'
+];
 
 $error = "";
 
+// 3. Traitement du formulaire
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
+    $username      = trim($_POST['username'] ?? '');
+    $password      = $_POST['password'] ?? '';
     $selectedBrand = $_POST['brand_verify'] ?? '';
+    
+    // On récupère la marque qui était attendue (stockée en session au chargement précédent)
+    $targetBrand = $_SESSION['captcha_target'] ?? 'porsche';
 
-    // --- 1. VÉRIFICATION DU LOGO ---
-    if ($selectedBrand !== 'porsche') {
-        $error = "Vérification échouée : vous devez sélectionner le logo Porsche.";
-    } else {
-        // --- 2. VÉRIFICATION DES IDENTIFIANTS ---
-        if (!empty($username) && !empty($password)) {
-            try {
-                $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
-                $stmt->execute([$username]);
-                $admin = $stmt->fetch();
+    // --- A. VÉRIFICATION DU CAPTCHA ALÉATOIRE ---
+    if ($selectedBrand !== $targetBrand) {
+        $error = "Vérification échouée : vous deviez sélectionner le logo " . $marques[$targetBrand] . ".";
+    } 
+    elseif (empty($username) || empty($password)) {
+        $error = "Veuillez remplir tous les champs.";
+    } 
+    else {
+        try {
+            $stmt = $db->prepare("SELECT * FROM admins WHERE username = :username LIMIT 1");
+            $stmt->execute([':username' => $username]);
+            $admin = $stmt->fetch();
 
-                if ($admin && password_verify($password, $admin['password'])) {
-                    $_SESSION['admin_id'] = $admin['id'];
-                    $_SESSION['admin_name'] = $admin['username'];
-                    header("Location: DashBoard.php");
-                    exit();
-                } else {
-                    $error = "Identifiants administrateur incorrects.";
-                }
-            } catch (PDOException $e) {
-                $error = "Erreur de connexion à la base de données.";
+            if ($admin && password_verify($password, $admin['password'])) {
+                session_regenerate_id();
+                $_SESSION['admin_id']   = $admin['id'];
+                $_SESSION['admin_name'] = $admin['username'];
+                
+                // On nettoie la session du captcha après réussite
+                unset($_SESSION['captcha_target']);
+
+                header("Location: DashBoard.php");
+                exit();
+            } else {
+                $error = "Identifiants administrateur incorrects.";
             }
-        } else {
-            $error = "Veuillez remplir tous les champs.";
+        } catch (PDOException $e) {
+            $error = "Une erreur est survenue lors de la connexion.";
         }
     }
 }
+
+// 4. GÉNÉRATION DE LA MARQUE ALÉATOIRE POUR LE PROCHAIN AFFICHAGE
+// On choisit une clé au hasard (porsche, mercedes ou bmw)
+$randomKey = array_rand($marques);
+$_SESSION['captcha_target'] = $randomKey; // On mémorise le choix pour la vérification au prochain POST
+$instruction = $marques[$randomKey];
 ?>
 
 <!DOCTYPE html>
@@ -56,24 +82,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <h2>Supercar Admin</h2>
     
     <?php if(!empty($error)): ?>
-        <div class="error"><?php echo $error; ?></div>
+        <div class="error" style="color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 10px; border-radius: 5px; margin-bottom: 20px; text-align: center; border: 1px solid #ff4d4d;">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
     <?php endif; ?>
 
-    <form method="POST" action="">
+    <form method="POST" action="login.php">
         <div class="form-group">
-            <label>Utilisateur</label>
-            <input type="text" name="username" required placeholder="Identifiant">
+            <label for="username">Utilisateur</label>
+            <input type="text" id="username" name="username" required placeholder="Identifiant" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
         </div>
         
         <div class="form-group">
-            <label>Mot de passe</label>
-            <input type="password" name="password" required placeholder="••••••••">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required placeholder="••••••••">
         </div>
 
         <div class="brand-verification">
-            <p class="verify-label">Sélectionnez le logo <strong>Porsche</strong></p>
+            <p class="verify-label">Sélectionnez le logo <strong><?php echo $instruction; ?></strong></p>
+            
             <div class="logo-options">
-                
                 <label class="logo-item">
                     <input type="radio" name="brand_verify" value="mercedes" required>
                     <img src="logomercedes.jpg" alt="Mercedes">
@@ -88,7 +116,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="radio" name="brand_verify" value="bmw">
                     <img src="logobmw.jpg" alt="BMW">
                 </label>
-
             </div>
         </div>
         
