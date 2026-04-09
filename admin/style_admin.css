@@ -1,0 +1,177 @@
+/* --- VARIABLES OFFICIELLES SUPERCAR --- */
+:root {
+    --crimson: #C1121F;
+    --varden: #FFF6D6;
+    --cosmos: #003049;
+    --marble: #669BBC;
+}
+
+/* --- BASE --- */
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--cosmos);
+    background: linear-gradient(160deg, var(--cosmos) 80%, #001a2a 100%);
+    color: white;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- CARD DE CONNEXION --- */
+.login-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(15px);
+    padding: 2.5rem;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 380px;
+}
+
+h2 {
+    font-family: 'Syncopate', sans-serif;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 1.1rem;
+}
+
+/* --- FORMULAIRE --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+    color: var(--marble);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-bottom: 2px solid rgba(102, 155, 188, 0.3);
+    border-radius: 4px;
+    color: white;
+    transition: all 0.4s ease;
+    box-sizing: border-box;
+}
+
+input:focus {
+    outline: none;
+    border-bottom-color: var(--crimson);
+    background: rgba(193, 18, 31, 0.05);
+}
+
+/* --- SYSTÈME DE VÉRIFICATION PAR LOGO --- */
+.brand-verification {
+    margin: 25px 0;
+    text-align: center;
+}
+
+.verify-label {
+    font-size: 0.7rem;
+    color: var(--varden);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+.logo-options {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo-item {
+    cursor: pointer;
+    position: relative;
+}
+
+.logo-item input {
+    display: none; /* Cache le bouton radio */
+}
+
+/* Style des images avec bords arrondis */
+.logo-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover; /* Remplit bien le carré arrondi */
+    border-radius: 12px; /* L'arrondi demandé */
+    filter: grayscale(100%) brightness(0.7);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0.5;
+    border: 2px solid transparent;
+}
+
+.logo-item:hover img {
+    filter: grayscale(0%) brightness(1);
+    opacity: 1;
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* État sélectionné */
+.logo-item input:checked + img {
+    filter: grayscale(0%) brightness(1.1);
+    opacity: 1;
+    transform: scale(1.15);
+    border-color: var(--crimson); /* Bordure rouge Crimson sur l'arrondi */
+    box-shadow: 0 0 15px rgba(193, 18, 31, 0.4);
+}
+
+/* --- BOUTON --- */
+button {
+    width: 100%;
+    padding: 16px;
+    background-color: var(--crimson);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: white;
+    color: var(--crimson);
+    transform: translateY(-2px);
+}
+
+/* --- ERREURS --- */
+.error {
+    background: rgba(193, 18, 31, 0.15);
+    color: #ffb3b3;
+    border-left: 4px solid var(--crimson);
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 20px;
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}

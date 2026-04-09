@@ -36,3 +36,10 @@ INSERT INTO voiture (modele, prix, annee, etat, type, kilometrage, disponibilite
 ('Audi TT 8J', 550000, 2009, 'Très Bon', 'thermique', 110000, 1, 'Coupé sportif iconique au design épuré.', 'AUDI_TT(8J).jpg', NULL, 4),
 ('Audi A6 C7', 620000, 2014, 'Bon', 'thermique', 140000, 1, 'Grande berline de luxe avec finitions soignées.', 'A6(C7).jpg', NULL, 4),
 ('Audi Q5', 580000, 2012, 'Bon', 'thermique', 155000, 1, 'SUV familial robuste et performant.', 'AUDI_Q5.jpg', NULL, 4);
+
+
+// COTE ADMIN
+
+
+INSERT INTO admin (identifiant, nom, prenom, motdepasse) 
+VALUES ('MadisonCarter', 'Carter', 'Madison', 'didison');
