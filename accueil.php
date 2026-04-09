@@ -1,5 +1,5 @@
 <?php 
-include 'config2.php'; 
+include 'config.php'; 
 
 // Petite fonction de sécurité pour l'affichage
 function e($string) {
