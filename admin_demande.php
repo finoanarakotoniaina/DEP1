@@ -6,9 +6,8 @@
 session_start();
 require_once 'config.php';
 
-// 1. SÉCURITÉ : Vérification de la session
-// Si l'id_admin n'est pas dans la session, on redirige vers le login
-if (!isset($_SESSION['admin_id'])) {
+// Vérification de la session (accepte l'ID 0 de Madison)
+if (!isset($_SESSION['admin_id']) && !array_key_exists('admin_id', $_SESSION)) {
     header('Location: login.php');
     exit();
 }
@@ -16,24 +15,29 @@ if (!isset($_SESSION['admin_id'])) {
 $db = $pdo ?? $db ?? $conn;
 
 try {
-    // 2. RÉCUPÉRATION NOM ADMIN (Dynamique selon ta table 'admin')
+    // Récupération dynamique de l'admin depuis la table 'admin'
     $stmtAdmin = $db->prepare("SELECT nom, prenom FROM admin WHERE id_admin = ?");
     $stmtAdmin->execute([$_SESSION['admin_id']]);
     $resAdmin = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
     
-    // Si trouvé, on affiche le vrai nom, sinon valeur de secours
-    $adminFullName = $resAdmin ? $resAdmin['prenom'] . " " . $resAdmin['nom'] : "Admin";
+    // On définit le nom ou on redirige si l'admin n'existe plus en base
+    if ($resAdmin) {
+        $adminFullName = $resAdmin['prenom'] . " " . $resAdmin['nom'];
+    } else {
+        header('Location: logout.php');
+        exit();
+    }
 
-    // 3. RÉCUPÉRATION DES DEMANDES (Depuis ta table 'demande_essai')
+    // Récupération des demandes d'essais
     $query = "SELECT * FROM demande_essai ORDER BY id_demande DESC";
     $demandes = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     $demandes = [];
 }
 ?>
-
 <!DOCTYPE html>
-<html lang="fr" class="bg-[#121212]">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>SuperCar | Demandes</title>
@@ -51,14 +55,6 @@ try {
         }
         .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255,255,255,0.05); }
         .nav-link.active { border-left: 3px solid var(--accent-red); background: linear-gradient(90deg, rgba(255,30,38,0.1), transparent); }
-
-        .logout-btn {
-            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-            width: 100%; padding: 0.75rem; margin-bottom: 0.8rem;
-            background: rgba(255, 30, 38, 0.05); border: 1px solid rgba(255, 30, 38, 0.15);
-            border-radius: 14px; color: #ff3b3b; font-size: 11px; font-weight: 800;
-            text-transform: uppercase; transition: 0.3s;
-        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -74,20 +70,16 @@ try {
             <a href="admin_voitures.php" class="nav-link"><i class="fa-solid fa-car-side"></i> Inventaire</a>
             <a href="admin_demande.php" class="nav-link active"><i class="fa-solid fa-calendar-check"></i> Demandes</a>
             <a href="admin_contact.php" class="nav-link"><i class="fa-solid fa-envelope"></i> Messages</a>
-            <a href="admin_services.php" class="nav-link"><i class="fa-solid fa-screwdriver-wrench"></i> Services</a>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-white/5">
-            <a href="logout.php" class="logout-btn"><i class="fa-solid fa-power-off text-xs"></i> Déconnexion</a>
-            <div class="bg-white/5 p-4 rounded-2xl flex items-center justify-between border border-white/5">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-white/10 text-red-600">
-                        <?= strtoupper(substr($adminFullName, 0, 1)) ?>
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold text-white"><?= htmlspecialchars($adminFullName) ?></p>
-                        <p class="text-[10px] text-gray-500 font-medium">Connecté</p>
-                    </div>
+            <div class="bg-white/5 p-4 rounded-2xl flex items-center gap-3 border border-white/5">
+                <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-red-600">
+                    <?= strtoupper(substr($adminFullName, 0, 1)) ?>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-white"><?= htmlspecialchars($adminFullName) ?></p>
+                    <p class="text-[10px] text-gray-500">Connecté</p>
                 </div>
             </div>
         </div>
@@ -95,30 +87,31 @@ try {
 
     <main class="flex-1 p-10 overflow-y-auto bg-[#080808]">
         <header class="mb-12">
-            <h2 class="text-4xl font-m font-black italic uppercase tracking-tighter">Gestion des <span class="text-red-600">Demandes</span></h2>
+            <h2 class="text-4xl font-m font-black italic uppercase tracking-tighter">
+                Gestion des <span class="text-red-600">Demandes</span>
+            </h2>
         </header>
 
         <div class="bg-white/[0.02] border border-white/5 rounded-[32px] overflow-hidden">
             <table class="w-full text-left">
                 <thead class="bg-white/[0.02] text-[10px] uppercase font-m tracking-widest text-gray-500">
                     <tr>
-                        <th class="p-6">Client</th>
-                        <th class="p-6">Détails</th>
-                        <th class="p-6 text-right">Statut</th>
+                        <th class="p-6">Client / Pilote</th>
+                        <th class="p-6">Statut Mission</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     <?php if (empty($demandes)): ?>
-                        <tr><td colspan="3" class="p-10 text-center text-gray-600 italic">Aucune demande enregistrée.</td></tr>
+                        <tr><td colspan="2" class="p-10 text-center text-gray-600 italic font-m uppercase text-[10px]">Aucun log détecté</td></tr>
                     <?php else: ?>
                         <?php foreach($demandes as $d): ?>
                         <tr class="hover:bg-white/[0.01] transition">
                             <td class="p-6">
-                                <p class="font-bold text-sm uppercase"><?= htmlspecialchars($d['nom_client'] ?? 'Inconnu') ?></p>
+                                <p class="font-bold text-sm uppercase italic"><?= htmlspecialchars($d['nom_client'] ?? 'Anonyme') ?></p>
+                                <p class="text-[10px] text-gray-500 uppercase tracking-widest">ID Log: #<?= $d['id_demande'] ?></p>
                             </td>
-                            <td class="p-6 text-xs text-gray-400">Demande d'essai n°<?= $d['id_demande'] ?></td>
-                            <td class="p-6 text-right">
-                                <span class="px-3 py-1 bg-red-600/10 text-red-600 text-[8px] font-black uppercase rounded-full border border-red-600/10">Reçu</span>
+                            <td class="p-6">
+                                <span class="px-3 py-1 bg-red-600/10 text-red-600 text-[8px] font-black uppercase rounded-full border border-red-600/10 tracking-widest">Reçu</span>
                             </td>
                         </tr>
                         <?php endforeach; ?>
