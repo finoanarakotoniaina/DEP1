@@ -18,7 +18,7 @@ include 'config.php';
             outline: none;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
-            box-shadow: 0 0 0 2px #C1121F; /* Couleur Crimson */
+            box-shadow: 0 0 0 2px #C1121F; 
         }
         /* Cache les boutons par défaut */
         .btn-save {
@@ -74,20 +74,29 @@ include 'config.php';
             <?php for($i=1; $i<=4; $i++): 
                 $id_name = "brand_".$i."_name";
                 $id_desc = "brand_".$i."_desc";
-                $btn_id = "btn_brand_".$i;
+                $btn_name = "btn_brand_".$i."_name";
+                $btn_desc = "btn_brand_".$i."_desc";
             ?>
             <div class="brand-card p-8 bg-white/5 backdrop-blur-sm border border-white/10 relative">
-                <h3 id="<?php echo $id_name; ?>" contenteditable="true" onfocus="showBtn('<?php echo $btn_id; ?>')" class="edit-zone font-title text-2xl mb-4">
-                    <?php echo getContent($id_name); ?>
-                </h3>
                 
-                <p id="<?php echo $id_desc; ?>" contenteditable="true" onfocus="showBtn('<?php echo $btn_id; ?>')" class="edit-zone text-gray-300 text-lg leading-relaxed mb-6">
-                    <?php echo getContent($id_desc); ?>
-                </p>
+                <div class="mb-6">
+                    <h3 id="<?php echo $id_name; ?>" contenteditable="true" onfocus="showBtn('<?php echo $btn_name; ?>')" class="edit-zone font-title text-2xl mb-2">
+                        <?php echo getContent($id_name); ?>
+                    </h3>
+                    <button id="<?php echo $btn_name; ?>" onclick="saveText('<?php echo $id_name; ?>', '<?php echo $btn_name; ?>')" class="btn-save bg-green-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">
+                        <i class="fas fa-save mr-2"></i> Enregistrer le nom
+                    </button>
+                </div>
+                
+                <div>
+                    <p id="<?php echo $id_desc; ?>" contenteditable="true" onfocus="showBtn('<?php echo $btn_desc; ?>')" class="edit-zone text-gray-300 text-lg leading-relaxed mb-2">
+                        <?php echo getContent($id_desc); ?>
+                    </p>
+                    <button id="<?php echo $btn_desc; ?>" onclick="saveText('<?php echo $id_desc; ?>', '<?php echo $btn_desc; ?>')" class="btn-save bg-green-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">
+                        <i class="fas fa-save mr-2"></i> Enregistrer la description
+                    </button>
+                </div>
 
-                <button id="<?php echo $btn_id; ?>" onclick="saveBrandGroup(<?php echo $i; ?>)" class="btn-save bg-green-600 px-6 py-2 rounded text-xs font-bold uppercase tracking-widest">
-                    <i class="fas fa-save mr-2"></i> Valider les modifs <?php echo $i; ?>
-                </button>
             </div>
             <?php endfor; ?>
 
@@ -95,30 +104,21 @@ include 'config.php';
     </section>
 
     <script>
-        // Affiche le bouton vert quand on clique sur le texte
+        // Affiche le bouton de sauvegarde spécifique
         function showBtn(id) {
             document.getElementById(id).style.display = "block";
         }
 
-        // Sauvegarde pour Titre / Sous-titre
+        // Sauvegarde générique pour n'importe quel ID
         function saveText(elementId, btnId) {
             const el = document.getElementById(elementId);
-            // On prend innerHTML pour le titre (si il y a des <span>) et innerText pour le reste
+            // Utilise innerHTML pour le titre (si balises span), sinon innerText
             const content = (elementId === 'hero_title') ? el.innerHTML : el.innerText;
+            
             executeUpload(elementId, content, btnId);
         }
 
-        // Sauvegarde pour les blocs Marques (Nom + Description)
-        function saveBrandGroup(index) {
-            const nameId = "brand_" + index + "_name";
-            const descId = "brand_" + index + "_desc";
-            const btnId = "btn_brand_" + index;
-
-            executeUpload(nameId, document.getElementById(nameId).innerText, null);
-            executeUpload(descId, document.getElementById(descId).innerText, btnId);
-        }
-
-        // Le coeur du système : Envoi AJAX vers updatehome.php
+        // Envoi AJAX vers updatehome.php
         function executeUpload(id, content, btnId) {
             let formData = new FormData();
             formData.append('id', id);
@@ -134,10 +134,10 @@ include 'config.php';
                     console.log("Sauvegarde " + id + " : OK");
                     if(btnId) {
                         document.getElementById(btnId).style.display = "none";
-                        // Effet visuel de confirmation
+                        // Petit effet visuel de confirmation (flash vert)
                         const target = document.getElementById(id);
                         target.style.transition = "color 0.3s";
-                        target.style.color = "#22c55e"; // Vert
+                        target.style.color = "#22c55e"; 
                         setTimeout(() => { target.style.color = ""; }, 1000);
                     }
                 } else {
