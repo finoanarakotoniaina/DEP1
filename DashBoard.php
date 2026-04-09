@@ -1,229 +1,243 @@
 <?php 
 /**
- * SUPERCAR - Dashboard Administration (Version MySQLi Optimisée)
+ * SUPERCAR - M5 Precision Telemetry v5.0
+ * Design : BMW M5 Instrument Cluster
+ * Structure : Rentable Navigation System
  */
 session_start();
+require_once 'config.php'; 
 
-if (!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
-    exit();
+// Correction de la liaison PDO pour éviter l'erreur fetch_row
+$db = $pdo ?? $db ?? $conn; 
+
+try {
+    // Télémétrie en temps réel
+    $countCars = $db->query("SELECT COUNT(*) FROM voiture")->fetchColumn() ?: 0;
+    $countClients = $db->query("SELECT COUNT(*) FROM client")->fetchColumn() ?: 0;
+    $countMessages = $db->query("SELECT COUNT(*) FROM contact")->fetchColumn() ?: 0;
+
+    // Flux des pilotes récents
+    $stmt = $db->query("SELECT nom, prenom, email FROM client ORDER BY id_client DESC LIMIT 4");
+    $recentDrivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("ERREUR SYSTEME : Liaison satellite interrompue.");
 }
-
-require_once 'config_admin.php'; 
-$db = $conn; 
-
-// Stats avec alias pour la clarté
-$countCars = $db->query("SELECT COUNT(*) FROM voiture")->fetch_row()[0] ?? 0;
-$countClients = $db->query("SELECT COUNT(*) FROM client")->fetch_row()[0] ?? 0;
-$countMessages = $db->query("SELECT COUNT(*) FROM contact")->fetch_row()[0] ?? 0;
-
-// On récupère aussi la valeur totale du stock (optionnel mais intéressant)
-// $totalValue = $db->query("SELECT SUM(prix) FROM voiture")->fetch_row()[0] ?? 0;
-
-$lastClientsRes = $db->query("SELECT nom, prenom, email, id_client FROM client ORDER BY id_client DESC LIMIT 5");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr" class="bg-[#050505]">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SuperCar | Command Center</title>
+    <title>SuperCar | M5 Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: white; overflow: hidden; }
-        .font-title { font-family: 'Syncopate', sans-serif; }
-        
-        /* Effet Glassmorphism Avancé */
-        .glass-card { 
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .glass-card:hover {
-            border-color: rgba(227, 30, 36, 0.5);
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.07);
+        :root {
+            --m-red: #ff1e26; /* Rouge M-Sport exact */
+            --bg-deep: #050505;
+            --bg-card: #0d0d10;
         }
 
-        /* Animation de scanline (effet écran cockpit) */
-        body::before {
-            content: " ";
-            position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 100;
-            background-size: 100% 4px, 3px 100%;
-            pointer-events: none;
-            opacity: 0.3;
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            color: #fff;
+            overflow: hidden;
+            background-image: radial-gradient(circle at top right, #1a1a22 0%, var(--bg-deep) 100%);
         }
 
-        /* Scrollbar custom */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #e31e24; border-radius: 10px; }
+        .font-m { font-family: 'Orbitron', sans-serif; }
+
+        /* --- DESIGN DES CADRANS BMW M5 --- */
+        .gauge-container {
+            position: relative;
+            width: 210px; height: 210px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .gauge-ring {
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                from -135deg, 
+                var(--c, var(--m-red)) 0%, 
+                var(--c, var(--m-red)) calc(var(--v) * 2.7deg), 
+                rgba(255,255,255,0.03) calc(var(--v) * 2.7deg),
+                rgba(255,255,255,0.03) 270deg,
+                transparent 270deg
+            );
+            -webkit-mask: radial-gradient(transparent 87%, black 88%);
+            mask: radial-gradient(transparent 87%, black 88%);
+        }
+
+        .gauge-needle {
+            position: absolute;
+            width: 2px; height: 90px;
+            background: linear-gradient(to top, transparent, var(--c, var(--m-red)), #fff);
+            bottom: 50%; left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(calc(-135deg + (var(--v) * 2.7deg)));
+            transition: transform 1.5s cubic-bezier(0.1, 0.5, 0.2, 1);
+            z-index: 10;
+        }
+
+        /* --- SIDEBAR STYLE RENTABLE --- */
+        .nav-link {
+            display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.25rem;
+            border-radius: 14px; color: #555; transition: 0.3s; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600;
+        }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(255,30,38,0.1) 0%, transparent 100%);
+            border-left: 3px solid var(--m-red); color: #fff;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 24px;
+        }
     </style>
 </head>
-<body class="flex min-h-screen">
+<body class="flex h-screen">
 
-    <aside class="w-24 hover:w-72 transition-all duration-500 border-r border-white/5 flex flex-col bg-[#080808] z-50 group">
-        <div class="p-8 font-title text-xl border-b border-white/5 flex items-center gap-4">
-            <span class="text-[#e31e24] text-2xl"><i class="fa-solid fa-bolt"></i></span>
-            <span class="group-hover:opacity-100 opacity-0 transition-opacity duration-300">SUPER<span class="text-[#e31e24]">CAR</span></span>
+    <aside class="w-72 bg-black border-r border-white/5 flex flex-col p-8">
+        <div class="mb-12">
+            <h1 class="text-xl font-m font-black italic uppercase tracking-tighter">SUPER<span class="text-red-600">CAR</span></h1>
         </div>
         
-        <nav class="flex-1 px-4 mt-8">
-            <ul class="space-y-6 font-title text-[10px] tracking-widest uppercase">
-                <li>
-                    <a href="dashboard.php" class="flex items-center gap-6 p-4 text-[#e31e24] bg-red-500/10 rounded-xl border border-red-500/20">
-                        <i class="fa-solid fa-gauge-high text-lg w-6"></i>
-                        <span class="group-hover:opacity-100 opacity-0 transition-opacity">Telemetry</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="admin_voitures.php" class="flex items-center gap-6 p-4 hover:bg-white/5 text-gray-500 hover:text-white rounded-xl transition-all">
-                        <i class="fa-solid fa-car-rear text-lg w-6"></i>
-                        <span class="group-hover:opacity-100 opacity-0 transition-opacity">Hangar</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="admin_clients.php" class="flex items-center gap-6 p-4 hover:bg-white/5 text-gray-400 hover:text-white rounded-xl transition-all">
-                        <i class="fa-solid fa-user-gear text-lg w-6"></i>
-                        <span class="group-hover:opacity-100 opacity-0 transition-opacity">Drivers</span>
-                    </a>
-                </li>
-            </ul>
+        <nav class="flex-1 space-y-2">
+            <p class="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-4">Navigation</p>
+            
+            <a href="DashBoard.php" class="nav-link active">
+                <i class="fa-solid fa-gauge-high"></i> Dashboard
+            </a>
+            <a href="admin_voitures.php" class="nav-link">
+                <i class="fa-solid fa-car-side"></i> Inventaire
+            </a>
+            <a href="admin_demande.php" class="nav-link">
+                <i class="fa-solid fa-calendar-check"></i> Demandes
+            </a>
+            <a href="admin_contact.php" class="nav-link">
+                <i class="fa-solid fa-envelope"></i> Messages
+            </a>
+            <a href="admin_services.php" class="nav-link">
+                <i class="fa-solid fa-screwdriver-wrench"></i> Services
+            </a>
         </nav>
 
-        <div class="p-8 border-t border-white/5">
-            <a href="logout.php" class="flex items-center gap-6 text-gray-600 hover:text-[#e31e24] transition-all">
-                <i class="fa-solid fa-power-off text-lg w-6"></i>
-                <span class="group-hover:opacity-100 opacity-0 transition-opacity font-title text-[10px]">Shutdown</span>
+        <div class="mt-auto pt-6 border-t border-white/5">
+            <a href="logout.php" class="flex items-center justify-between p-4 bg-red-600/5 hover:bg-red-600/15 border border-red-600/10 rounded-2xl transition group no-underline">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
+                        <i class="fa-solid fa-power-off text-[10px] text-white"></i>
+                    </div>
+                    <span class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Déconnexion</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-red-900 group-hover:translate-x-1 transition"></i>
             </a>
         </div>
     </aside>
 
-    <main class="flex-1 p-12 overflow-y-auto relative">
+    <main class="flex-1 p-12 overflow-y-auto">
         
         <header class="flex justify-between items-center mb-12">
-            <div class="relative">
-                <div class="absolute -left-4 top-0 w-1 h-full bg-[#e31e24] shadow-[0_0_15px_#e31e24]"></div>
-                <h1 class="font-title text-5xl uppercase tracking-tighter italic">System <span class="text-[#e31e24] not-italic">Overview</span></h1>
-                <p class="text-gray-500 font-medium tracking-widest text-[10px] uppercase mt-2">Operator: <?= htmlspecialchars($_SESSION['prenom']) ?> // Auth: Level_01</p>
-            </div>
-            
-            <div class="flex items-center gap-6">
-                <div class="text-right">
-                    <div class="text-[10px] font-title text-green-500 animate-pulse">● System Online</div>
-                    <div class="text-xs opacity-50 font-mono">LAT: 48.8566 | LON: 2.3522</div>
-                </div>
-                <div class="w-14 h-14 rounded-2xl glass-card flex items-center justify-center border-[#e31e24]/30 shadow-[0_0_20px_rgba(227,30,36,0.2)]">
-                    <i class="fa-solid fa-shield-halved text-[#e31e24] text-xl"></i>
+            <div>
+                <h2 class="text-4xl font-m italic uppercase tracking-tighter">Command <span class="text-gray-600">Center</span></h2>
+                <div class="flex items-center gap-3 mt-2">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">System Online / Admin Root</span>
                 </div>
             </div>
+            <button class="bg-red-600 text-white px-8 py-3 rounded-xl font-m text-[10px] uppercase shadow-[0_10px_30px_rgba(255,30,38,0.25)]">System Secure</button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
             
-            <div class="glass-card p-8 rounded-3xl relative overflow-hidden group">
-                <div class="absolute -right-4 -bottom-4 text-white/5 text-9xl group-hover:text-[#e31e24]/10 transition-colors duration-700">
-                    <i class="fa-solid fa-car"></i>
-                </div>
-                <span class="text-[10px] font-title text-gray-500 block mb-2 uppercase tracking-[0.2em]">Active Inventory</span>
-                <div class="flex items-baseline gap-4">
-                    <div class="text-6xl font-title font-bold text-white"><?= $countCars ?></div>
-                    <div class="text-[#e31e24] text-xs font-title tracking-tighter">Units</div>
-                </div>
-                <div class="mt-4 w-full bg-white/5 h-1 rounded-full overflow-hidden">
-                    <div class="bg-[#e31e24] h-full shadow-[0_0_10px_#e31e24]" style="width: <?= min(($countCars/50)*100, 100) ?>%"></div>
-                </div>
-            </div>
-
-            <div class="glass-card p-8 rounded-3xl border-b-4 border-[#e31e24]">
-                <span class="text-[10px] font-title text-gray-500 block mb-2 uppercase tracking-[0.2em]">Registered Drivers</span>
-                <div class="text-6xl font-title font-bold leading-none mb-4"><?= $countClients ?></div>
-                <div class="flex gap-2">
-                    <span class="px-2 py-1 rounded bg-green-500/10 text-green-500 text-[8px] font-title tracking-widest">+12% Monthly</span>
-                </div>
-            </div>
-
-            <div class="glass-card p-8 rounded-3xl group">
-                <span class="text-[10px] font-title text-gray-500 block mb-2 uppercase tracking-[0.2em]">Comm. Link</span>
-                <div class="flex justify-between items-center">
-                    <div class="text-6xl font-title font-bold"><?= $countMessages ?></div>
-                    <div class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:rotate-12 transition-transform">
-                        <i class="fa-solid fa-envelope-open-text text-gray-500"></i>
+            <div class="glass-card p-10 flex flex-col items-center">
+                <div class="gauge-container" style="--v: <?= min($countCars, 100) ?>;">
+                    <div class="gauge-ring"></div>
+                    <div class="gauge-needle"></div>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pt-8">
+                        <span class="text-5xl font-m font-black italic"><?= $countCars ?></span>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-2">Stock Actif</p>
                     </div>
                 </div>
-                <p class="text-[9px] font-title text-gray-600 mt-4 uppercase">Awaiting processing...</p>
             </div>
-        </div>
 
-        <div class="glass-card rounded-3xl overflow-hidden border-white/10">
-            <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-                <h2 class="font-title text-xs text-[#e31e24] uppercase tracking-[0.3em]">Latest Mission Logs</h2>
-                <div class="flex gap-2">
-                    <div class="w-2 h-2 rounded-full bg-[#e31e24] animate-ping"></div>
-                    <span class="text-[9px] font-title opacity-50">Real-time Feed</span>
+            <div class="glass-card p-10 flex flex-col items-center">
+                <div class="gauge-container" style="--v: <?= min($countClients, 100) ?>; --c: #fff;">
+                    <div class="gauge-ring"></div>
+                    <div class="gauge-needle"></div>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pt-8">
+                        <span class="text-5xl font-m font-black italic"><?= $countClients ?></span>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-2">Pilotes</p>
+                    </div>
                 </div>
             </div>
-            
-            <div class="overflow-x-auto">
+
+            <div class="glass-card p-10 flex flex-col items-center">
+                <div class="gauge-container" style="--v: <?= min($countMessages * 10, 100) ?>;">
+                    <div class="gauge-ring"></div>
+                    <div class="gauge-needle"></div>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pt-8">
+                        <span class="text-5xl font-m font-black italic"><?= $countMessages ?></span>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-2">Messages</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="lg:col-span-2 glass-card overflow-hidden">
+                <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                    <h3 class="text-xs font-m uppercase tracking-widest italic">Live Télémétrie Pilotes</h3>
+                    <a href="admin_contact.php" class="text-[9px] font-bold text-red-600 uppercase hover:text-white transition">Voir Tout</a>
+                </div>
                 <table class="w-full text-left">
-                    <thead class="text-[10px] font-title text-gray-500 uppercase bg-black/20">
+                    <thead class="text-[9px] text-gray-600 uppercase font-black bg-black/40">
                         <tr>
-                            <th class="p-6 tracking-widest">Operator Identity</th>
-                            <th class="p-6 tracking-widest">Network Access</th>
-                            <th class="p-6 text-right tracking-widest">Status</th>
+                            <th class="p-6">Identification</th>
+                            <th class="p-6">Communication Link</th>
+                            <th class="p-6 text-right">Statut</th>
                         </tr>
                     </thead>
-                    <tbody class="text-sm">
-                        <?php while($row = $lastClientsRes->fetch_assoc()): ?>
-                        <tr class="border-t border-white/5 hover:bg-[#e31e24]/5 transition-colors group">
-                            <td class="p-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-800 to-black border border-white/10 flex items-center justify-center font-title text-[#e31e24]">
-                                        <?= strtoupper(substr($row['nom'], 0, 1)) ?>
-                                    </div>
-                                    <div>
-                                        <div class="text-white font-bold tracking-tight uppercase"><?= htmlspecialchars($row['nom'] . ' ' . $row['prenom']) ?></div>
-                                        <div class="text-[9px] font-title text-gray-600">ID: #00<?= $row['id_client'] ?></div>
-                                    </div>
+                    <tbody class="divide-y divide-white/5">
+                        <?php foreach($recentDrivers as $driver): ?>
+                        <tr class="hover:bg-red-600/[0.03] transition group">
+                            <td class="p-6 flex items-center gap-5">
+                                <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-m text-red-600 group-hover:border-red-600/50 transition">
+                                    <?= strtoupper(substr($driver['nom'], 0, 1)) ?>
                                 </div>
+                                <span class="text-xs font-bold uppercase italic"><?= htmlspecialchars($driver['nom'] . ' ' . $driver['prenom']) ?></span>
                             </td>
-                            <td class="p-6">
-                                <span class="font-mono text-xs opacity-50 group-hover:opacity-100 transition-opacity">
-                                    <i class="fa-solid fa-at mr-2 text-[#e31e24]"></i><?= htmlspecialchars($row['email']) ?>
-                                </span>
-                            </td>
+                            <td class="p-6 font-mono text-xs text-gray-500"><?= htmlspecialchars($driver['email']) ?></td>
                             <td class="p-6 text-right">
-                                <button class="px-4 py-2 border border-white/10 rounded-lg font-title text-[9px] hover:bg-white hover:text-black transition-all uppercase tracking-widest">
-                                    Profile
-                                </button>
+                                <span class="px-3 py-1 bg-green-500/10 text-green-500 text-[8px] font-m uppercase rounded-full">Actif</span>
                             </td>
                         </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="glass-card p-8 border-t-2 border-red-600">
+                <h4 class="text-[10px] font-m uppercase text-gray-500 mb-6">Efficiency Level</h4>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-7xl font-m font-black italic tracking-tighter">98</span>
+                    <span class="text-xl font-bold text-red-600">%</span>
+                </div>
+                <div class="w-full bg-white/5 h-2 rounded-full mt-6 overflow-hidden">
+                    <div class="h-full bg-red-600 shadow-[0_0_10px_#ff1e26]" style="width: 98%"></div>
+                </div>
             </div>
         </div>
     </main>
 
-    <script>
-        // Effet de parallaxe léger sur les cartes
-        document.querySelectorAll('.glass-card').forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                card.style.setProperty('--mouse-x', `${x}px`);
-                card.style.setProperty('--mouse-y', `${y}px`);
-            });
-        });
-    </script>
 </body>
 </html>
