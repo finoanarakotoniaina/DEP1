@@ -86,3 +86,64 @@ CREATE TABLE admin(
    PRIMARY KEY(id_admin)
 );
 
+
+
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Apr 09, 2026 at 08:00 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `supercar`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `home_content`
+--
+
+CREATE TABLE `home_content` (
+  `element_id` varchar(50) NOT NULL,
+  `content` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `home_content`
+--
+
+INSERT INTO `home_content` (`element_id`, `content`) VALUES
+('brand_1_desc', 'Bien que la marque se soit diveifvehber'),
+('brand_1_name', 'BMW'),
+('hero_subtitle', 'Votre partenaire de confiance à l\'Île Maurice pour l\'acquisition de véhicules d\'exception importés d\'Allemagne, du Japon et des USA.'),
+('hero_title', '\r\n                    \r\n                    \r\n                    L\'ÉLÉGANCE<br> <span class=\"text-[var(--crimson)]\">CERTIFIEE</span>'),
+('hero_video', 'mercedes.mp4');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `home_content`
+--
+ALTER TABLE `home_content`
+  ADD PRIMARY KEY (`element_id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
