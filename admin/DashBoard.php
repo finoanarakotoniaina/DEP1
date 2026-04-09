@@ -6,7 +6,7 @@ session_start();
 
 // 1. Sécurité : Si Madison n'est pas connectée, retour au login
 if (!isset($_SESSION['admin_id'])) {
-    header('Location: LOGIN.php');
+    header('Location: login.php');
     exit();
 }
 
