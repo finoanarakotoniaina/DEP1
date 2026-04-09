@@ -218,3 +218,206 @@ body {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- STYLE ADMIN --- */
+/* ==========================================================================
+   SECTION ADMINISTRATION : CONNEXION (login.php)
+   ========================================================================== */
+
+/* Centrage total de la page */
+body.login-body {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--cosmos); /* Bleu nuit profond */
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Carte de connexion compacte (Ajustée selon tes retours) */
+.login-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    padding: 2rem; /* Réduit pour éviter l'effet "trop grand" */
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 360px; /* Largeur réduite pour un look plus élégant */
+    text-align: center;
+}
+
+.login-card h2 {
+    font-family: 'Syncopate', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+/* --- CHAMPS DE SAISIE (INPUTS) --- */
+.login-card .form-group {
+    text-align: left;
+    margin-bottom: 1.2rem;
+}
+
+.login-card label {
+    font-size: 0.7rem;
+    color: var(--marble);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: block;
+    text-transform: uppercase;
+}
+
+.login-card input {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    padding: 10px 15px !important; /* Hauteur réduite */
+    color: white !important;
+    font-size: 0.85rem !important;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.login-card input:focus {
+    border-color: var(--crimson) !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    outline: none;
+}
+
+/* Gestion de l'icône œil dans le champ password */
+.password-container {
+    position: relative;
+    width: 100%;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.toggle-password:hover {
+    color: white;
+}
+
+/* --- ZONE CAPTCHA LOGOS (INTERACTIF) --- */
+.brand-verification {
+    margin: 20px 0;
+}
+
+.verify-label {
+    color: white;
+    font-size: 0.75rem;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+}
+
+.logo-options {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo-item {
+    cursor: pointer;
+    position: relative;
+}
+
+/* Masquer le cercle radio (checkpoint) */
+.logo-item input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.logo-item img {
+    width: 55px;
+    height: 55px;
+    border-radius: 12px;
+    filter: grayscale(100%) brightness(0.7);
+    opacity: 0.5;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 2px solid transparent;
+}
+
+/* Effet Zoom au survol */
+.logo-item:hover img {
+    filter: grayscale(0%) brightness(1);
+    opacity: 0.9;
+    transform: scale(1.15);
+}
+
+/* Effet Zoom + Bordure quand sélectionné */
+.logo-item input:checked + img {
+    filter: grayscale(0%) brightness(1.1);
+    opacity: 1;
+    transform: scale(1.25);
+    border-color: var(--crimson);
+    box-shadow: 0 8px 15px rgba(193, 18, 31, 0.3);
+}
+
+/* --- BOUTON DE CONNEXION --- */
+.login-card button {
+    background-color: var(--crimson) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    padding: 14px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    margin-top: 15px !important;
+    border: none !important;
+    width: 100% !important;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.login-card button:hover {
+    background-color: white !important;
+    color: var(--crimson) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Message d'erreur */
+.error {
+    background: rgba(255, 77, 77, 0.1);
+    color: #ff4d4d;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 77, 77, 0.2);
+}
