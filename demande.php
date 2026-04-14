@@ -2,8 +2,9 @@
 include 'config.php'; 
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 
-// 1. Récupération du modèle via URL (GET) ou soumission (POST)
-$modele_selectionne = $_GET['modele'] ?? $_POST['modele'] ?? '';
+// 1. Récupération des données (ID pour la BDD et Nom pour l'affichage)
+$id_voiture_hidden = $_GET['id_v'] ?? $_POST['id_voiture_cache'] ?? '';
+$modele_selectionne = $_GET['modele'] ?? $_POST['modele_affiche'] ?? '';
 
 $message = "";
 
@@ -12,25 +13,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['valider_essai'])) {
     $id_client = $_SESSION['id_client'] ?? null;
     
     if ($id_client) {
-        $modele = htmlspecialchars($_POST['modele']); // Nom de la voiture
-        $date_essai = $_POST['date_essai']; // date_souhaitee
-        $heure_essai = $_POST['heure_essai']; // Optionnel (non présent dans ta table demande_essai)
+        $date_essai = $_POST['date_essai'];
+        $heure_essai = $_POST['heure_essai'];
+        $id_v_a_inserer = $_POST['id_voiture_cache']; 
 
-        // Sécurité Serveur : Vérification des horaires (08h-17h)
         if ($heure_essai < "08:00" || $heure_essai > "17:00") {
             $message = "ERREUR : CRÉNEAU DISPONIBLE UNIQUEMENT ENTRE 08H ET 17H.";
         } else {
             try {
-                // ADAPTATION À TA BASE DE DONNÉES :
-                // Table: demande_essai | Colonnes: id_client, date_souhaitee, statut, id_voiture
                 $sql = "INSERT INTO demande_essai (id_client, date_souhaitee, statut, id_voiture) VALUES (?, ?, 'EN ATTENTE', ?)";
                 $stmt = $db->prepare($sql);
-                
-                // On enregistre le nom du modèle dans 'id_voiture' (Assure-toi que id_voiture est en VARCHAR)
-                $stmt->execute([$id_client, $date_essai, $modele]);
+                $stmt->execute([$id_client, $date_essai, $id_v_a_inserer]);
                 
                 $message = "VOTRE DEMANDE A ÉTÉ ENREGISTRÉE AVEC SUCCÈS.";
-                $modele_selectionne = ""; // Reset après succès
+                $modele_selectionne = ""; 
+                $id_voiture_hidden = "";
             } catch (Exception $e) {
                 $message = "ERREUR : " . $e->getMessage();
             }
@@ -87,6 +84,8 @@ $isLoggedIn = isset($_SESSION['id_client']);
             <li><a href="contact.php" class="nav-link">Contact</a></li>
             <?php if ($isLoggedIn): ?>
                 <li class="ml-4"><a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-[9px] hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2"><i class="fa-solid fa-door-open"></i> Déconnexion</a></li>
+            <?php else: ?>
+                <li class="ml-4"><a href="connexion.php" class="nav-link flex items-center gap-2 font-bold"><i class="fa-solid fa-user text-[var(--crimson)]"></i> Connexion</a></li>
             <?php endif; ?>
         </ul>
     </nav>
@@ -95,9 +94,16 @@ $isLoggedIn = isset($_SESSION['id_client']);
         <div class="z-10 max-w-4xl">
             <span class="text-gray-500 font-bold tracking-[0.5em] uppercase mb-4 block text-[10px]">Expérience Ultime</span>
             <h1 class="font-title text-5xl md:text-7xl font-bold leading-none mb-8 uppercase">DEMANDE <br> <span class="text-[var(--crimson)]">D'ESSAI.</span></h1>
+            
+            <p class="text-gray-400 max-w-md mb-12 text-sm leading-relaxed border-l border-[var(--crimson)] pl-6">
+                Prenez les commandes de l'exceptionnel. Choisissez votre modèle, définissez votre créneau et laissez-vous transporter par une ingénierie hors du commun.
+            </p>
+
             <a href="#booking" class="inline-flex items-center gap-8 group">
                 <div class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[var(--crimson)] transition-all duration-500">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="group-hover:text-[var(--crimson)] transform group-hover:translate-y-1 transition-all"><path d="M7 13l5 5 5-5M7 6l5 5 5-5" stroke-width="2" stroke-linecap="round"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="group-hover:text-[var(--crimson)] transform group-hover:translate-y-1 transition-all">
+                        <path d="M7 13l5 5 5-5M7 6l5 5 5-5" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
                 </div>
                 <span class="font-title text-[10px] tracking-[0.2em] uppercase">Réserver mon créneau</span>
             </a>
@@ -121,6 +127,8 @@ $isLoggedIn = isset($_SESSION['id_client']);
             </div>
 
             <form action="demande.php#booking" method="POST" class="space-y-8 bg-white/5 p-10 rounded-[40px] border border-white/10 backdrop-blur-sm">
+                <input type="hidden" name="id_voiture_cache" value="<?php echo htmlspecialchars($id_voiture_hidden); ?>">
+
                 <div class="grid grid-cols-2 gap-6">
                     <div class="space-y-1 border-b border-white/10">
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Nom</label>
@@ -141,11 +149,11 @@ $isLoggedIn = isset($_SESSION['id_client']);
                     <div class="space-y-2">
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Modèle</label>
                         <div class="flex items-center gap-2 border-b border-white/20">
-                            <input type="text" name="modele" 
+                            <input type="text" name="modele_affiche" 
                                    value="<?php echo htmlspecialchars($modele_selectionne); ?>" 
                                    placeholder="VOTRE MODÈLE" 
                                    readonly required 
-                                   class="bg-transparent w-full p-4 text-xs outline-none text-[var(--crimson)] font-bold tracking-widest placeholder:text-gray-600 placeholder:font-normal">
+                                   class="bg-transparent w-full p-4 text-xs outline-none text-[var(--crimson)] font-bold tracking-widest">
                             <a href="voiture.php" class="pr-2 text-[var(--crimson)] hover:scale-125 transition-transform text-xl" title="Ouvrir le catalogue">
                                 <i class="fa-solid fa-circle-plus"></i>
                             </a>
@@ -177,25 +185,11 @@ $isLoggedIn = isset($_SESSION['id_client']);
 
     <script>
         function closeModal() { window.location.href = 'accueil.php'; }
-        
-        // Bloquer dates passées (min = demain)
         const dateIn = document.getElementById('d');
         if(dateIn) {
             const today = new Date();
             today.setDate(today.getDate() + 1);
             dateIn.min = today.toISOString().split('T')[0];
-        }
-
-        // Bloquer heures hors 08h-17h en temps réel
-        const timeIn = document.getElementById('h');
-        if(timeIn) {
-            timeIn.addEventListener('input', function() {
-                const hour = this.value;
-                if(hour && (hour < "08:00" || hour > "17:00")) {
-                    alert("Les essais sont limités de 08:00 à 17:00 pour des raisons de sécurité.");
-                    this.value = ""; 
-                }
-            });
         }
     </script>
 </body>
