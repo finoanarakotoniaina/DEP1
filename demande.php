@@ -1,6 +1,31 @@
 <?php 
 include 'config.php'; 
-session_start(); // OBLIGATOIRE pour lire les infos de connexion
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+
+$message = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['valider_essai'])) {
+    $id_client = $_SESSION['id_client'] ?? null;
+    if ($id_client) {
+        $modele = htmlspecialchars($_POST['modele']);
+        $date_essai = $_POST['date_essai'];
+        $heure_essai = $_POST['heure_essai'];
+
+        // Sécurité côté serveur (PHP)
+        if ($heure_essai < "08:00" || $heure_essai > "17:00") {
+            $message = "ERREUR : CRÉNEAU DISPONIBLE UNIQUEMENT ENTRE 08H ET 17H.";
+        } else {
+            try {
+                $sql = "INSERT INTO essai (id_client, modele, date_essai, creneau) VALUES (?, ?, ?, ?)";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$id_client, $modele, $date_essai, $heure_essai]);
+                $message = "VOTRE DEMANDE A ÉTÉ ENREGISTRÉE AVEC SUCCÈS.";
+            } catch (Exception $e) {
+                $message = "ERREUR : " . $e->getMessage();
+            }
+        }
+    }
+}
+
 $isLoggedIn = isset($_SESSION['id_client']); 
 ?>
 <!DOCTYPE html>
@@ -10,6 +35,7 @@ $isLoggedIn = isset($_SESSION['id_client']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperCar | L'Inévitable</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
@@ -17,15 +43,10 @@ $isLoggedIn = isset($_SESSION['id_client']);
         .modal-blur { backdrop-filter: blur(10px); }
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-        body, html { background-color: #0a0a0a; }
+        .no-caps { text-transform: none !important; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        body, html { background-color: #0a0a0a; scroll-behavior: smooth; }
     </style>
 </head>
 <body class="split-bg text-white">
@@ -33,45 +54,29 @@ $isLoggedIn = isset($_SESSION['id_client']);
     <div id="authModal" class="<?php echo $isLoggedIn ? 'hidden' : 'flex'; ?> fixed inset-0 z-[100] items-center justify-center modal-blur px-6 animate-fade-in">
         <div class="bg-[#0a0a0a] border border-white/10 p-10 rounded-[20px] max-w-md w-full text-center relative shadow-2xl">
             <button onclick="closeModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             <h2 class="font-title text-2xl mb-4 uppercase tracking-tighter">Accès Réservé</h2>
-            <p class="text-gray-400 text-sm mb-8 leading-relaxed">
-                Pour réserver un essai exclusif, veuillez vous identifier ou rejoindre le cercle SuperCar.
-            </p>
+            <p class="text-gray-400 text-sm mb-8 leading-relaxed">Pour réserver un essai exclusif, veuillez vous identifier.</p>
             <div class="flex flex-col gap-4">
                 <a href="connexion.php?redirect=demande.php" class="bg-[var(--crimson)] py-4 font-title text-[10px] tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all text-center">Connexion</a>
-                <a href="inscription.php" class="border border-white/20 py-4 font-title text-[10px] tracking-[0.2em] uppercase hover:border-[var(--crimson)] hover:text-[var(--crimson)] transition-all text-center">Inscription</a>
+                <a href="inscription.php" class="border border-white/20 py-4 font-title text-[10px] tracking-[0.2em] uppercase hover:border-[var(--crimson)] transition-all text-center">Inscription</a>
             </div>
         </div>
     </div>
 
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-        
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
             <li><a href="accueil.php" class="nav-link">Accueil</a></li>
             <li><a href="voiture.php" class="nav-link">Voitures</a></li>
             <li><a href="demande.php" class="nav-link active">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
             <li><a href="contact.php" class="nav-link">Contact</a></li> |
-
-            <?php if (isset($_SESSION['id_client'])): ?>
-                <li>
-                    <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2">
-                        <i class="fa-solid fa-door-open text-[18px]"></i> Déconnexion
-                    </a>
-                </li>
+            <?php if ($isLoggedIn): ?>
+                <li><a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2"><i class="fa-solid fa-door-open"></i> Déconnexion</a></li>
             <?php else: ?>
-                <li>
-                    <strong>
-                        <a href="connexion.php" class="nav-link flex items-center gap-2">
-                            <i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion
-                        </a>
-                    </strong>
-                </li>
+                <li><strong><a href="connexion.php" class="nav-link flex items-center gap-2"><i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion</a></strong></li>
             <?php endif; ?>
         </ul>
     </nav>
@@ -79,70 +84,62 @@ $isLoggedIn = isset($_SESSION['id_client']);
     <section class="relative h-screen flex items-center px-6 lg:px-24 overflow-hidden">
         <div class="z-10 max-w-4xl relative">
             <span class="text-gray-500 font-bold tracking-[0.5em] uppercase mb-4 block text-[10px]">Édition Limitée</span>
-            <h1 class="font-title text-5xl md:text-7xl font-bold leading-none mb-8 uppercase">
-                DEMANDE <br> <span class="text-[var(--crimson)]">D'ESSAI.</span>
-            </h1>
-            <p class="text-xl text-gray-400 font-light max-w-2xl leading-relaxed mb-10">
-                Une ingénierie qui défie les lois de la physique. Ne vous contentez pas de conduire, fusionnez avec la route.
-            </p>
+            <h1 class="font-title text-5xl md:text-7xl font-bold leading-none mb-8 uppercase">DEMANDE <br> <span class="text-[var(--crimson)]">D'ESSAI.</span></h1>
+            <p class="text-xl text-gray-400 font-light max-w-2xl leading-relaxed mb-10">Une ingénierie qui défie les lois de la physique.</p>
             <a href="#booking" class="inline-flex items-center gap-8 group">
                 <div class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[var(--crimson)] transition-all duration-500">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="group-hover:text-[var(--crimson)] transform group-hover:translate-y-1 transition-all">
-                        <path d="M7 13l5 5 5-5M7 6l5 5 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="group-hover:text-[var(--crimson)] transform group-hover:translate-y-1 transition-all"><path d="M7 13l5 5 5-5M7 6l5 5 5-5" stroke-width="2" stroke-linecap="round"/></svg>
                 </div>
-                <span class="font-title text-[10px] tracking-[0.2em] group-hover:text-[var(--crimson)] transition-colors uppercase">Défiler pour réserver</span>
+                <span class="font-title text-[10px] tracking-[0.2em] uppercase">Défiler pour réserver</span>
             </a>
         </div>
         <div class="absolute inset-y-0 right-0 w-full md:w-1/2 z-0">
-            <img src="photo_essai.jpeg" alt="Essai" class="w-full h-full object-cover grayscale opacity-30 [mask-image:linear-gradient(to_left,black_40%,transparent_100%)]">
+            <img src="photo_essai.jpeg" alt="Essai" class="w-full h-full object-cover grayscale opacity-30">
         </div>
     </section>
 
     <section id="booking" class="min-h-screen pt-10 pb-24 px-6 lg:px-24 flex flex-col justify-center relative border-t border-white/5">
-        <div class="absolute left-0 top-0 h-full w-24 border-r border-white/5 flex items-center justify-center">
-            <span class="vertical-text tracking-[1em] text-xs text-gray-600 font-bold uppercase" style="writing-mode: vertical-rl; transform: rotate(180deg);">Reservation Form</span>
-        </div>
         <div class="max-w-5xl mx-auto w-full grid lg:grid-cols-2 gap-20 items-start">
             <div class="space-y-12">
                 <h2 class="font-title text-4xl uppercase">Configurateur <br> d'essai</h2>
-                <div class="grid gap-8">
-                    <div class="flex items-start gap-4">
-                        <span class="text-[var(--crimson)] font-title text-2xl">01</span>
-                        <div><h3 class="font-bold text-lg uppercase">Identité</h3><p class="text-gray-500 text-sm">Vos informations.</p></div>
-                    </div>
+                <?php if($message): ?>
+                    <div class="p-4 bg-white/5 border-l-2 border-[var(--crimson)] text-[10px] tracking-widest uppercase"><?php echo $message; ?></div>
+                <?php endif; ?>
+                <div class="flex items-start gap-4">
+                    <span class="text-[var(--crimson)] font-title text-2xl">01</span>
+                    <div><h3 class="font-bold text-lg uppercase">Identité</h3><p class="text-gray-500 text-sm">Vos informations.</p></div>
                 </div>
             </div>
 
-            <form id="mainForm" action="traitement_demande.php" method="POST" class="space-y-8 bg-white/5 p-10 rounded-[40px] border border-white/10 backdrop-blur-sm">
+            <form action="demande.php#booking" method="POST" class="space-y-8 bg-white/5 p-10 rounded-[40px] border border-white/10 backdrop-blur-sm">
                 <div class="grid grid-cols-2 gap-6">
-                    <input type="text" name="nom" placeholder="NOM" required 
-                           value="<?php echo $_SESSION['nom'] ?? ''; ?>" 
-                           class="bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none uppercase">
-                    
-                    <input type="text" name="prenom" placeholder="PRÉNOM" required 
-                           value="<?php echo $_SESSION['prenom'] ?? ''; ?>" 
-                           class="bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none uppercase">
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Nom</label>
+                        <input type="text" name="nom" value="<?php echo strtoupper($_SESSION['nom'] ?? ''); ?>" readonly class="bg-transparent border-b border-white/20 w-full p-2 text-xs outline-none text-gray-400">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Prénom</label>
+                        <input type="text" name="prenom" value="<?php echo ucfirst(strtolower($_SESSION['prenom'] ?? '')); ?>" readonly class="bg-transparent border-b border-white/20 w-full p-2 text-xs outline-none no-caps text-gray-400">
+                    </div>
                 </div>
 
-                <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required 
-                       value="<?php echo $_SESSION['email'] ?? ''; ?>" 
-                       class="w-full bg-transparent border-b border-white/20 p-4 text-xs focus:border-[var(--crimson)] outline-none">
+                <div class="space-y-1">
+                    <label class="text-[10px] text-gray-500 font-bold uppercase">Email</label>
+                    <input type="email" name="email" value="<?php echo $_SESSION['email'] ?? ''; ?>" readonly class="w-full bg-transparent border-b border-white/20 p-2 text-xs text-gray-400 outline-none">
+                </div>
 
                 <div class="grid grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Modèle</label>
-                        <select name="modele" class="bg-transparent border-b border-white/20 w-full p-4 text-xs outline-none focus:border-[var(--crimson)] cursor-pointer">
-                            <option value="GT-CRIMSON" class="bg-black">GT-CRIMSON</option>
-                            <option value="SF90-STRADALE" class="bg-black">SF90 STRADALE</option>
-                            <option value="LAFERRARI" class="bg-black">LAFERRARI</option>
+                        <select name="modele" required class="bg-transparent border-b border-white/20 w-full p-4 text-xs outline-none">
+                            <option value="GT-CRIMSON">GT-CRIMSON</option>
+                            <option value="SF90-STRADALE">SF90 STRADALE</option>
+                            <option value="LAFERRARI">LAFERRARI</option>
                         </select>
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">Mobile</label>
-                        <input type="tel" name="mobile" placeholder="N° MOBILE" required 
-                               value="<?php echo $_SESSION['telephone'] ?? ''; ?>" 
-                               class="bg-transparent border-b border-white/20 w-full p-4 text-xs focus:border-[var(--crimson)] outline-none">
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Téléphone</label>
+                        <input type="tel" name="mobile" value="<?php echo $_SESSION['telephone'] ?? ''; ?>" required class="bg-transparent border-b border-white/20 w-full p-4 text-xs outline-none">
                     </div>
                 </div>
 
@@ -153,24 +150,35 @@ $isLoggedIn = isset($_SESSION['id_client']);
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Créneau (08h-17h)</label>
-                        <input type="time" name="heure_essai" min="08:00" max="17:00" required class="bg-transparent border border-white/10 rounded-lg w-full p-3 text-xs">
+                        <input type="time" name="heure_essai" id="h" min="08:00" max="17:00" required class="bg-transparent border border-white/10 rounded-lg w-full p-3 text-xs">
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-[var(--crimson)] py-6 font-title text-xs tracking-[0.4em] uppercase hover:bg-white hover:text-black transition-all">Valider l'accès</button>
+                <button type="submit" name="valider_essai" class="w-full bg-[var(--crimson)] py-6 font-title text-xs tracking-[0.4em] uppercase hover:bg-white hover:text-black transition-all">Valider l'accès</button>
             </form>
         </div>
     </section>
 
     <script>
-        function closeModal() {
-            window.location.href = 'accueil.php';
-        }
-
+        function closeModal() { window.location.href = 'accueil.php'; }
+        
+        // Gestion de la date min (Demain)
         const dateIn = document.getElementById('d');
         if(dateIn) {
             const today = new Date();
             today.setDate(today.getDate() + 1);
             dateIn.min = today.toISOString().split('T')[0];
+        }
+
+        // --- NOUVEAU : Blocage physique de l'heure ---
+        const timeIn = document.getElementById('h');
+        if(timeIn) {
+            timeIn.addEventListener('input', function() {
+                const hour = this.value;
+                if(hour < "08:00" || hour > "17:00") {
+                    alert("Les essais sont limités de 08:00 à 17:00.");
+                    this.value = ""; // Réinitialise le champ si invalide
+                }
+            });
         }
     </script>
 </body>
