@@ -10,19 +10,25 @@ $message = "";
 // 2. Traitement de la réservation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['valider_essai'])) {
     $id_client = $_SESSION['id_client'] ?? null;
+    
     if ($id_client) {
-        $modele = htmlspecialchars($_POST['modele']);
-        $date_essai = $_POST['date_essai'];
-        $heure_essai = $_POST['heure_essai'];
+        $modele = htmlspecialchars($_POST['modele']); // Nom de la voiture
+        $date_essai = $_POST['date_essai']; // date_souhaitee
+        $heure_essai = $_POST['heure_essai']; // Optionnel (non présent dans ta table demande_essai)
 
         // Sécurité Serveur : Vérification des horaires (08h-17h)
         if ($heure_essai < "08:00" || $heure_essai > "17:00") {
             $message = "ERREUR : CRÉNEAU DISPONIBLE UNIQUEMENT ENTRE 08H ET 17H.";
         } else {
             try {
-                $sql = "INSERT INTO essai (id_client, modele, date_essai, creneau) VALUES (?, ?, ?, ?)";
+                // ADAPTATION À TA BASE DE DONNÉES :
+                // Table: demande_essai | Colonnes: id_client, date_souhaitee, statut, id_voiture
+                $sql = "INSERT INTO demande_essai (id_client, date_souhaitee, statut, id_voiture) VALUES (?, ?, 'EN ATTENTE', ?)";
                 $stmt = $db->prepare($sql);
-                $stmt->execute([$id_client, $modele, $date_essai, $heure_essai]);
+                
+                // On enregistre le nom du modèle dans 'id_voiture' (Assure-toi que id_voiture est en VARCHAR)
+                $stmt->execute([$id_client, $date_essai, $modele]);
+                
                 $message = "VOTRE DEMANDE A ÉTÉ ENREGISTRÉE AVEC SUCCÈS.";
                 $modele_selectionne = ""; // Reset après succès
             } catch (Exception $e) {
@@ -172,7 +178,7 @@ $isLoggedIn = isset($_SESSION['id_client']);
     <script>
         function closeModal() { window.location.href = 'accueil.php'; }
         
-        // Bloquer dates passées
+        // Bloquer dates passées (min = demain)
         const dateIn = document.getElementById('d');
         if(dateIn) {
             const today = new Date();
@@ -180,13 +186,13 @@ $isLoggedIn = isset($_SESSION['id_client']);
             dateIn.min = today.toISOString().split('T')[0];
         }
 
-        // Bloquer heures hors 08h-17h
+        // Bloquer heures hors 08h-17h en temps réel
         const timeIn = document.getElementById('h');
         if(timeIn) {
             timeIn.addEventListener('input', function() {
                 const hour = this.value;
                 if(hour && (hour < "08:00" || hour > "17:00")) {
-                    alert("Les essais sont limités de 08:00 à 17:00.");
+                    alert("Les essais sont limités de 08:00 à 17:00 pour des raisons de sécurité.");
                     this.value = ""; 
                 }
             });

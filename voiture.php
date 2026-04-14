@@ -14,7 +14,6 @@ try {
 }
 
 // --- RÉCUPÉRATION DES DONNÉES ---
-// On récupère tout de 'voiture' + le nom de la marque depuis la table 'marque'
 $query = "SELECT v.*, m.nom_marque 
           FROM voiture v 
           LEFT JOIN marque m ON v.id_marque = m.id_marque 
@@ -22,7 +21,6 @@ $query = "SELECT v.*, m.nom_marque
 $stmt = $pdo->query($query);
 $toutes_voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// On organise les voitures par marque dans un tableau associatif
 $voituresParMarque = [];
 foreach ($toutes_voitures as $v) {
     $nomM = !empty($v['nom_marque']) ? $v['nom_marque'] : 'Autres';
@@ -81,28 +79,16 @@ foreach ($toutes_voitures as $v) {
 
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-        
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
             <li><a href="accueil.php" class="nav-link">Accueil</a></li>
             <li><a href="voiture.php" class="nav-link active">Voitures</a></li>
             <li><a href="demande.php" class="nav-link">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
             <li><a href="contact.php" class="nav-link">Contact</a></li> |
-
             <?php if (isset($_SESSION['id_client'])): ?>
-                <li>
-                    <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2">
-                        <i class="fa-solid fa-door-open text-[18px]"></i> Déconnexion
-                    </a>
-                </li>
+                <li><a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2"><i class="fa-solid fa-door-open text-[18px]"></i> Déconnexion</a></li>
             <?php else: ?>
-                <li>
-                    <strong>
-                        <a href="connexion.php" class="nav-link flex items-center gap-2">
-                            <i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion
-                        </a>
-                    </strong>
-                </li>
+                <li><strong><a href="connexion.php" class="nav-link flex items-center gap-2"><i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion</a></strong></li>
             <?php endif; ?>
         </ul>
     </nav>
@@ -112,9 +98,7 @@ foreach ($toutes_voitures as $v) {
             <a href="accueil.php" id="back-to-home" style="display: <?php echo (isset($_GET['from']) && $_GET['from'] == 'accueil') ? 'flex' : 'none'; ?>;" class="inline-flex items-center text-[10px] font-title uppercase tracking-[0.2em] text-gray-400 hover:text-[#C1121F] mb-8 transition-all group">
                 <span class="mr-3 transition-transform group-hover:-translate-x-1">❮</span> Retour vers l'accueil
             </a>
-            <h1 class="font-title text-3xl md:text-5xl font-bold leading-none uppercase tracking-tight">
-                NOS <span class="text-[#C1121F]">MODÈLES</span>
-            </h1>
+            <h1 class="font-title text-3xl md:text-5xl font-bold leading-none uppercase tracking-tight">NOS <span class="text-[#C1121F]">MODÈLES</span></h1>
             <div class="w-20 h-1 bg-[#C1121F] mt-4"></div>
         </div>
 
@@ -125,42 +109,38 @@ foreach ($toutes_voitures as $v) {
                 <?php $rowId = "row-" . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $nomMarque)); ?>
                 <button class="nav-btn btn-prev" onclick="scrollByThree('<?php echo $rowId; ?>', -1)">❮</button>
                 <div class="story-row" id="<?php echo $rowId; ?>">
-<?php foreach ($voitures as $car): ?>
-    <div class="car-card">
-        <div class="hover-specs">
-            <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase">Fiche Technique</p>
-            <div class="spec-item"><span>Année</span> <span><?php echo $car['annee']; ?></span></div>
-            <div class="spec-item"><span>Prix</span> <span><?php echo number_format($car['prix'], 0, '.', ' '); ?> Rs</span></div>
-            <div class="spec-item"><span>Etat</span> <span><?php echo htmlspecialchars($car['etat']); ?></span></div>
-            <div class="spec-item"><span>Kilométrage</span> <span><?php echo number_format($car['kilometrage'], 0, '.', ' '); ?> km</span></div>
-            <div class="spec-item"><span>Type</span> <span><?php echo htmlspecialchars($car['type']); ?></span></div>
-        </div>
-        
-        <img src="image_url/<?php echo htmlspecialchars($car['image_url']); ?>" class="w-full h-64 object-cover rounded-t-[24px]" alt="<?php echo htmlspecialchars($car['modele']); ?>">
-        
-        <div class="p-8 bg-white/5 rounded-b-[24px]">
-            <div class="flex justify-between items-center mb-2">
-                <?php if ($car['disponibilite']): ?>
-            <span class="text-[#C1121F] font-bold text-[10px] uppercase">Disponible</span>
-                <?php else: ?>
-            <span class="text-gray-600 font-bold text-[10px] uppercase line-through">Indisponible</span>
-                <?php endif; ?>
-
-            <span class="text-gray-400 text-[10px] font-bold uppercase">
-                <?php echo htmlspecialchars($car['type']); ?>
-            </span>
-        </div>
-            
-            <h3 class="font-title text-[13px] mb-4 text-white uppercase h-10 leading-tight">
-                <?php echo htmlspecialchars($car['modele']); ?>
-            </h3>
-            
-            <div class="flex justify-between items-center mt-4">
-                <p class="font-bold text-xl text-white"><?php echo number_format($car['prix'], 0, '.', ' '); ?> Rs</p>
-            </div>
-        </div>
-    </div>
-<?php endforeach; ?>
+                    <?php foreach ($voitures as $car): ?>
+                    <a href="demande.php?modele=<?php echo urlencode($car['modele']); ?>#booking" class="car-card block no-underline">
+                        <div class="hover-specs">
+                            <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase">Fiche Technique</p>
+                            <div class="spec-item"><span>Année</span> <span><?php echo $car['annee']; ?></span></div>
+                            <div class="spec-item"><span>Prix</span> <span><?php echo number_format($car['prix'], 0, '.', ' '); ?> Rs</span></div>
+                            <div class="spec-item"><span>Etat</span> <span><?php echo htmlspecialchars($car['etat']); ?></span></div>
+                            <div class="spec-item"><span>Kilométrage</span> <span><?php echo number_format($car['kilometrage'], 0, '.', ' '); ?> km</span></div>
+                            <div class="spec-item"><span>Type</span> <span><?php echo htmlspecialchars($car['type']); ?></span></div>
+                            <p class="text-[9px] mt-4 text-center opacity-70 italic">Cliquez pour réserver un essai</p>
+                        </div>
+                        
+                        <img src="image_url/<?php echo htmlspecialchars($car['image_url']); ?>" class="w-full h-64 object-cover rounded-t-[24px]" alt="<?php echo htmlspecialchars($car['modele']); ?>">
+                        
+                        <div class="p-8 bg-white/5 rounded-b-[24px]">
+                            <div class="flex justify-between items-center mb-2">
+                                <?php if ($car['disponibilite']): ?>
+                                    <span class="text-[#C1121F] font-bold text-[10px] uppercase">Disponible</span>
+                                <?php else: ?>
+                                    <span class="text-gray-600 font-bold text-[10px] uppercase line-through">Indisponible</span>
+                                <?php endif; ?>
+                                <span class="text-gray-400 text-[10px] font-bold uppercase"><?php echo htmlspecialchars($car['type']); ?></span>
+                            </div>
+                            <h3 class="font-title text-[13px] mb-4 text-white uppercase h-10 leading-tight">
+                                <?php echo htmlspecialchars($car['modele']); ?>
+                            </h3>
+                            <div class="flex justify-between items-center mt-4">
+                                <p class="font-bold text-xl text-white"><?php echo number_format($car['prix'], 0, '.', ' '); ?> Rs</p>
+                            </div>
+                        </div>
+                    </a>
+                    <?php endforeach; ?>
                 </div>
                 <button class="nav-btn btn-next" onclick="scrollByThree('<?php echo $rowId; ?>', 1)">❯</button>
             </div>
