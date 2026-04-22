@@ -27,7 +27,7 @@ INSERT INTO voiture (modele, prix, annee, etat, type, kilometrage, disponibilite
 ('Mercedes-Benz 450 SLC (C107)', 450000, 1978, 'Bon', 'thermique', 142000, true, 'Coupé de luxe vintage.', '280SE3.5Coupé(W111).jpeg', NULL, 3),
 ('Mercedes-Benz 300 SL Gullwing', 1000000, 1955, 'Exceptionnel', 'thermique', 32000, true, 'Légende mondiale avec ses portières papillon.', '300SLGullwing(W198).jpeg', NULL, 3),
 ('Mercedes-Benz S 350 (W221)', 320000, 2007, 'Bon', 'thermique', 198000, true, 'Berline de luxe moderne offrant un grand confort.', 'S350(W221).jpg', NULL, 3),
-('Mercedes-Benz 190 SL Roadster', 780000, 1960, 'Bon', 'thermique', 76000, true, 'Roadster classique décapotable.', '190SL(W121).jpg', NULL, 3);
+('Mercedes-Benz 190 SL Roadster', 780000, 1960, 'Bon', 'thermique', 76000, true, 'Roadster classique décapotable.', '190SL(W121).jpg', NULL, 3),
 
 -- Audi --
 ('Audi A3 Sportback', 350000, 2011, 'Très Bon', 'thermique', 120000, 1, 'Compacte premium polyvalente et élégante.', 'A3(8P).jpg', NULL, 4),
