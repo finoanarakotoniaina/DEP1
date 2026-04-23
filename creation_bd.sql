@@ -144,6 +144,17 @@ ALTER TABLE `home_content`
   ADD PRIMARY KEY (`element_id`);
 COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+CREATE TABLE essai_content (
+    id INT PRIMARY KEY,
+    contenu TEXT
+);
+
+INSERT INTO essai_content (id, contenu) VALUES 
+(1, 'EXPÉRIENCE ULTIME'),
+(2, 'DEMANDE'),
+(3, "D'ESSAI."),
+(4, 'Prenez les commandes de l\'exceptionnel. Choisissez votre modèle, définissez votre créneau et laissez-vous transporter par une ingénierie hors du commun.'),
+(5, 'RÉSERVER MON CRÉNEAU'),
+(6, 'photo_essai.jpeg');

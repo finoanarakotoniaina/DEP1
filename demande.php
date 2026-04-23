@@ -2,13 +2,29 @@
 include 'config.php'; 
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 
-// 1. Récupération des données (ID pour la BDD et Nom pour l'affichage)
+// --- 1. RÉCUPÉRATION DES ÉLÉMENTS DYNAMIQUES (ID 1 à 5) ---
+try {
+    $query_ui = $db->query("SELECT id, contenu FROM essai_content");
+    $ui = $query_ui->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch (Exception $e) {
+    $ui = []; 
+}
+
+// Assignation des textes et de l'image selon la BDD
+$txt_accroche = $ui[1] ?? "EXPÉRIENCE ULTIME";
+$txt_ligne1   = $ui[2] ?? "DEMANDE";
+$txt_ligne2   = $ui[3] ?? "D'ESSAI.";   // Toujours en crimson
+$txt_desc     = $ui[4] ?? "Prenez les commandes de l'exceptionnel. Choisissez votre modèle, définissez votre créneau et laissez-vous transporter par une ingénierie hors du commun.";
+$txt_btn      = $ui[5] ?? "RÉSERVER MON CRÉNEAU";
+$img_hero     = $ui[6] ?? "photo_essai.jpeg";
+
+// --- 2. RÉCUPÉRATION DES DONNÉES VÉHICULE ---
 $id_voiture_hidden = $_GET['id_v'] ?? $_POST['id_voiture_cache'] ?? '';
 $modele_selectionne = $_GET['modele'] ?? $_POST['modele_affiche'] ?? '';
 
 $message = "";
 
-// 2. Traitement de la réservation
+// --- 3. TRAITEMENT DE LA RÉSERVATION ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['valider_essai'])) {
     $id_client = $_SESSION['id_client'] ?? null;
     
@@ -56,6 +72,11 @@ $isLoggedIn = isset($_SESSION['id_client']);
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
         body, html { background-color: #0a0a0a; scroll-behavior: smooth; }
+
+        /* Couleur exacte du fond bleu de la section hero (split-bg côté gauche) */
+        .hero-fade-left {
+            background: linear-gradient(to right, #0d1b2a 0%, #0d1b2a00 100%);
+        }
     </style>
 </head>
 <body class="split-bg text-white">
@@ -76,14 +97,12 @@ $isLoggedIn = isset($_SESSION['id_client']);
 
     <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-        
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
             <li><a href="accueil.php" class="nav-link">Accueil</a></li>
             <li><a href="voiture.php" class="nav-link">Voitures</a></li>
             <li><a href="demande.php" class="nav-link active">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
             <li><a href="contact.php" class="nav-link">Contact</a></li> |
-
             <?php if (isset($_SESSION['id_client'])): ?>
                 <li>
                     <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2">
@@ -103,12 +122,18 @@ $isLoggedIn = isset($_SESSION['id_client']);
     </nav>
 
     <section class="relative h-screen flex items-center px-6 lg:px-24 overflow-hidden">
-        <div class="z-10 max-w-4xl">
-            <span class="text-gray-500 font-bold tracking-[0.5em] uppercase mb-4 block text-[10px]">Expérience Ultime</span>
-            <h1 class="font-title text-5xl md:text-7xl font-bold leading-none mb-8 uppercase">DEMANDE <br> <span class="text-[var(--crimson)]">D'ESSAI.</span></h1>
+        <div class="z-10 max-w-4xl relative">
+            <span class="text-gray-500 font-bold tracking-[0.5em] uppercase mb-4 block text-[10px]">
+                <?= htmlspecialchars($txt_accroche) ?>
+            </span>
+
+            <h1 class="font-title text-5xl md:text-7xl font-bold leading-none mb-8 uppercase">
+                <?= htmlspecialchars($txt_ligne1) ?> <br>
+                <span style="color: var(--crimson);"><?= htmlspecialchars($txt_ligne2) ?></span>
+            </h1>
             
             <p class="text-gray-400 max-w-md mb-12 text-sm leading-relaxed border-l border-[var(--crimson)] pl-6">
-                Prenez les commandes de l'exceptionnel. Choisissez votre modèle, définissez votre créneau et laissez-vous transporter par une ingénierie hors du commun.
+                <?= htmlspecialchars($txt_desc) ?>
             </p>
 
             <a href="#booking" class="inline-flex items-center gap-8 group">
@@ -117,11 +142,16 @@ $isLoggedIn = isset($_SESSION['id_client']);
                         <path d="M7 13l5 5 5-5M7 6l5 5 5-5" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                 </div>
-                <span class="font-title text-[10px] tracking-[0.2em] uppercase">Réserver mon créneau</span>
+                <span class="font-title text-[10px] tracking-[0.2em] uppercase">
+                    <?= htmlspecialchars($txt_btn) ?>
+                </span>
             </a>
         </div>
-        <div class="absolute inset-y-0 right-0 w-full md:w-1/2 z-0">
-            <img src="photo_essai.jpeg" alt="Essai" class="w-full h-full object-cover grayscale opacity-30">
+        
+        <!-- IMAGE HERO : pleine largeur, fondu avec la couleur exacte --cosmos (#003049) -->
+        <div class="absolute inset-0 z-0">
+            <img src="<?= htmlspecialchars($img_hero) ?>" alt="Essai" class="w-full h-full object-cover grayscale opacity-50 block" style="object-position: right center;">
+            <div class="absolute inset-0" style="background: linear-gradient(to right, #003049 0%, #003049 40%, rgba(0,48,73,0.5) 58%, transparent 72%);"></div>
         </div>
     </section>
 
