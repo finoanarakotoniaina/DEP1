@@ -20,7 +20,6 @@ $clientId = (int) $_GET['id'];
 $db = $pdo ?? $db ?? $conn;
 
 try {
-    // Infos du client
     $stmtClient = $db->prepare("SELECT * FROM client WHERE id_client = ?");
     $stmtClient->execute([$clientId]);
     $client = $stmtClient->fetch(PDO::FETCH_ASSOC);
@@ -30,7 +29,6 @@ try {
         exit();
     }
 
-    // Demandes du client (si table demande_essai existe)
     $demandes = [];
     try {
         $stmtDemandes = $db->prepare("
@@ -44,7 +42,6 @@ try {
         $demandes = $stmtDemandes->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {}
 
-    // Messages du client (si table contact liée)
     $messages = [];
     try {
         $stmtMessages = $db->prepare("SELECT * FROM contact WHERE id_contact = ? ORDER BY id_contact DESC");
@@ -52,7 +49,6 @@ try {
         $messages = $stmtMessages->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {}
 
-    // Admin connecté
     $stmtAdmin = $db->prepare("SELECT nom, prenom FROM admin WHERE id_admin = ?");
     $stmtAdmin->execute([$_SESSION['admin_id']]);
     $resAdmin = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
@@ -77,18 +73,7 @@ $fullName = htmlspecialchars($client['prenom'] . ' ' . $client['nom']);
     <link rel="stylesheet" href="style.css">
 
     <style>
-        :root {
-            --crimson: #C1121F;
-            --cosmos: #0a0c10;
-        }
-
-        body {
-            background-color: var(--cosmos);
-            color: #fff;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .font-title { font-family: 'Orbitron', sans-serif; }
+        body { background-color: var(--cosmos); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         .sidebar {
             background: rgba(0, 0, 0, 0.2);
@@ -124,21 +109,19 @@ $fullName = htmlspecialchars($client['prenom'] . ' ' . $client['nom']);
 
         .glass-card {
             background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.05);
             backdrop-filter: blur(12px);
         }
 
-        /* Avatar glow */
         .pilot-avatar {
             background: linear-gradient(135deg, rgba(193,18,31,0.3), rgba(193,18,31,0.05));
             border: 2px solid rgba(193,18,31,0.4);
             box-shadow: 0 0 40px rgba(193,18,31,0.15), inset 0 0 20px rgba(193,18,31,0.05);
         }
 
-        /* Info field */
         .info-field {
             background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.05);
             border-radius: 16px;
             padding: 1rem 1.25rem;
             transition: 0.3s;
@@ -148,40 +131,29 @@ $fullName = htmlspecialchars($client['prenom'] . ' ' . $client['nom']);
             background: rgba(255,255,255,0.04);
         }
 
-        /* Badge statut */
         .badge-active {
             background: rgba(34,197,94,0.1);
             border: 1px solid rgba(34,197,94,0.2);
             color: #22c55e;
         }
 
-        /* Table demandes */
         .demande-row { border-bottom: 1px solid rgba(255,255,255,0.04); }
         .demande-row:hover { background: rgba(255,255,255,0.02); }
 
-        /* Scanline déco */
         .scanline::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(255,255,255,0.005) 2px,
-                rgba(255,255,255,0.005) 4px
-            );
+            content: ''; position: absolute; inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.005) 2px, rgba(255,255,255,0.005) 4px);
             pointer-events: none;
         }
 
-        /* Animate in */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        .fade-up { animation: fadeUp 0.5s ease forwards; }
-        .delay-1 { animation-delay: 0.1s; opacity: 0; }
-        .delay-2 { animation-delay: 0.2s; opacity: 0; }
-        .delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .fade-up  { animation: fadeUp 0.5s ease forwards; }
+        .delay-1  { animation-delay: 0.1s; opacity: 0; }
+        .delay-2  { animation-delay: 0.2s; opacity: 0; }
+        .delay-3  { animation-delay: 0.3s; opacity: 0; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -232,30 +204,31 @@ $fullName = htmlspecialchars($client['prenom'] . ' ' . $client['nom']);
                     <i class="fa-solid fa-chevron-right text-[6px] mr-1 text-[var(--crimson)]"></i>
                     Tableau de bord / Fiche Pilote
                 </p>
-                <h2 class="text-3xl font-title font-black italic uppercase tracking-tighter">
+                <h2 class="text-4xl font-title font-black italic uppercase tracking-tighter">
                     FICHE <span style="color: var(--crimson)">PILOTE</span>
                 </h2>
             </div>
-            <div class="ml-auto">
+            <div class="ml-auto flex items-center gap-4">
                 <span class="badge-active px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-[2px]">
                     <i class="fa-solid fa-circle text-[6px] mr-2 animate-pulse"></i> Verified Pilot
                 </span>
+                <a href="admin_demande.php?client=<?= $clientId ?>"
+                   class="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gray-300 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-calendar-check mr-2"></i>Demandes
+                </a>
             </div>
         </header>
 
         <!-- PROFIL CARD -->
         <div class="glass-card rounded-3xl p-8 mb-6 scanline relative overflow-hidden fade-up delay-1">
-            <!-- Déco BG -->
             <div class="absolute right-0 top-0 w-96 h-96 rounded-full opacity-5"
                  style="background: radial-gradient(circle, var(--crimson), transparent); transform: translate(30%, -30%)"></div>
 
             <div class="flex flex-col md:flex-row items-start md:items-center gap-8 relative z-10">
-                <!-- Avatar -->
                 <div class="pilot-avatar w-28 h-28 rounded-3xl flex items-center justify-center flex-shrink-0">
                     <span class="font-title text-4xl font-black text-white"><?= $initials ?></span>
                 </div>
 
-                <!-- Nom + ID -->
                 <div class="flex-1">
                     <p class="text-[9px] text-[var(--crimson)] font-bold uppercase tracking-[3px] mb-2">
                         ID PILOTE #<?= str_pad($client['id_client'], 4, '0', STR_PAD_LEFT) ?>
@@ -272,26 +245,12 @@ $fullName = htmlspecialchars($client['prenom'] . ' ' . $client['nom']);
                         </span>
                     </div>
                 </div>
-
-                <!-- Actions -->
-                <div class="flex gap-3">
-                    <a href="admin_demande.php?client=<?= $clientId ?>"
-                       class="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gray-300 hover:bg-white/10 transition-all">
-                        <i class="fa-solid fa-calendar-check mr-2"></i>Demandes
-                    </a>
-                    <button onclick="window.print()"
-                            class="px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-white transition-all"
-                            style="background: var(--crimson);">
-                        <i class="fa-solid fa-print mr-2"></i>Imprimer
-                    </button>
-                </div>
             </div>
         </div>
 
         <!-- INFOS GRID -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 fade-up delay-2">
 
-            <!-- Email -->
             <div class="info-field">
                 <p class="text-[8px] text-gray-500 font-bold uppercase tracking-[2px] mb-2">
                     <i class="fa-solid fa-at mr-2 text-[var(--crimson)]"></i>Adresse Email
@@ -305,7 +264,6 @@ $fullName = htmlspecialchars($client['prenom'] . ' ' . $client['nom']);
                 </a>
             </div>
 
-            <!-- Téléphone -->
             <div class="info-field">
                 <p class="text-[8px] text-gray-500 font-bold uppercase tracking-[2px] mb-2">
                     <i class="fa-solid fa-phone mr-2 text-[var(--crimson)]"></i>Téléphone
@@ -321,7 +279,6 @@ $fullName = htmlspecialchars($client['prenom'] . ' ' . $client['nom']);
                 <?php endif; ?>
             </div>
 
-            <!-- Statut compte -->
             <div class="info-field">
                 <p class="text-[8px] text-gray-500 font-bold uppercase tracking-[2px] mb-2">
                     <i class="fa-solid fa-shield-halved mr-2 text-[var(--crimson)]"></i>Statut Compte
@@ -338,9 +295,7 @@ $fullName = htmlspecialchars($client['prenom'] . ' ' . $client['nom']);
         <div class="glass-card rounded-3xl overflow-hidden mb-6 fade-up delay-3">
             <div class="p-6 border-b border-white/5 flex justify-between items-center">
                 <div>
-                    <h3 class="text-[11px] font-title uppercase tracking-[3px] text-gray-400 italic">
-                        Historique des Demandes
-                    </h3>
+                    <h3 class="text-[11px] font-title uppercase tracking-[3px] text-gray-400 italic">Historique des Demandes</h3>
                     <p class="text-[9px] text-gray-600 mt-0.5"><?= count($demandes) ?> demande(s) enregistrée(s)</p>
                 </div>
                 <div class="text-[9px] font-bold uppercase text-[var(--crimson)] tracking-tighter">
