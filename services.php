@@ -2,14 +2,6 @@
 include 'config.php';
 
 // Fonction de récupération depuis services_content
-function getContent($id) {
-    global $pdo, $db, $conn;
-    $database = $pdo ?? $db ?? $conn;
-    $stmt = $database->prepare("SELECT content FROM services_content WHERE element_id = ?");
-    $stmt->execute([$id]);
-    $row = $stmt->fetch();
-    return $row ? $row['content'] : '';
-}
 
 // Données des 4 services depuis la BDD
 $services = [];
