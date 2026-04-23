@@ -86,7 +86,7 @@ try {
         
         <nav class="flex-1 space-y-1">
             <p class="text-[9px] text-gray-700 font-bold uppercase tracking-[2px] mb-4 px-2">Navigation</p>
-            <a href="DashBoard.php" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="tableaudebord.php" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Tableau de bord</a>
             <a href="admin_voitures.php" class="nav-link"><i class="fa-solid fa-car-side"></i> Inventaire</a>
             <a href="admin_demande.php" class="nav-link"><i class="fa-solid fa-calendar-check"></i> Demandes</a>
             <a href="admin_contact.php" class="nav-link active"><i class="fa-solid fa-envelope"></i> Messages</a>
