@@ -30,17 +30,32 @@ try {
 
 /**
  * 4. Fonction magique pour récupérer tes contenus
- * Elle cherche dans la table 'home_content' l'identifiant (ex: hero_title)
+ * Elle cherche d'abord dans 'home_content', puis dans 'services_content'
  */
 function getContent($element_id) {
     global $db;
     try {
+        // --- RECHERCHE DANS LA TABLE ACCUEIL ---
         $stmt = $db->prepare("SELECT content FROM home_content WHERE element_id = ?");
         $stmt->execute([$element_id]);
         $row = $stmt->fetch();
         
-        // Si le texte existe en base, on le donne, sinon on affiche une alerte
-        return $row ? $row['content'] : "Texte [$element_id] manquant en BDD";
+        if ($row) {
+            return $row['content'];
+        }
+
+        // --- RECHERCHE DANS LA TABLE SERVICES (si non trouvé dans accueil) ---
+        $stmt = $db->prepare("SELECT content FROM services_content WHERE element_id = ?");
+        $stmt->execute([$element_id]);
+        $row = $stmt->fetch();
+
+        if ($row) {
+            return $row['content'];
+        }
+
+        // Si le texte n'existe dans aucune des deux tables
+        return "Texte [$element_id] manquant en BDD";
+
     } catch (Exception $e) {
         return "Erreur SQL : " . $e->getMessage();
     }

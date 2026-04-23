@@ -6,21 +6,15 @@ session_start();
 include 'config.php'; 
 
 // --- NOUVEAU : RÉCUPÉRATION DES RÉGLAGES DYNAMIQUES ---
-try {
-    $stmt_settings = $db->query("SELECT cle, valeur FROM contact_settings");
-    $s = $stmt_settings->fetchAll(PDO::FETCH_KEY_PAIR);
-} catch (Exception $e) {
-    // Valeurs de secours si la table n'existe pas encore
-    $s = [
-        'titre_principal' => 'RESTONS CONNECTÉS.',
-        'image_supercar' => 'mercedes.jfif',
-        'email_contact' => 'supercar@gmail.com',
-        'tel_contact' => '+230 454 8950',
-        'siege_contact' => 'Ebène CyberCity',
-        'responsable_contact' => 'M. Carter',
-        'map_iframe' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3743.766395692348!2d57.48366931535213!3d-20.247833086425713!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x217c5af34726e6f1%3A0xc47e3077755b76!2sEbene%20Cybercity!5e0!3m2!1sen!2smu!4v1647424000000!5m2!1sen!2smu'
-    ];
+// --- RÉCUPÉRATION DES RÉGLAGES DYNAMIQUES ---
+$stmt_settings = $db->query("SELECT cle, valeur FROM contact_settings");
+$s = $stmt_settings->fetchAll(PDO::FETCH_KEY_PAIR);
+
+// Vérification de sécurité (au cas où la table est vide)
+if (!$s) {
+    die("Erreur : Les réglages de contact ne sont pas configurés dans la base de données.");
 }
+
 
 $message_envoi = "";
 $show_modal = false;

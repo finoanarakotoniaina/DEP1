@@ -1,7 +1,7 @@
 <?php
 /**
  * SUPERCAR - Gestion des Contacts
- * Intégration de la Navigation Master & Session Admin
+ * Style unifié Cockpit Precision Edition v14.3
  */
 session_start();
 require_once 'config.php';
@@ -45,136 +45,194 @@ try {
     die("Erreur base de données : " . $e->getMessage());
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperCar | Messages Clients</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Syncopate:wght@700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        :root { --bg-deep: #050505; --accent-red: #ff1e26; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-deep); color: #fff; margin:0; }
-        .font-m { font-family: 'Orbitron', sans-serif; }
-        
-        /* Sidebar Styles */
-        .nav-link {
-            display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.25rem;
-            border-radius: 14px; color: #555; transition: 0.3s; font-size: 0.85rem; font-weight: 600;
-        }
-        .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255,255,255,0.05); }
-        .nav-link.active { border-left: 3px solid var(--accent-red); background: linear-gradient(90deg, rgba(255,30,38,0.1), transparent); }
+    <link rel="stylesheet" href="style.css">
 
-        .logout-btn {
+    <style>
+        body { background-color: var(--cosmos); color: #fff; }
+
+        .sidebar {
+            background: rgba(0, 0, 0, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link-admin {
+            display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.25rem;
+            border-radius: 14px; color: rgba(255,255,255,0.6); transition: 0.3s;
+            font-size: 0.85rem; font-weight: 600;
+        }
+        .nav-link-admin:hover { color: white; background: rgba(255,255,255,0.05); }
+        .nav-link-admin.active {
+            color: white;
+            background: linear-gradient(90deg, rgba(193, 18, 31, 0.2), transparent);
+            border-left: 3px solid var(--crimson);
+        }
+
+        .logout-btn-admin {
             display: flex; align-items: center; justify-content: center; gap: 0.75rem;
             width: 100%; padding: 0.75rem; margin-bottom: 0.8rem;
-            background: rgba(255, 30, 38, 0.05); border: 1px solid rgba(255, 30, 38, 0.15);
-            border-radius: 14px; color: #ff3b3b; font-size: 11px; font-weight: 800;
+            background: rgba(193, 18, 31, 0.1); border: 1px solid rgba(193, 18, 31, 0.2);
+            border-radius: 14px; color: #ff4d4d; font-size: 11px; font-weight: 800;
             text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
         }
-        .logout-btn:hover { background: rgba(255, 30, 38, 0.15); border-color: var(--accent-red); color: #fff; }
+        .logout-btn-admin:hover { background: var(--crimson); color: white; }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .grid-bg-overlay {
+            background-image: linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .msg-row:hover { background: rgba(255,255,255,0.02); }
+
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <aside class="w-72 bg-black border-r border-white/5 p-6 flex flex-col">
-        <div class="mb-12 px-2 text-2xl font-m font-black italic tracking-tighter uppercase text-white">
-            SUPER<span class="text-red-600">CAR</span>
+    <!-- SIDEBAR -->
+    <aside class="w-72 sidebar p-6 flex flex-col z-20 flex-shrink-0">
+        <div class="font-title text-xl tracking-tighter uppercase mb-10">
+            SUPER<span class="text-[var(--crimson)]">CAR</span>
         </div>
-        
+
         <nav class="flex-1 space-y-1">
-            <p class="text-[9px] text-gray-700 font-bold uppercase tracking-[2px] mb-4 px-2">Navigation</p>
-            <a href="DashBoard.php" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-            <a href="admin_voitures.php" class="nav-link"><i class="fa-solid fa-car-side"></i> Inventaire</a>
-            <a href="admin_demande.php" class="nav-link"><i class="fa-solid fa-calendar-check"></i> Demandes</a>
-            <a href="admin_contact.php" class="nav-link active"><i class="fa-solid fa-envelope"></i> Messages</a>
-            <a href="admin_services.php" class="nav-link"><i class="fa-solid fa-screwdriver-wrench"></i> Services</a>
+            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[2px] mb-4 px-2">Menu Principal</p>
+            <a href="tableaudebord.php" class="nav-link-admin"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
+            <a href="admin_voitures.php" class="nav-link-admin"><i class="fa-solid fa-car-side w-5"></i> Inventaire</a>
+            <a href="admin_demande.php" class="nav-link-admin"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
+            <a href="admin_contact.php" class="nav-link-admin active"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
+            <a href="admin_services.php" class="nav-link-admin"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-white/5">
-            <a href="logout.php" class="logout-btn">
+            <a href="logout.php" class="logout-btn-admin">
                 <i class="fa-solid fa-power-off text-xs"></i> Se déconnecter
             </a>
-            
+
             <div class="bg-white/5 p-4 rounded-2xl flex items-center justify-between border border-white/5">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-white/10 text-gray-400">
+                    <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold border border-white/10 text-white">
                         <?= strtoupper(substr($adminFullName, 0, 1)) ?>
                     </div>
                     <div>
                         <p class="text-xs font-bold text-white"><?= htmlspecialchars($adminFullName) ?></p>
-                        <p class="text-[10px] text-gray-500 font-medium italic">Connecté</p>
+                        <p class="text-[10px] text-gray-400 font-medium italic">Administrateur</p>
                     </div>
                 </div>
-                <i class="fa-solid fa-sort text-[10px] text-gray-600"></i>
             </div>
         </div>
     </aside>
 
-    <main class="flex-1 p-10 overflow-y-auto bg-[#080808]">
-        <header class="flex justify-between items-center mb-12">
+    <!-- MAIN -->
+    <main class="flex-1 p-10 overflow-y-auto grid-bg-overlay">
+
+        <!-- HEADER -->
+        <header class="mb-12 flex justify-between items-end">
             <div>
-                <h2 class="text-4xl font-m font-black italic uppercase tracking-tighter">
-                    Messages <span class="text-red-600">Clients</span>
+                <h2 class="text-4xl font-title font-black italic uppercase tracking-tighter">
+                    MESSAGES <span style="color: var(--crimson)">CLIENTS</span>
                 </h2>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[3px] mt-2 italic">Backoffice / Flux de communication</p>
+                <p class="text-[10px] text-green-500 font-bold uppercase tracking-[3px] mt-2">
+                    <i class="fa-solid fa-circle text-[6px] mr-2 animate-pulse"></i> Flux de communication actif
+                </p>
             </div>
-            <div class="text-right">
-                <p class="text-[9px] text-gray-600 font-black uppercase tracking-widest">Total Logs</p>
-                <span class="text-4xl font-m font-black text-red-600"><?= count($messages) ?></span>
+            <div class="stat-badge px-8 py-4 rounded-3xl text-center">
+                <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1">Total Logs</p>
+                <span class="text-4xl font-title font-black italic text-white"><?= count($messages) ?></span>
             </div>
         </header>
 
+        <!-- NOTIFICATION SUPPRESSION -->
         <?php if (isset($_GET['status'])): ?>
-            <div class="mb-6 p-4 bg-red-600/10 border border-red-600/20 rounded-2xl text-red-500 text-[10px] font-bold uppercase tracking-widest animate-pulse">
+            <div class="mb-6 p-4 bg-[var(--crimson)]/10 border border-[var(--crimson)]/20 rounded-2xl text-[var(--crimson)] text-[10px] font-bold uppercase tracking-widest">
                 <i class="fa-solid fa-circle-check mr-2"></i> Message supprimé de la base
             </div>
         <?php endif; ?>
 
-        <div class="bg-white/[0.02] border border-white/5 rounded-[32px] overflow-hidden">
+        <!-- TABLE -->
+        <div class="table-container rounded-[32px] overflow-hidden backdrop-blur-md">
+            <div class="p-8 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
+                <h3 class="text-[11px] font-title uppercase tracking-[3px] text-gray-400 italic">Transmissions Reçues</h3>
+                <div class="text-[9px] font-bold uppercase text-green-500 tracking-tighter">
+                    <i class="fa-solid fa-satellite-dish mr-1"></i> Live Flux
+                </div>
+            </div>
+
             <table class="w-full text-left">
-                <thead class="bg-white/[0.02] text-[10px] uppercase font-m tracking-widest text-gray-500">
-                    <tr>
+                <thead class="border-b border-white/5">
+                    <tr class="text-[9px] uppercase font-bold tracking-[2px] text-gray-600">
                         <th class="p-6">ID / Client</th>
                         <th class="p-6">Coordonnées</th>
-                        <th class="p-6 w-1/3">Transmission</th>
-                        <th class="p-6 text-center">Actions</th>
+                        <th class="p-6 w-1/3">Message</th>
+                        <th class="p-6 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     <?php if (empty($messages)): ?>
-                        <tr><td colspan="4" class="p-10 text-center text-gray-600 italic font-m uppercase text-[10px]">Aucune communication détectée</td></tr>
+                        <tr>
+                            <td colspan="4" class="p-10 text-center text-gray-600 italic uppercase text-[10px] tracking-widest">
+                                <i class="fa-solid fa-ghost opacity-30 text-2xl mb-3 block"></i>
+                                Aucune communication détectée
+                            </td>
+                        </tr>
                     <?php else: ?>
                         <?php foreach ($messages as $msg): ?>
-                            <tr class="hover:bg-red-600/[0.01] transition-colors group">
-                                <td class="p-6">
-                                    <p class="font-bold text-sm uppercase italic text-white"><?= htmlspecialchars($msg['prenom'] . ' ' . $msg['nom']) ?></p>
-                                    <p class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Signal #<?= $msg['id_contact'] ?></p>
-                                </td>
-                                <td class="p-6 text-xs text-red-600/80 font-medium">
-                                    <?= htmlspecialchars($msg['email']) ?>
-                                </td>
-                                <td class="p-6">
-                                    <div class="text-[11px] text-gray-400 leading-relaxed italic border-l-2 border-red-600/20 pl-4">
-                                        "<?= nl2br(htmlspecialchars($msg['message'])) ?>"
+                        <tr class="msg-row transition-colors group">
+                            <td class="p-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center font-bold text-sm text-[var(--crimson)] group-hover:border-[var(--crimson)]/30 transition-all flex-shrink-0">
+                                        <?= strtoupper(substr($msg['prenom'] ?? $msg['nom'], 0, 1)) ?>
                                     </div>
-                                </td>
-                                <td class="p-6 text-center">
-                                    <a href="admin_contact.php?delete_id=<?= $msg['id_contact'] ?>" 
-                                       onclick="return confirm('Confirmer la suppression définitive ?')"
-                                       class="w-10 h-10 inline-flex items-center justify-center rounded-full bg-red-600/5 text-red-600 hover:bg-red-600 hover:text-white transition-all">
-                                        <i class="fa-solid fa-trash-can text-xs"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                                    <div>
+                                        <p class="font-bold text-sm uppercase italic tracking-tight text-white">
+                                            <?= htmlspecialchars($msg['prenom'] . ' ' . $msg['nom']) ?>
+                                        </p>
+                                        <p class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">
+                                            Signal #<?= str_pad($msg['id_contact'], 4, '0', STR_PAD_LEFT) ?>
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-6 font-mono text-xs text-gray-500">
+                                <i class="fa-solid fa-at mr-2 opacity-30"></i><?= htmlspecialchars($msg['email']) ?>
+                            </td>
+                            <td class="p-6">
+                                <div class="text-[11px] text-gray-400 leading-relaxed italic border-l-2 border-[var(--crimson)]/20 pl-4 line-clamp-3">
+                                    "<?= nl2br(htmlspecialchars($msg['message'])) ?>"
+                                </div>
+                            </td>
+                            <td class="p-6 text-center">
+                                <a href="admin_contact.php?delete_id=<?= $msg['id_contact'] ?>"
+                                   onclick="return confirm('Confirmer la suppression définitive ?')"
+                                   class="w-10 h-10 inline-flex items-center justify-center rounded-xl bg-white/5 border border-white/5 text-gray-500 hover:bg-[var(--crimson)] hover:text-white hover:border-[var(--crimson)] transition-all">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </a>
+                            </td>
+                        </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
-    </main>
 
+    </main>
 </body>
 </html>
