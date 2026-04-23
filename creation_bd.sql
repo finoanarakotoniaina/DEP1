@@ -147,3 +147,34 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+-- 1. Création de la table spécifique aux services
+CREATE TABLE IF NOT EXISTS `services_content` (
+  `element_id` varchar(50) NOT NULL,
+  `content` text DEFAULT NULL,
+  PRIMARY KEY (`element_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- Insertion / Mise à jour des données avec le dossier image_url/
+REPLACE INTO `services_content` (`element_id`, `content`) VALUES
+-- Service 1
+('service_1_img', 'vidange.webp'),
+('service_1_title', 'Vidange'),
+('service_1_text', 'Lubrification haute performance avec huiles synthétiques certifiées.'),
+
+-- Service 2
+('service_2_img', 'pneux.jpg'),
+('service_2_title', 'Pneus'),
+('service_2_text', 'Contrôle de l\'usure et équilibrage de précision.'),
+
+-- Service 3
+('service_3_img', 'testdiagnostic.webp'),
+('service_3_title', 'Diagnostic'),
+('service_3_text', 'Scan complet des calculateurs et mise à jour des systèmes.'),
+
+-- Service 4
+('service_4_img', 'moteur.jpg'),
+('service_4_title', 'Moteur'),
+('service_4_text', 'Calage et réglages fins de la distribution.');
