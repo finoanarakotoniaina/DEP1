@@ -27,8 +27,8 @@ try {
     $countClients = $db->query("SELECT COUNT(*) FROM client")->fetchColumn() ?: 0;
     $countMessages = $db->query("SELECT COUNT(*) FROM contact")->fetchColumn() ?: 0;
 
-    // Récupération des pilotes récents
-    $stmtRecent = $db->query("SELECT nom, prenom, email FROM client ORDER BY id_client DESC LIMIT 3");
+    // ✅ CORRECTION 1 : id_client ajouté dans le SELECT
+    $stmtRecent = $db->query("SELECT id_client, nom, prenom, email FROM client ORDER BY id_client DESC LIMIT 3");
     $recentDrivers = $stmtRecent->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
@@ -78,7 +78,6 @@ try {
         }
         .logout-btn-admin:hover { background: var(--crimson); color: white; }
 
-        /* DATA MODULES STYLE */
         .stat-card {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -230,9 +229,11 @@ try {
                                 <i class="fa-solid fa-at mr-2 opacity-30"></i><?= htmlspecialchars($driver['email']) ?>
                             </td>
                             <td class="p-6 text-right">
-                                <button class="px-5 py-2 bg-white/5 text-[8px] font-black uppercase rounded-lg border border-white/5 hover:bg-[var(--crimson)] hover:text-white transition-all italic tracking-widest">
+                                
+                                <a href="admin_client_detail.php?id=<?= $driver['id_client'] ?>"
+                                   class="px-5 py-2 bg-white/5 text-[8px] font-black uppercase rounded-lg border border-white/5 hover:bg-[var(--crimson)] hover:text-white transition-all italic tracking-widest">
                                     Consulter
-                                </button>
+                                </a>
                             </td>
                         </tr>
                         <?php endforeach; ?>

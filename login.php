@@ -5,7 +5,7 @@
 require_once 'config.php'; 
 
 if (isset($_SESSION['admin_id'])) {
-    header("Location: DashBoard.php");
+    header("Location: tableaudebord.php");
     exit();
 }
 
@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['admin_id']   = $admin['id_admin'];
                 $_SESSION['admin_name'] = $admin['identifiant'];
                 unset($_SESSION['captcha_target']);
-                header("Location: DashBoard.php");
+                header("Location: tableaudebord.php");
                 exit();
             } else {
                 $error = "Identifiants incorrects.";

@@ -1,4 +1,44 @@
-<?php include 'config.php'; ?>
+<?php 
+include 'config.php';
+
+// Fonction de récupération depuis services_content
+function getContent($id) {
+    global $pdo, $db, $conn;
+    $database = $pdo ?? $db ?? $conn;
+    $stmt = $database->prepare("SELECT content FROM services_content WHERE element_id = ?");
+    $stmt->execute([$id]);
+    $row = $stmt->fetch();
+    return $row ? $row['content'] : '';
+}
+
+// Données des 4 services depuis la BDD
+$services = [];
+for ($i = 1; $i <= 4; $i++) {
+    $services[$i] = [
+        'img'   => getContent("service_{$i}_img"),
+        'title' => getContent("service_{$i}_title"),
+        'text'  => getContent("service_{$i}_text"),
+    ];
+}
+
+// Fallbacks si la BDD est vide
+$fallbacks = [
+    1 => ['img' => 'vidange.webp',        'title' => 'Vidange',    'text' => 'Lubrification haute performance avec huiles synthétiques certifiées. Nous protégeons les composants internes pour une fluidité mécanique absolue.'],
+    2 => ['img' => 'pneux.jpg',           'title' => 'Pneus',      'text' => 'Contrôle de l\'usure et équilibrage de précision. Maximisez votre grip latéral et votre sécurité sur tous les types de revêtements.'],
+    3 => ['img' => 'testdiagnostic.webp', 'title' => 'Diagnostic', 'text' => 'Scan complet des calculateurs et mise à jour des systèmes embarqués. Nous identifions la moindre anomalie avant qu\'elle ne devienne critique.'],
+    4 => ['img' => 'moteur.jpg',          'title' => 'Moteur',     'text' => 'Calage et réglages fins de la distribution. Redonnez à votre supercar sa sonorité iconique et son couple dévastateur d\'origine.'],
+];
+
+foreach ($services as $i => $s) {
+    if (empty($s['img']))    $services[$i]['img']   = $fallbacks[$i]['img'];
+    if (empty($s['title']))  $services[$i]['title'] = $fallbacks[$i]['title'];
+    if (empty($s['text']))   $services[$i]['text']  = $fallbacks[$i]['text'];
+}
+
+// Titre et description hero depuis BDD
+$heroTitle = getContent('serv_hero_title') ?: 'Domptez <br> <span class="text-[var(--crimson)]">l\'instinct.</span>';
+$heroDesc  = getContent('serv_hero_desc')  ?: 'Nos services de maintenance garantissent que chaque kilomètre reste une expérience pure et sans compromis. L\'excellence au service de votre performance.';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -46,10 +86,10 @@
         <div class="z-10 max-w-4xl relative">
             <span class="text-gray-500 font-bold tracking-[0.5em] uppercase mb-4 block text-[10px]">Ingénierie de pointe</span>
             <h1 class="font-title text-5xl md:text-7xl font-bold leading-none mb-8 uppercase">
-                Domptez <br> <span class="text-[var(--crimson)]">l'instinct.</span>
+                <?= $heroTitle ?>
             </h1>
             <p class="text-xl text-gray-400 font-light max-w-2xl leading-relaxed mb-10">
-                Nos services de maintenance garantissent que chaque kilomètre reste une expérience pure et sans compromis. L'excellence au service de votre performance.
+                <?= $heroDesc ?>
             </p>
             <a href="#services-list" class="inline-flex items-center gap-8 group">
                 <div class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[var(--crimson)] transition-all duration-500">
@@ -73,55 +113,22 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            
-            <!-- VIDANGE -->
+            <?php for ($i = 1; $i <= 4; $i++): ?>
             <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl group transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 hover:z-50 hover:bg-[#051622] hover:border-[var(--crimson)]/50 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
                 <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900">
-                    <img src="vidange.webp" alt="Vidange" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                    <img src="<?= htmlspecialchars($services[$i]['img']) ?>" 
+                         alt="<?= htmlspecialchars($services[$i]['title']) ?>" 
+                         class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
                 </div>
-                <span class="text-[var(--crimson)] font-title text-sm mb-2 block uppercase">01</span>
-                <h3 class="font-title text-xl leading-tight mb-4 uppercase">Vidange</h3>
+                <span class="text-[var(--crimson)] font-title text-sm mb-2 block uppercase">0<?= $i ?></span>
+                <h3 class="font-title text-xl leading-tight mb-4 uppercase">
+                    <?= htmlspecialchars($services[$i]['title']) ?>
+                </h3>
                 <p class="text-gray-400 group-hover:text-white text-[14px] leading-relaxed font-light transition-colors">
-                    Lubrification haute performance avec huiles synthétiques certifiées. Nous protégeons les composants internes pour une fluidité mécanique absolue.
+                    <?= htmlspecialchars($services[$i]['text']) ?>
                 </p>
             </div>
-            
-            <!-- PNEUS -->
-            <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl group transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 hover:z-50 hover:bg-[#051622] hover:border-[var(--crimson)]/50 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
-                <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900">
-                    <img src="pneux.jpg" alt="Pneus" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
-                </div>
-                <span class="text-[var(--crimson)] font-title text-sm mb-2 block uppercase">02</span>
-                <h3 class="font-title text-xl leading-tight mb-4 uppercase">Pneus</h3>
-                <p class="text-gray-400 group-hover:text-white text-[14px] leading-relaxed font-light transition-colors">
-                    Contrôle de l'usure et équilibrage de précision. Maximisez votre grip latéral et votre sécurité sur tous les types de revêtements.
-                </p>
-            </div>
-
-            <!-- DIAGNOSTIC -->
-            <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl group transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 hover:z-50 hover:bg-[#051622] hover:border-[var(--crimson)]/50 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
-                <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900">
-                    <img src="testdiagnostic.webp" alt="Diagnostic" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
-                </div>
-                <span class="text-[var(--crimson)] font-title text-sm mb-2 block uppercase">03</span>
-                <h3 class="font-title text-xl leading-tight mb-4 uppercase">Diagnostic</h3>
-                <p class="text-gray-400 group-hover:text-white text-[14px] leading-relaxed font-light transition-colors">
-                    Scan complet des calculateurs et mise à jour des systèmes embarqués. Nous identifions la moindre anomalie avant qu'elle ne devienne critique.
-                </p>
-            </div>
-
-            <!-- MOTEUR -->
-            <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl group transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 hover:z-50 hover:bg-[#051622] hover:border-[var(--crimson)]/50 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
-                <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900">
-                    <img src="moteur.jpg" alt="Moteur" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
-                </div>
-                <span class="text-[var(--crimson)] font-title text-sm mb-2 block uppercase">04</span>
-                <h3 class="font-title text-xl leading-tight mb-4 uppercase">Moteur</h3>
-                <p class="text-gray-400 group-hover:text-white text-[14px] leading-relaxed font-light transition-colors">
-                    Calage et réglages fins de la distribution. Redonnez à votre supercar sa sonorité iconique et son couple dévastateur d'origine.
-                </p>
-            </div>
-
+            <?php endfor; ?>
         </div>
     </section>
 
