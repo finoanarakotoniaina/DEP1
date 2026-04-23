@@ -47,7 +47,6 @@ try {
     
     <style>
         body { background-color: var(--cosmos); }
-        
         .sidebar {
             background: rgba(0, 0, 0, 0.2);
             border-right: 1px solid rgba(255, 255, 255, 0.05);
