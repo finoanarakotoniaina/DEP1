@@ -52,11 +52,14 @@ try {
     <meta charset="UTF-8">
     <title>SuperCar | Messages Clients</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Syncopate:wght@700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    
     <style>
         :root { --bg-deep: #050505; --accent-red: #ff1e26; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-deep); color: #fff; margin:0; }
+        body {
+             font-family: 'Plus Jakarta Sans',sans-serif; background-color: var(--cosmos); color: #fff; margin:0; }
         .font-m { font-family: 'Orbitron', sans-serif; }
         
         /* Sidebar Styles */
