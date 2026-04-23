@@ -178,3 +178,28 @@ REPLACE INTO `services_content` (`element_id`, `content`) VALUES
 ('service_4_img', 'moteur.jpg'),
 ('service_4_title', 'Moteur'),
 ('service_4_text', 'Calage et réglages fins de la distribution.');
+
+
+CREATE TABLE `services_content` (
+  `element_id` varchar(50) NOT NULL,
+  `content` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `services_content` (`element_id`, `content`) VALUES
+('service_1_img', 'vidange.webp'),
+('service_1_text', 'Lubrification haute performance avec huiles synthétiques certifiées.'),
+('service_1_title', 'Vidange'),
+('service_2_img', 'pneux.jpg'),
+('service_2_text', '\r\n                        Contrôle de l\'usure et équilibrage de précision.                    '),
+('service_2_title', '\r\n                        \r\n                        \r\n                        Pneus                                                            '),
+('service_3_img', 'testdiagnostic.webp'),
+('service_3_text', 'Scan complet des calculateurs et mise à jour des systèmes.'),
+('service_3_title', 'Diagnostic'),
+('service_4_img', 'moteur.jpg'),
+('service_4_text', 'Calage et réglages fins de la distribution.'),
+('service_4_title', '\r\n                        Moteur                    '),
+('serv_hero_desc', '\r\n                    \r\n                    Nos services de maintenance garantissent que chaque kilomètre reste une expérience pure et sans compromis.                                '),
+('serv_hero_title', '\r\n                    \r\n                    Domptez <br> <span class=\"text-[var(--crimson)]\">l\'instinct.</span>                                ');
+
+ALTER TABLE `services_content`
+  ADD PRIMARY KEY (`element_id`);
