@@ -62,12 +62,11 @@ try {
     $acceptees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'accepte'")->fetchColumn();
     $refusees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'refuse'")->fetchColumn();
 
+    // Remplace ton bloc SELECT par celui-ci :
     $demandes = $db->query("
         SELECT 
             de.id_demande,
             de.date_souhaitee,
-            de.heure_souhaitee,
-            de.mobile,
             de.statut,
             CONCAT(c.prenom, ' ', c.nom) AS nom_complet,
             c.email,
@@ -123,10 +122,11 @@ try {
         
         <nav class="flex-1 space-y-1">
             <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[2px] mb-4 px-2">Menu Principal</p>
-            <a href="tableaudebord.php" class="nav-link-admin"><i class="fa-solid fa-gauge-high w-5"></i> Dashboard</a>
+            <a href="tableaudebord.php" class="nav-link-admin"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
             <a href="admin_voitures.php" class="nav-link-admin"><i class="fa-solid fa-car-side w-5"></i> Inventaire</a>
             <a href="admin_demande.php" class="nav-link-admin active"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
             <a href="admin_contact.php" class="nav-link-admin"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
+            <a href="admin_services.php" class="nav-link-admin"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-white/5">
@@ -362,7 +362,7 @@ try {
 
                 <div class="mt-8 flex justify-center">
                     <button type="submit" name="save_ui" class="bg-[var(--crimson)] px-14 py-4 font-title text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all">
-                        Valider et Publier
+                        Mettre à jour
                     </button>
                 </div>
             </form>
