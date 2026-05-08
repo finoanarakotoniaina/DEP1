@@ -28,8 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             } else { echo json_encode(['success'=>false,'message'=>'Aucun fichier']); }
             exit;
         }
-        if ($action === 'delete_car') {
-            $db->prepare("DELETE FROM voiture WHERE id_voiture = ?")->execute([intval($_POST['id_voiture'])]);
+        // Archive au lieu de supprimer définitivement
+        if ($action === 'archive_car') {
+            $id = intval($_POST['id_voiture']);
+            // On ajoute un champ 'archive' = 1 (à créer en BDD si pas encore fait : ALTER TABLE voiture ADD archive TINYINT(1) DEFAULT 0)
+            $db->prepare("UPDATE voiture SET archive = 1 WHERE id_voiture = ?")->execute([$id]);
             echo json_encode(['success'=>true]);
             exit;
         }
@@ -48,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $imageName = 'car_new_'.time().'.'.$ext;
                 move_uploaded_file($_FILES['image']['tmp_name'], 'image_url/'.$imageName);
             }
-            $db->prepare("INSERT INTO voiture (modele,prix,annee,etat,type,image_url,id_marque) VALUES (?,?,?,?,?,?,?)")
+            $db->prepare("INSERT INTO voiture (modele,prix,annee,etat,type,image_url,id_marque,archive) VALUES (?,?,?,?,?,?,?,0)")
                ->execute([$_POST['modele'],$_POST['prix'],$_POST['annee'],$_POST['etat'],$_POST['type'],$imageName,$id_marque]);
             $newId = $db->lastInsertId();
             echo json_encode(['success'=>true,'id'=>$newId,'image'=>$imageName,
@@ -70,15 +73,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             echo json_encode(['success'=>true]);
             exit;
         }
+        if ($action === 'update_titre') {
+            // Stocke le titre modifié dans une table config ou un fichier — adapte selon ton besoin
+            // Exemple simple : table config(cle, valeur)
+            $val = trim($_POST['valeur']);
+            $cle = trim($_POST['cle']);
+            $allowed_cles = ['titre_nos_modeles'];
+            if (!in_array($cle, $allowed_cles)) { echo json_encode(['success'=>false]); exit; }
+            $db->prepare("INSERT INTO config (cle,valeur) VALUES (?,?) ON DUPLICATE KEY UPDATE valeur=?")->execute([$cle,$val,$val]);
+            echo json_encode(['success'=>true]);
+            exit;
+        }
     } catch (PDOException $e) {
         echo json_encode(['success'=>false,'message'=>$e->getMessage()]);
         exit;
     }
 }
 
-// --- CHARGEMENT ---
+// --- CHARGEMENT — exclure archivés ---
 try {
-    $toutes_voitures = $db->query("SELECT v.*, m.nom_marque, m.id_marque FROM voiture v LEFT JOIN marque m ON v.id_marque = m.id_marque ORDER BY m.nom_marque, v.modele")->fetchAll(PDO::FETCH_ASSOC);
+    $toutes_voitures = $db->query("SELECT v.*, m.nom_marque, m.id_marque FROM voiture v LEFT JOIN marque m ON v.id_marque = m.id_marque WHERE v.archive = 0 OR v.archive IS NULL ORDER BY m.nom_marque, v.modele")->fetchAll(PDO::FETCH_ASSOC);
     $voituresParMarque = [];
     foreach ($toutes_voitures as $v) {
         $nomM = !empty($v['nom_marque']) ? $v['nom_marque'] : 'Autres';
@@ -98,18 +112,11 @@ try {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 <style>
-:root {
-    --cr: #C1121F;
-    --cr-h: #e01a2a;
-    --navy: #060e1e;
-    --navy2: #0b1729;
-}
-
 /* ===== ADMIN BAR ===== */
 #admin-bar {
     position: fixed; top: 0; left: 0; right: 0; height: 54px;
-    background: linear-gradient(90deg, var(--navy) 0%, var(--navy2) 60%, var(--navy) 100%);
-    border-bottom: 2px solid var(--cr);
+    background: linear-gradient(90deg, #060e1e 0%, #0b1729 60%, #060e1e 100%);
+    border-bottom: 2px solid var(--crimson);
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 22px; z-index: 9999;
     box-shadow: 0 4px 30px rgba(193,18,31,0.2);
@@ -117,7 +124,7 @@ try {
 .abl { display:flex; align-items:center; gap:16px; }
 .abr { display:flex; align-items:center; gap:8px; }
 .ab-logo { font-family:'Syncopate',sans-serif; font-size:14px; font-weight:700; color:#fff; letter-spacing:0.08em; }
-.ab-logo span { color:var(--cr); }
+.ab-logo span { color:var(--crimson); }
 .ab-sep { width:1px; height:22px; background:rgba(255,255,255,0.1); }
 .ab-user {
     display:flex; align-items:center; gap:9px;
@@ -125,7 +132,7 @@ try {
     border-radius:8px; padding:5px 12px;
 }
 .ab-av {
-    width:24px; height:24px; border-radius:50%; background:var(--cr);
+    width:24px; height:24px; border-radius:50%; background:var(--crimson);
     display:flex; align-items:center; justify-content:center;
     font-family:'Syncopate',sans-serif; font-size:10px; font-weight:700; color:#fff;
 }
@@ -144,12 +151,41 @@ try {
 }
 .ab-ghost { background:rgba(26,44,80,0.6); color:rgba(255,255,255,0.65); border:1px solid rgba(26,44,80,0.9); }
 .ab-ghost:hover { background:rgba(26,44,80,.95); color:#fff; }
-.ab-red   { background:var(--cr); color:#fff; }
-.ab-red:hover { background:var(--cr-h); }
 
 /* Layout */
 body { padding-top: 54px; }
-nav.site-nav { top: 54px !important; }
+
+/* Bande ajout marque sous la barre admin */
+#brand-add-bar {
+    position: fixed; top: 54px; left: 0; right: 0; z-index: 9998;
+    background: rgba(6,14,30,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(193,18,31,0.2);
+    padding: 10px 24px;
+    display: flex; align-items: center; gap: 14px;
+}
+.bab-label {
+    font-family:'Syncopate',sans-serif; font-size:8px; letter-spacing:.2em;
+    color:rgba(255,255,255,.35); white-space:nowrap;
+}
+.bab-label i { color:var(--crimson); margin-right:6px; }
+.bab-input {
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+    border-radius:8px; padding:7px 14px; color:#fff;
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:12px;
+    outline:none; width:220px; transition:border-color .2s;
+}
+.bab-input:focus { border-color:var(--crimson); box-shadow:0 0 0 3px rgba(193,18,31,.08); }
+.bab-btn {
+    background:var(--crimson); color:#fff; border:none; cursor:pointer;
+    padding:7px 18px; border-radius:8px;
+    font-family:'Syncopate',sans-serif; font-size:8px; letter-spacing:.13em;
+    display:flex; align-items:center; gap:7px; transition:all .2s; white-space:nowrap;
+}
+.bab-btn:hover { background:#e01a2a; transform:translateY(-1px); }
+
+/* Décalage main pour les deux barres fixes */
+main { padding-top: calc(40px + 44px) !important; } /* nav site (~80px) + brand-add-bar (44px) */
 
 /* Sliders */
 .row-wrapper { position:relative; padding:0 40px; margin-bottom:60px; overflow:visible!important; }
@@ -160,16 +196,16 @@ nav.site-nav { top: 54px !important; }
 .nav-btn:hover { background:#fff; color:#000; }
 .btn-prev { left:0; } .btn-next { right:0; }
 .spec-item { display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,.2); padding:12px 0; font-size:11px; text-transform:uppercase; }
-.hover-specs { position:absolute; top:0; width:280px; height:100%; background:var(--cr); color:#fff; padding:30px; border-radius:24px; opacity:0; visibility:hidden; transition:all .4s; display:flex; flex-direction:column; justify-content:center; pointer-events:none; }
+.hover-specs { position:absolute; top:0; width:280px; height:100%; background:var(--crimson); color:#fff; padding:30px; border-radius:24px; opacity:0; visibility:hidden; transition:all .4s; display:flex; flex-direction:column; justify-content:center; pointer-events:none; }
 .car-card .hover-specs { left:105%; }
 .car-card:nth-child(3n) .hover-specs { left:auto!important; right:105%!important; }
 
 /* Hover carte */
 .car-card:hover { transform:scale(1.03); z-index:200; }
-.car-card:hover .edit-ring { opacity:1; box-shadow:0 0 0 2px var(--cr), 0 0 28px rgba(193,18,31,.22); }
+.car-card:hover .edit-ring { opacity:1; box-shadow:0 0 0 2px var(--crimson), 0 0 28px rgba(193,18,31,.22); }
 .edit-ring { position:absolute; inset:0; border-radius:24px; pointer-events:none; opacity:0; transition:all .25s; z-index:20; }
 
-/* Image — clic pour changer */
+/* Image cliquable */
 .img-wrap { position:relative; cursor:pointer; }
 .img-ov {
     position:absolute; inset:0; background:rgba(193,18,31,0);
@@ -189,11 +225,22 @@ nav.site-nav { top: 54px !important; }
 }
 [contenteditable="true"]:hover { border-bottom-color:rgba(193,18,31,.85); }
 [contenteditable="true"]:focus {
-    border-bottom:2px solid var(--cr);
+    border-bottom:2px solid var(--crimson);
     background:rgba(193,18,31,.06); border-radius:3px; padding:0 3px;
 }
 
-/* Bouton supprimer carte */
+/* Titre NOS MODÈLES éditable */
+.titre-editable {
+    font-family:'Syncopate',sans-serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight:700; text-transform:uppercase; letter-spacing:-0.02em;
+    border-bottom: 1px dashed rgba(193,18,31,.3) !important;
+    cursor:text;
+}
+.titre-editable:focus { background: rgba(193,18,31,.04); border-radius:4px; }
+.titre-span-red { color:var(--crimson); }
+
+/* Bouton archive carte */
 .del-btn {
     position:absolute; top:10px; right:10px; z-index:30;
     width:30px; height:30px; border-radius:7px;
@@ -201,8 +248,8 @@ nav.site-nav { top: 54px !important; }
     color:rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center;
     cursor:pointer; font-size:11px; opacity:0; transition:all .2s; backdrop-filter:blur(8px);
 }
-.car-card:hover .del-btn { opacity:1; color:#fff; border-color:var(--cr); }
-.del-btn:hover { background:var(--cr)!important; }
+.car-card:hover .del-btn { opacity:1; color:#fff; border-color:var(--crimson); }
+.del-btn:hover { background:var(--crimson)!important; }
 
 /* Titre marque éditable */
 .brand-wrap { display:flex; align-items:center; gap:10px; padding:0 6rem; margin-bottom:8px; }
@@ -220,37 +267,12 @@ nav.site-nav { top: 54px !important; }
 }
 .add-card:hover { background:rgba(193,18,31,.09); border-color:rgba(193,18,31,.65); transform:scale(1.02); }
 .add-circle {
-    width:52px; height:52px; border-radius:50%; background:var(--cr); color:#fff;
+    width:52px; height:52px; border-radius:50%; background:var(--crimson); color:#fff;
     display:flex; align-items:center; justify-content:center;
     font-size:22px; transition:all .3s; box-shadow:0 8px 24px rgba(193,18,31,.35);
 }
 .add-card:hover .add-circle { transform:scale(1.12); box-shadow:0 12px 32px rgba(193,18,31,.55); }
 .add-label { font-family:'Syncopate',sans-serif; font-size:9px; letter-spacing:.2em; color:rgba(193,18,31,.65); text-align:center; line-height:1.9; text-transform:uppercase; }
-
-/* Footer ajout marque */
-#adm-footer {
-    margin-top:60px; padding:38px 6rem;
-    border-top:1px solid rgba(255,255,255,.05);
-    background:rgba(0,0,0,.28);
-    display:flex; align-items:center; justify-content:space-between;
-    flex-wrap:wrap; gap:20px;
-}
-.footer-form { display:flex; align-items:center; gap:12px; }
-.fi {
-    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09);
-    border-radius:10px; padding:11px 18px; color:#fff;
-    font-family:'Plus Jakarta Sans',sans-serif; font-size:13px;
-    outline:none; width:230px; transition:border-color .2s;
-}
-.fi:focus { border-color:var(--cr); box-shadow:0 0 0 3px rgba(193,18,31,.08); }
-.fb {
-    background:var(--cr); color:#fff; border:none; cursor:pointer;
-    padding:11px 22px; border-radius:10px;
-    font-family:'Syncopate',sans-serif; font-size:8px; letter-spacing:.15em;
-    display:flex; align-items:center; gap:8px; transition:all .2s;
-}
-.fb:hover { background:var(--cr-h); transform:translateY(-1px); }
-.footer-note { font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; color:rgba(255,255,255,.2); }
 
 /* Modal */
 .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.9); backdrop-filter:blur(10px); z-index:10000; display:none; align-items:center; justify-content:center; padding:20px; }
@@ -265,28 +287,28 @@ nav.site-nav { top: 54px !important; }
 .fg { margin-bottom:16px; }
 .fl { display:block; font-family:'Syncopate',sans-serif; font-size:8px; letter-spacing:.2em; color:rgba(255,255,255,.38); margin-bottom:7px; text-transform:uppercase; }
 .inp { width:100%; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:10px 14px; color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; outline:none; transition:border-color .2s; }
-.inp:focus { border-color:var(--cr); box-shadow:0 0 0 3px rgba(193,18,31,.07); }
+.inp:focus { border-color:var(--crimson); box-shadow:0 0 0 3px rgba(193,18,31,.07); }
 .fgrid { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
 .mimg-zone { border:2px dashed rgba(255,255,255,.09); border-radius:12px; padding:16px; text-align:center; cursor:pointer; transition:all .2s; position:relative; overflow:hidden; }
-.mimg-zone:hover { border-color:var(--cr); background:rgba(193,18,31,.03); }
+.mimg-zone:hover { border-color:var(--crimson); background:rgba(193,18,31,.03); }
 .mimg-zone img { width:100%; height:130px; object-fit:cover; border-radius:8px; display:none; }
 .mimg-zone .mph { color:rgba(255,255,255,.22); font-size:12px; font-family:'Plus Jakarta Sans'; }
 .mimg-zone .mph i { font-size:24px; display:block; margin-bottom:6px; }
 .mimg-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
 .btn-cx { background:rgba(255,255,255,.06); color:rgba(255,255,255,.65); border:1px solid rgba(255,255,255,.1); padding:9px 18px; border-radius:7px; font-family:'Syncopate',sans-serif; font-size:8px; cursor:pointer; transition:all .2s; }
 .btn-cx:hover { background:rgba(255,255,255,.1); }
-.btn-sv { background:var(--cr); color:#fff; border:none; padding:9px 20px; border-radius:7px; font-family:'Syncopate',sans-serif; font-size:8px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all .2s; }
-.btn-sv:hover { background:var(--cr-h); }
+.btn-sv { background:var(--crimson); color:#fff; border:none; padding:9px 20px; border-radius:7px; font-family:'Syncopate',sans-serif; font-size:8px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all .2s; }
+.btn-sv:hover { background:#e01a2a; }
 
 /* Confirm */
 #confirm-ov { position:fixed; inset:0; background:rgba(0,0,0,.88); backdrop-filter:blur(6px); z-index:99999; display:none; align-items:center; justify-content:center; }
 #confirm-ov.open { display:flex; }
 .cbox { background:#0d0303; border:1px solid rgba(193,18,31,.4); border-radius:16px; padding:32px; max-width:320px; text-align:center; }
-.cbox .ci { font-size:28px; color:var(--cr); margin-bottom:13px; }
+.cbox .ci { font-size:28px; color:var(--crimson); margin-bottom:13px; }
 .cbox h4 { font-family:'Syncopate',sans-serif; font-size:10px; letter-spacing:.15em; margin-bottom:9px; }
 .cbox p  { color:rgba(255,255,255,.4); font-family:'Plus Jakarta Sans'; font-size:12px; margin-bottom:20px; }
 .cact { display:flex; gap:10px; justify-content:center; }
-.btn-del { background:var(--cr); color:#fff; border:none; padding:9px 20px; border-radius:7px; font-family:'Syncopate',sans-serif; font-size:8px; cursor:pointer; }
+.btn-arc { background:var(--crimson); color:#fff; border:none; padding:9px 20px; border-radius:7px; font-family:'Syncopate',sans-serif; font-size:8px; cursor:pointer; display:flex; align-items:center; gap:6px; }
 .btn-no  { background:rgba(255,255,255,.07); color:#fff; border:1px solid rgba(255,255,255,.12); padding:9px 20px; border-radius:7px; font-family:'Syncopate',sans-serif; font-size:8px; cursor:pointer; }
 
 /* Toast */
@@ -295,11 +317,11 @@ nav.site-nav { top: 54px !important; }
 #toast.ok   { border-color:rgba(34,197,94,.4); }
 #toast.ok   .ti { color:#22c55e; font-size:15px; }
 #toast.err  { border-color:rgba(193,18,31,.5); }
-#toast.err  .ti { color:var(--cr); font-size:15px; }
+#toast.err  .ti { color:var(--crimson); font-size:15px; }
 #toast.wait .ti { color:rgba(255,255,255,.4); animation:spin 1s linear infinite; display:inline-block; font-size:15px; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-.nav-link.active { color:#C1121F !important; font-weight:700; }
+.nav-link.active { color:var(--crimson) !important; font-weight:700; }
 </style>
 </head>
 <body class="split-bg text-white">
@@ -316,20 +338,40 @@ nav.site-nav { top: 54px !important; }
         <div class="ab-live"><div class="ab-live-dot"></div>LIVE EDITOR</div>
     </div>
     <div class="abr">
-        <a href="dashboard.php" class="ab-btn ab-ghost"><i class="fas fa-gauge-high"></i> DASHBOARD</a>
-        <a href="voiture.php" target="_blank" class="ab-btn ab-ghost"><i class="fas fa-eye"></i> VUE CLIENT</a>
+        <a href="tableaudebord.php" class="ab-btn ab-ghost"><i class="fas fa-arrow-left"></i> RETOUR</a>
+        <a href="archive.php" class="ab-btn ab-ghost"><i class="fas fa-box-archive"></i> ARCHIVES</a>
     </div>
 </div>
 
+<!-- ===== BANDE AJOUT MARQUE (sous admin bar, au-dessus du contenu) ===== -->
+<div id="brand-add-bar">
+    <span class="bab-label"><i class="fas fa-layer-group"></i>NOUVELLE MARQUE</span>
+    <input type="text" id="new-brand-input" class="bab-input" placeholder="Ex: Bugatti, Koenigsegg..." onkeydown="if(event.key==='Enter') addBrand()">
+    <button class="bab-btn" onclick="addBrand()"><i class="fas fa-plus"></i> CRÉER</button>
+</div>
 
 <!-- ===== CONTENU ===== -->
 <main class="pt-40" id="main-content">
     <div class="px-6 lg:px-24 mb-12">
-        <h1 class="font-title text-3xl md:text-5xl font-bold leading-none uppercase tracking-tight" style="font-family:'Syncopate'">
-            NOS <span style="color:#C1121F">MODÈLES</span>
+        <!-- Titre éditable directement -->
+        <h1 style="font-family:'Syncopate';font-size:clamp(1.8rem,5vw,3rem);font-weight:700;line-height:1;letter-spacing:-0.02em;text-transform:uppercase">
+            <span
+                contenteditable="true"
+                class="titre-editable"
+                data-field="titre_nos_modeles"
+                onblur="saveTitre(this)"
+                title="Cliquez pour modifier le titre"
+            >NOS </span><span class="titre-span-red"
+                contenteditable="true"
+                data-field="titre_nos_modeles_rouge"
+                onblur="saveTitre(this)"
+                title="Cliquez pour modifier"
+            >MODÈLES</span>
         </h1>
-        <div class="w-20 h-1 mt-4" style="background:#C1121F"></div>
-        
+        <div class="w-20 h-1 mt-4" style="background:var(--crimson)"></div>
+        <p class="mt-4 text-[10px] font-mono tracking-widest" style="color:rgba(193,18,31,.5)">
+            <i class="fas fa-pen mr-1"></i>TEXTE · <i class="fas fa-camera mr-1 ml-2"></i>PHOTO · <i class="fas fa-plus-circle mr-1 ml-2"></i>AJOUTER
+        </p>
     </div>
 
     <?php foreach ($voituresParMarque as $nomMarque => $voitures):
@@ -364,20 +406,41 @@ nav.site-nav { top: 54px !important; }
 
                     <div class="edit-ring"></div>
 
-                    <!-- Bouton supprimer -->
+                    <!-- Bouton archiver (ne supprime pas définitivement) -->
                     <button class="del-btn"
-                            onclick="confirmDelete(<?php echo $car['id_voiture']; ?>,'<?php echo htmlspecialchars(addslashes($car['modele'])); ?>')"
-                            title="Supprimer ce véhicule">
-                        <i class="fas fa-trash-alt"></i>
+                            onclick="confirmArchive(<?php echo $car['id_voiture']; ?>,'<?php echo htmlspecialchars(addslashes($car['modele'])); ?>')"
+                            title="Archiver ce véhicule">
+                        <i class="fas fa-box-archive"></i>
                     </button>
 
                     <!-- Fiche technique hover -->
                     <div class="hover-specs">
                         <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase" style="font-family:'Syncopate'">Fiche Technique</p>
-                        <div class="spec-item"><span>Année</span><span><?php echo $car['annee']; ?></span></div>
-                        <div class="spec-item"><span>État</span><span><?php echo htmlspecialchars($car['etat']); ?></span></div>
-                        <div class="spec-item"><span>Type</span><span><?php echo htmlspecialchars($car['type']); ?></span></div>
-                        <p class="text-[9px] mt-4 text-center opacity-50 italic">✎ Cliquez sur le texte pour modifier</p>
+                        <div class="spec-item"><span>Année</span>
+                            <span contenteditable="true"
+                                  data-car-id="<?php echo $car['id_voiture']; ?>"
+                                  data-field="annee"
+                                  data-original="<?php echo $car['annee']; ?>"
+                                  onblur="saveField(this)"
+                            ><?php echo $car['annee']; ?></span>
+                        </div>
+                        <div class="spec-item"><span>État</span>
+                            <span contenteditable="true"
+                                  data-car-id="<?php echo $car['id_voiture']; ?>"
+                                  data-field="etat"
+                                  data-original="<?php echo htmlspecialchars($car['etat']); ?>"
+                                  onblur="saveField(this)"
+                            ><?php echo htmlspecialchars($car['etat']); ?></span>
+                        </div>
+                        <div class="spec-item"><span>Type</span>
+                            <span contenteditable="true"
+                                  data-car-id="<?php echo $car['id_voiture']; ?>"
+                                  data-field="type"
+                                  data-original="<?php echo htmlspecialchars($car['type']); ?>"
+                                  onblur="saveField(this)"
+                            ><?php echo htmlspecialchars($car['type']); ?></span>
+                        </div>
+                        <p class="text-[9px] mt-4 text-center opacity-50 italic">✎ Cliquez sur une valeur pour modifier</p>
                     </div>
 
                     <!-- IMAGE cliquable -->
@@ -405,7 +468,7 @@ nav.site-nav { top: 54px !important; }
                                   data-field="modele"
                                   data-original="<?php echo htmlspecialchars($car['modele']); ?>"
                                   onblur="saveField(this)"
-                                  title="Cliquer pour modifier"
+                                  title="Cliquer pour modifier le modèle"
                             ><?php echo htmlspecialchars($car['modele']); ?></span>
                         </h3>
                         <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
@@ -414,9 +477,8 @@ nav.site-nav { top: 54px !important; }
                                   data-car-id="<?php echo $car['id_voiture']; ?>"
                                   data-field="prix"
                                   data-original="<?php echo $car['prix']; ?>"
-                                  data-raw="<?php echo $car['prix']; ?>"
                                   onblur="saveField(this)"
-                                  title="Cliquer pour modifier"
+                                  title="Cliquer pour modifier le prix"
                             ><?php echo number_format($car['prix'],0,'.', ' '); ?></span>
                             <span class="font-bold text-xl text-white">Rs</span>
                         </div>
@@ -437,20 +499,6 @@ nav.site-nav { top: 54px !important; }
     </section>
     <?php endforeach; ?>
 </main>
-
-<!-- ===== FOOTER — AJOUT MARQUE ===== -->
-<footer id="adm-footer">
-    <div>
-        <p style="font-family:'Syncopate',sans-serif;font-size:9px;color:rgba(255,255,255,.4);letter-spacing:.2em;margin-bottom:13px">
-            <i class="fas fa-layer-group mr-2" style="color:var(--cr)"></i>AJOUTER UNE NOUVELLE MARQUE
-        </p>
-        <div class="footer-form">
-            <input type="text" id="new-brand-input" class="fi" placeholder="Ex: Bugatti, Koenigsegg...">
-            <button class="fb" onclick="addBrand()"><i class="fas fa-plus"></i> CRÉER</button>
-        </div>
-    </div>
-    <div class="footer-note">Éditeur Live · SuperCar Admin<br><span style="color:rgba(255,255,255,.12)"><?php echo date('d/m/Y H:i'); ?></span></div>
-</footer>
 
 <!-- ===== MODAL AJOUT VOITURE ===== -->
 <div class="modal-bg" id="add-modal">
@@ -504,15 +552,15 @@ nav.site-nav { top: 54px !important; }
     </div>
 </div>
 
-<!-- ===== CONFIRM DELETE ===== -->
+<!-- ===== CONFIRM ARCHIVE ===== -->
 <div id="confirm-ov">
     <div class="cbox">
-        <div class="ci"><i class="fas fa-triangle-exclamation"></i></div>
-        <h4>SUPPRIMER CE VÉHICULE ?</h4>
-        <p id="confirm-text">Cette action est irréversible.</p>
+        <div class="ci"><i class="fas fa-box-archive"></i></div>
+        <h4>ARCHIVER CE VÉHICULE ?</h4>
+        <p id="confirm-text">Il sera retiré de l'inventaire et accessible dans les archives.</p>
         <div class="cact">
             <button class="btn-no" onclick="closeConfirm()">Annuler</button>
-            <button class="btn-del" id="btn-yes">Supprimer</button>
+            <button class="btn-arc" id="btn-yes"><i class="fas fa-box-archive"></i> ARCHIVER</button>
         </div>
     </div>
 </div>
@@ -544,7 +592,7 @@ async function saveField(el) {
     const id    = el.dataset.carId;
     const field = el.dataset.field;
     let val = el.textContent.trim();
-    if (field === 'prix') val = val.replace(/\s|\u00a0/g,'').replace('Rs','').trim();
+    if (field === 'prix') val = val.replace(/[\s\u00a0]/g,'').replace('Rs','').trim();
     if (!val) { el.textContent = el.dataset.original || ''; return; }
 
     const fd = new FormData();
@@ -563,6 +611,20 @@ async function saveField(el) {
     } catch(e) { toast('Erreur réseau','err'); }
 }
 
+// ===== SAVE TITRE PRINCIPAL =====
+async function saveTitre(el) {
+    const val = el.textContent.trim();
+    if (!val) { el.textContent = el.dataset.original || ''; return; }
+    const fd = new FormData();
+    fd.append('action','update_titre');
+    fd.append('cle', el.dataset.field);
+    fd.append('valeur', val);
+    toast('Titre sauvegardé ✓','wait');
+    const j = await fetch('voiture_admin.php',{method:'POST',body:fd}).then(r=>r.json());
+    if (j.success) toast('Titre mis à jour ✓','ok');
+    else toast('Erreur sauvegarde titre','err');
+}
+
 // ===== SAVE BRAND =====
 async function saveBrand(el) {
     const id  = el.dataset.idMarque;
@@ -573,8 +635,7 @@ async function saveBrand(el) {
     toast('Renommage...','wait');
     const j = await fetch('voiture_admin.php',{method:'POST',body:fd}).then(r=>r.json());
     if (j.success) {
-        el.dataset.original = val; toast('Marque renommée','ok');
-        // Mettre à jour le libellé du bouton + dans la même section
+        el.dataset.original = val; toast('Marque renommée ✓','ok');
         const sec = el.closest('section');
         if (sec) {
             const lbl = sec.querySelector('.add-label');
@@ -583,7 +644,7 @@ async function saveBrand(el) {
     } else { el.textContent = el.dataset.original; toast(j.message||'Erreur','err'); }
 }
 
-// ===== UPLOAD IMAGE (clic direct) =====
+// ===== UPLOAD IMAGE =====
 async function uploadImg(input) {
     if (!input.files.length) return;
     const id = input.dataset.carId;
@@ -591,8 +652,10 @@ async function uploadImg(input) {
     fd.append('action','update_image'); fd.append('id_voiture',id); fd.append('image',input.files[0]);
     toast('Envoi de la photo...','wait');
     const j = await fetch('voiture_admin.php',{method:'POST',body:fd}).then(r=>r.json());
-    if (j.success) { document.getElementById('img-'+id).src='image_url/'+j.image+'?t='+Date.now(); toast('Photo mise à jour','ok'); }
-    else toast(j.message||'Erreur','err');
+    if (j.success) {
+        document.getElementById('img-'+id).src = 'image_url/'+j.image+'?t='+Date.now();
+        toast('Photo mise à jour ✓','ok');
+    } else toast(j.message||'Erreur','err');
 }
 
 // ===== MODAL AJOUT VOITURE =====
@@ -652,17 +715,17 @@ function injectCard(d, rowId) {
     if (!row) { location.reload(); return; }
     const addBtn = row.querySelector('.add-card');
     const prix = parseInt(d.prix||0).toLocaleString('fr-FR');
-    const img = 'image_url/'+(d.image||'default.jpg');
-    const modeleEsc = (d.modele||'').replace(/'/g,"\\'");
+    const img  = 'image_url/'+(d.image||'default.jpg');
+    const me   = (d.modele||'').replace(/'/g,"\\'");
     const html = `
     <div class="car-card" data-id="${d.id}" data-modele="${d.modele||''}" data-prix="${d.prix||0}" data-annee="${d.annee||''}" data-etat="${d.etat||''}" data-type="${d.type||''}" data-image="${d.image||''}">
         <div class="edit-ring"></div>
-        <button class="del-btn" onclick="confirmDelete(${d.id},'${modeleEsc}')" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
+        <button class="del-btn" onclick="confirmArchive(${d.id},'${me}')" title="Archiver"><i class="fas fa-box-archive"></i></button>
         <div class="hover-specs">
             <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase" style="font-family:'Syncopate'">Fiche Technique</p>
-            <div class="spec-item"><span>Année</span><span>${d.annee||''}</span></div>
-            <div class="spec-item"><span>État</span><span>${d.etat||''}</span></div>
-            <div class="spec-item"><span>Type</span><span>${d.type||''}</span></div>
+            <div class="spec-item"><span>Année</span><span contenteditable="true" data-car-id="${d.id}" data-field="annee" data-original="${d.annee||''}" onblur="saveField(this)">${d.annee||''}</span></div>
+            <div class="spec-item"><span>État</span><span contenteditable="true" data-car-id="${d.id}" data-field="etat" data-original="${d.etat||''}" onblur="saveField(this)">${d.etat||''}</span></div>
+            <div class="spec-item"><span>Type</span><span contenteditable="true" data-car-id="${d.id}" data-field="type" data-original="${d.type||''}" onblur="saveField(this)">${d.type||''}</span></div>
         </div>
         <div class="img-wrap" title="Cliquer pour changer">
             <div class="img-ov"><div class="img-ov-inner"><i class="fas fa-camera"></i><span>CHANGER PHOTO</span></div></div>
@@ -696,7 +759,6 @@ async function addBrand() {
     if (j.success) {
         toast('Marque créée !','ok'); input.value='';
         injectBrandSection(j.nom_marque, j.id_marque);
-        // Ajouter au select modal
         document.getElementById('m-marque').add(new Option(j.nom_marque, j.nom_marque));
     } else toast(j.message||'Erreur','err');
 }
@@ -727,25 +789,25 @@ function injectBrandSection(nom, idMarque) {
     },100);
 }
 
-// ===== SUPPRESSION =====
-function confirmDelete(id, modele) {
-    document.getElementById('confirm-text').textContent = `Supprimer "${modele}" de l'inventaire ?`;
+// ===== ARCHIVE (pas de suppression définitive) =====
+function confirmArchive(id, modele) {
+    document.getElementById('confirm-text').textContent = `"${modele}" sera retiré de l'inventaire et placé en archive.`;
     document.getElementById('confirm-ov').classList.add('open');
     document.getElementById('btn-yes').onclick = async () => {
         closeConfirm();
-        const fd = new FormData(); fd.append('action','delete_car'); fd.append('id_voiture',id);
-        toast('Suppression...','wait');
+        const fd = new FormData();
+        fd.append('action','archive_car'); fd.append('id_voiture', id);
+        toast('Archivage...','wait');
         const j = await fetch('voiture_admin.php',{method:'POST',body:fd}).then(r=>r.json());
         if (j.success) {
             const c = document.querySelector(`.car-card[data-id="${id}"]`);
             if(c){c.style.transition='all .35s';c.style.opacity='0';c.style.transform='scale(0.8)';setTimeout(()=>c.remove(),370);}
-            toast('Véhicule supprimé','ok');
+            toast('Véhicule archivé ✓','ok');
         } else toast(j.message||'Erreur','err');
     };
 }
 function closeConfirm() { document.getElementById('confirm-ov').classList.remove('open'); }
 
-// Fermer sur click extérieur
 document.getElementById('add-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 document.getElementById('confirm-ov').addEventListener('click',function(e){if(e.target===this)closeConfirm();});
 </script>

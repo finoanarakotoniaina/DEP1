@@ -64,7 +64,9 @@ CREATE TABLE voiture(
 CREATE TABLE demande_essai(
    id_demande INT AUTO_INCREMENT PRIMARY KEY,
    date_souhaitee DATE,
-   statut VARCHAR(50),
+   heure_souhaitee TIME,
+   mobile VARCHAR(20),
+   statut VARCHAR(50) DEFAULT 'en attente',
    id_client INT,
    id_voiture INT,
    FOREIGN KEY(id_client) REFERENCES client(id_client),
