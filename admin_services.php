@@ -1,7 +1,7 @@
 <?php 
-// 1. Connexion forcée (pour éviter l'erreur $conn undefined)
+// 1. Connexion forcée
 $host = "localhost";
-$dbname = "supercar"; // <-- Vérifie que c'est bien le nom de ta base
+$dbname = "supercar"; 
 $user = "root";
 $pass = "";
 
@@ -12,7 +12,7 @@ try {
     die("Erreur de connexion : " . $e->getMessage());
 }
 
-// 2. Fonction de récupération (indispensable pour l'affichage)
+// 2. Fonction de récupération
 function getContent($id) {
     global $conn;
     $stmt = $conn->prepare("SELECT content FROM services_content WHERE element_id = ?");
@@ -69,20 +69,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     
     <style>
         :root { --crimson: #C1121F; }
+        
+        body { background-color: #0a0a0a; color: white; }
+
+        /* Style du bouton Retour */
+        .back-dashboard {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 20px;
+            font-family: 'Syncopate';
+            font-size: 9px;
+            letter-spacing: 2px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-dashboard:hover {
+            background: var(--crimson);
+            border-color: var(--crimson);
+            transform: translateX(5px);
+            box-shadow: 0 0 20px rgba(193, 18, 31, 0.4);
+        }
+
         .edit-zone:focus {
             outline: none;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
             box-shadow: 0 0 0 2px var(--crimson); 
         }
+
         .btn-save {
             display: none; 
             animation: fadeIn 0.3s ease;
         }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .admin-badge {
@@ -91,10 +123,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: 'Syncopate'; font-size: 10px; border-radius: 50px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
+
+        .font-title { font-family: 'Syncopate', sans-serif; }
     </style>
 </head>
 
-<body class="split-bg text-white font-['Plus_Jakarta_Sans']">
+<body class="text-white font-['Plus_Jakarta_Sans']">
+
+    <a href="dashboard.php" class="back-dashboard">
+        <i class="fas fa-arrow-left mr-3"></i> TABLEAU DE BORD
+    </a>
 
     <div class="admin-badge"><i class="fas fa-tools mr-2"></i> ADMINISTRATION SERVICES</div>
 
@@ -153,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     
                     <input type="file" id="input_<?php echo $id_img; ?>" class="hidden" accept="image/*" 
-                           onchange="uploadImage('<?php echo $id_img; ?>', this, 'img_preview_<?php echo $i; ?>')">
+                            onchange="uploadImage('<?php echo $id_img; ?>', this, 'img_preview_<?php echo $i; ?>')">
                 </div>
                 
                 <span class="text-[var(--crimson)] font-title text-sm mb-2 block uppercase">0<?php echo $i; ?></span>
@@ -189,8 +227,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             formData.append('id', elementId);
             formData.append('content', content);
 
-            // On appelle admin_services.php (soi-même)
-            fetch('admin_services.php', { 
+            // window.location.pathname récupère le nom du fichier actuel automatiquement
+            fetch(window.location.pathname, { 
                 method: 'POST',
                 body: formData
             })
@@ -211,8 +249,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 formData.append('id', id);
                 formData.append('image', input.files[0]);
 
-                // On appelle admin_services.php (soi-même)
-                fetch('admin_services.php', {
+                fetch(window.location.pathname, {
                     method: 'POST',
                     body: formData
                 })
