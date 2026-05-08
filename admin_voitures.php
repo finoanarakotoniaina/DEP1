@@ -316,7 +316,7 @@ nav.site-nav { top: 54px !important; }
         <div class="ab-live"><div class="ab-live-dot"></div>LIVE EDITOR</div>
     </div>
     <div class="abr">
-        <a href="dashboard.php" class="ab-btn ab-ghost"><i class="fas fa-gauge-high"></i> DASHBOARD</a>
+        <a href="tableaudebord.php" class="ab-btn ab-ghost"><i class="fas fa-gauge-high"></i> TABLEAU DE BORD</a>
         <a href="voiture.php" target="_blank" class="ab-btn ab-ghost"><i class="fas fa-eye"></i> VUE CLIENT</a>
     </div>
 </div>
