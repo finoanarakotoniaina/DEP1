@@ -1,5 +1,5 @@
-<?php 
-// 1. Connexion forcée
+<?php
+// 1. Connexion forcée (pour éviter l'erreur $conn undefined)
 $host = "localhost";
 $dbname = "supercar"; 
 $user = "root";
@@ -12,7 +12,7 @@ try {
     die("Erreur de connexion : " . $e->getMessage());
 }
 
-// 2. Fonction de récupération
+// 2. Fonction de récupération (indispensable pour l'affichage)
 function getContent($id) {
     global $conn;
     $stmt = $conn->prepare("SELECT content FROM services_content WHERE element_id = ?");
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo "Erreur BDD";
         }
-        exit; 
+        exit;
     }
 
     // Cas de l'Image
@@ -69,52 +69,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
     
     <style>
         :root { --crimson: #C1121F; }
-        
-        body { background-color: #0a0a0a; color: white; }
-
-        /* Style du bouton Retour */
-        .back-dashboard {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 12px 20px;
-            font-family: 'Syncopate';
-            font-size: 9px;
-            letter-spacing: 2px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-        }
-
-        .back-dashboard:hover {
-            background: var(--crimson);
-            border-color: var(--crimson);
-            transform: translateX(5px);
-            box-shadow: 0 0 20px rgba(193, 18, 31, 0.4);
-        }
-
         .edit-zone:focus {
             outline: none;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
-            box-shadow: 0 0 0 2px var(--crimson); 
+            box-shadow: 0 0 0 2px var(--crimson);
         }
-
         .btn-save {
-            display: none; 
+            display: none;
             animation: fadeIn 0.3s ease;
         }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .admin-badge {
@@ -124,14 +92,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
-        .font-title { font-family: 'Syncopate', sans-serif; }
+        /* STYLE DU BOUTON RETOUR */
+        .btn-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            font-family: 'Syncopate';
+            font-size: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        .btn-back:hover {
+            background: var(--crimson);
+            border-color: var(--crimson);
+        }
     </style>
 </head>
 
-<body class="text-white font-['Plus_Jakarta_Sans']">
+<body class="split-bg text-white font-['Plus_Jakarta_Sans']">
 
-    <a href="dashboard.php" class="back-dashboard">
-        <i class="fas fa-arrow-left mr-3"></i> TABLEAU DE BORD
+    <!-- AJOUT DU BOUTON RETOUR -->
+    <a href="tableaudebord.php" class="btn-back">
+        <i class="fas fa-arrow-left mr-2"></i> RETOUR TABLEAU DE BORD
     </a>
 
     <div class="admin-badge"><i class="fas fa-tools mr-2"></i> ADMINISTRATION SERVICES</div>
@@ -171,8 +161,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            <?php 
-            for($i=1; $i<=4; $i++): 
+            <?php
+            for($i=1; $i<=4; $i++):
                 $id_img = "service_".$i."_img";
                 $id_title = "service_".$i."_title";
                 $id_text = "service_".$i."_text";
@@ -181,8 +171,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ?>
             <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl">
                 <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900 relative group">
-                    <img id="img_preview_<?php echo $i; ?>" src="<?php echo getContent($id_img); ?>" 
-                         class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500 cursor-pointer">
+                    <img id="img_preview_<?php echo $i; ?>" src="<?php echo getContent($id_img); ?>"
+                           class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500 cursor-pointer">
                     
                     <div class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
                         <label for="input_<?php echo $id_img; ?>" class="cursor-pointer bg-white text-black p-4 rounded-full hover:bg-[var(--crimson)] hover:text-white transition-colors">
@@ -190,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </label>
                     </div>
                     
-                    <input type="file" id="input_<?php echo $id_img; ?>" class="hidden" accept="image/*" 
+                    <input type="file" id="input_<?php echo $id_img; ?>" class="hidden" accept="image/*"
                             onchange="uploadImage('<?php echo $id_img; ?>', this, 'img_preview_<?php echo $i; ?>')">
                 </div>
                 
@@ -227,8 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             formData.append('id', elementId);
             formData.append('content', content);
 
-            // window.location.pathname récupère le nom du fichier actuel automatiquement
-            fetch(window.location.pathname, { 
+            fetch('admin_services.php', {
                 method: 'POST',
                 body: formData
             })
@@ -237,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if(data.trim() === "Succès") {
                     document.getElementById(btnId).style.display = "none";
                     const target = document.getElementById(elementId);
-                    target.style.color = "#22c55e"; 
+                    target.style.color = "#22c55e";
                     setTimeout(() => { target.style.color = ""; }, 1000);
                 } else { alert("Erreur : " + data); }
             });
@@ -249,7 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 formData.append('id', id);
                 formData.append('image', input.files[0]);
 
-                fetch(window.location.pathname, {
+                fetch('admin_services.php', {
                     method: 'POST',
                     body: formData
                 })
