@@ -127,7 +127,19 @@ try {
             <a href="admin_demande.php" class="nav-link-admin active"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
             <a href="admin_contact.php" class="nav-link-admin"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
             <a href="admin_services.php" class="nav-link-admin"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                   </nav>
+=======
+<<<<<<< HEAD
+             <a href="admin_archive.php" class="nav-link-admin"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
+=======
+            <a href="admin_archive.php" class="nav-link-admin"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
+>>>>>>> 8d62e3a6844e7e65b8096fa6586c86031966fceb
+>>>>>>> d495bf5943b6f75d7ba0edb89d474ff3b96c4064
         </nav>
+>>>>>>> f577bdeb41bffb3cbd76b278418fe2ac3365115f
 
         <div class="mt-auto pt-6 border-t border-white/5">
             <a href="logout.php" class="logout-btn-admin">

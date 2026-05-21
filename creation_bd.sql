@@ -99,3 +99,32 @@ CREATE TABLE essai_content (
     contenu TEXT
 ) ENGINE=InnoDB CHARSET=utf8mb4;
 
+
+
+
+-- TABLE CONTACT SETTINGS--
+
+
+-- 2. On s'assure que la table pour la CONFIGURATION DES TEXTES existe et porte le bon nom
+CREATE TABLE IF NOT EXISTS contact_settings (
+    element_id VARCHAR(50) PRIMARY KEY,
+    content TEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table CONTACT_CLIENT: --
+
+
+-- 1. On supprime l'ancienne table si elle existe pour partir sur une base propre
+DROP TABLE IF EXISTS contact_client;
+
+-- 2. On crée la table finale pour stocker les messages de tes clients
+CREATE TABLE contact_client (
+    id_contact INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    prenom VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    message TEXT NOT NULL,
+    date_envoi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+

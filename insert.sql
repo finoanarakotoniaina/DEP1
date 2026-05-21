@@ -43,12 +43,16 @@ INSERT INTO admin (identifiant, nom, prenom, motdepasse)
 VALUES ('MadisonCarter', 'Carter', 'Madison', 'didison');
 
 -- contenu accueil 
-INSERT INTO home_content (element_id, content) VALUES
-('brand_1_desc', 'Bien que la marque se soit diveifvehber'),
+INSERT INTO table_contenu (id, contenu) VALUES 
 ('brand_1_name', 'BMW'),
-('hero_subtitle', 'Votre partenaire de confiance à l\'Île Maurice pour l\'acquisition de véhicules d\'exception importés d\'Allemagne, du Japon et des USA.'),
-('hero_title', 'L\'ÉLÉGANCE<br> <span class="text-[var(--crimson)]">CERTIFIEE</span>'),
-('hero_video', 'mercedes.mp4');
+('brand_1_desc', 'Bien que la marque se soit diversifiee.'),
+('brand_2_name', 'MERCEDES-BENZ'),
+('brand_2_desc', 'L excellence et l innovation automobile allemande depuis des generations.'),
+('brand_3_name', 'AUDI'),
+('brand_3_desc', 'Le confort haut de gamme allie a la technologie de pointe Vorsprung durch Technik.'),
+('brand_4_name', 'PORSCHE'),
+('brand_4_desc', 'La performance pure et le design intemporel des voitures de sport.');
+
 
 -- contenu essai
 INSERT INTO essai_content (id, contenu) VALUES 
@@ -75,3 +79,26 @@ INSERT INTO services_content (element_id, content) VALUES
 ('service_4_title', 'Moteur'),
 ('serv_hero_desc', 'Nos services de maintenance garantissent que chaque kilomètre reste une expérience pure et sans compromis.'),
 ('serv_hero_title', 'Domptez <br> <span class="text-[var(--crimson)]">l\'instinct.</span>');
+
+REPLACE INTO contact_content (element_id, content) VALUES 
+('contact_title', 'CONTACTEZ-NOUS'),
+('contact_subtitle', 'Une question ou un projet d''achat ? L''équipe SuperCar est à votre entière disposition.'),
+('contact_phone', '+230 403 2000'),
+('contact_email', 'contact@supercar.mu'),
+('contact_address', 'Cybercité, Ébène - Île Maurice');
+
+INSERT INTO `contact_settings` (`element_id`, `content`) VALUES
+('contact_title', 'Contactez-Nous'),
+('contact_subtitle', 'Une question ou une demande d\'essai ? Notre équipe est à votre disposition.'),
+('company_address', 'Cybercité, Ébène - Île Maurice'),
+('company_phone', '+230 390 9998'),
+('company_email', 'contact@supercar.mu');
+
+-- 3. On injecte les textes par défaut pour que l'Éditeur Live ne soit pas vide au départ
+INSERT INTO contact_settings (element_id, content) VALUES
+('contact_title', 'PRENDRE CONTACT'),
+('contact_subtitle', 'Une question ? Un projet d\'acquisition ? Notre équipe d\'experts est à votre entière disposition pour vous accompagner.'),
+('company_address', 'MCCI Business School, Ébène, Maurice'),
+('company_phone', '+230 467 1234'),
+('company_email', 'contact@supercar.mu')
+ON DUPLICATE KEY UPDATE content=VALUES(content);
