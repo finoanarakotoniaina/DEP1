@@ -18,15 +18,17 @@ $message_status = "";
 // --- LOGIQUE DE SAUVEGARDE ÉDITEUR LIVE ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
     try {
-        // Mise à jour des 5 champs de texte (Structure identique clé/valeur ou ID)
-        $stmt_text = $db->prepare("UPDATE contact_settings SET content = ? WHERE element_id = ?");
-        $stmt_text->execute([$_POST['txt_1'] ?? '', 'contact_title']);
-        $stmt_text->execute([$_POST['txt_2'] ?? '', 'contact_subtitle']);
-        $stmt_text->execute([$_POST['txt_3'] ?? '', 'company_address']);
-        $stmt_text->execute([$_POST['txt_4'] ?? '', 'company_phone']);
-        $stmt_text->execute([$_POST['txt_5'] ?? '', 'company_email']);
+        // ✅ CORRECTION : Correspondance exacte avec tes colonnes 'valeur' et 'cle'
+        $stmt_text = $db->prepare("UPDATE contact_settings SET valeur = ? WHERE cle = ?");
+        
+        // ✅ CORRECTION : Alignement sur tes vraies clés BDD
+        $stmt_text->execute([trim($_POST['txt_1'] ?? ''), 'titre_principal']);
+        $stmt_text->execute([trim($_POST['txt_2'] ?? ''), 'responsable_contact']); 
+        $stmt_text->execute([trim($_POST['txt_3'] ?? ''), 'siege_contact']);
+        $stmt_text->execute([trim($_POST['txt_4'] ?? ''), 'tel_contact']);
+        $stmt_text->execute([trim($_POST['txt_5'] ?? ''), 'email_contact']);
 
-        $message_status = "✅ INTERFACE MISE À JOUR";
+        $message_status = "✅ INTERFACE MISE À JOUR AVEC SUCCÈS";
     } catch (Exception $e) {
         $message_status = "❌ ERREUR : " . $e->getMessage();
     }
@@ -39,11 +41,11 @@ try {
     $resAdmin = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
     $adminFullName = $resAdmin ? $resAdmin['prenom'] . " " . $resAdmin['nom'] : "Admin";
 
-    // Récupération des textes depuis la table contact_settings
-    $settings = $db->query("SELECT element_id, content FROM contact_settings")->fetchAll(PDO::FETCH_KEY_PAIR);
+    // ✅ CORRECTION : Extraction clé/valeur conforme à ta structure de table
+    $settings = $db->query("SELECT cle, valeur FROM contact_settings")->fetchAll(PDO::FETCH_KEY_PAIR);
 
 } catch (PDOException $e) {
-    die("Erreur : " . $e->getMessage());
+    die("Erreur Système : " . $e->getMessage());
 }
 
 $currentPage = basename($_SERVER['PHP_SELF']);
@@ -67,8 +69,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         .logout-btn-admin { display: flex; align-items: center; justify-content: center; gap: 0.75rem; width: 100%; padding: 0.75rem; margin-bottom: 0.8rem; background: rgba(193, 18, 31, 0.1); border: 1px solid rgba(193, 18, 31, 0.2); border-radius: 14px; color: #ff4d4d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
         .logout-btn-admin:hover { background: var(--crimson); color: white; }
         
-        /* Style spécial Éditeur Live de ton cockpit */
-        .live-wrap { background-color: #0b0f19; border-radius: 32px; position: relative; overflow: hidden; min-height: 400px; border: 1px solid rgba(255,255,255,0.05); width: 100%; }
+        /* 🔵 CHANGEMENT ICI : La boîte prend désormais la couleur de fond 'var(--cosmos)' */
+        .live-wrap { background-color: var(--cosmos); border-radius: 32px; position: relative; overflow: hidden; min-height: 400px; border: 1px solid rgba(255,255,255,0.05); width: 100%; }
         .live-field { background: transparent; border: 1px dashed rgba(255,255,255,0.1); color: white; outline: none; transition: 0.2s; width: 100%; }
         .live-field:hover { border-color: rgba(255,255,255,0.4); }
         .live-field:focus { border-color: var(--crimson); border-style: solid; background: rgba(255,255,255,0.05); }
@@ -82,6 +84,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </div>
         
         <nav class="flex-1 space-y-1">
+<<<<<<< HEAD
     <a href="tableaudebord.php" class="nav-link-admin"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
     <a href="admin_accueil.php" class="nav-link-admin"><i class="fa-solid fa-house w-5"></i> Page Accueil</a>
     <a href="admin_affichage_contact.php" class="nav-link-admin <?= ($currentPage == 'admin_affichage_contact.php') ? 'active' : '' ?>"><i class="fa-solid fa-address-book w-5"></i> Page Contact</a>
@@ -91,6 +94,19 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <a href="admin_services.php" class="nav-link-admin"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
     <a href="mentions-legales.php" class="nav-link-admin <?= ($currentPage == 'mentions-legales.php') ? 'active' : '' ?>"><i class="fa-solid fa-scale-balanced w-5"></i> Mentions Légales</a>
 </nav>
+=======
+            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[2px] mb-4 px-2">Menu Principal</p>
+            <a href="tableaudebord.php" class="nav-link-admin <?= ($currentPage == 'tableaudebord.php') ? 'active' : '' ?>"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
+            <a href="admin_accueil.php" class="nav-link-admin <?= ($currentPage == 'admin_accueil.php') ? 'active' : '' ?>"><i class="fa-solid fa-house w-5"></i> Page Accueil</a>
+            <a href="admin_affichage_contact.php" class="nav-link-admin <?= ($currentPage == 'admin_affichage_contact.php') ? 'active' : '' ?>"><i class="fa-solid fa-address-book w-5"></i> Page Contact</a>
+            <a href="admin_voitures.php" class="nav-link-admin <?= ($currentPage == 'admin_voitures.php') ? 'active' : '' ?>"><i class="fa-solid fa-car-side w-5"></i> Inventaire</a>
+            <a href="admin_demande.php" class="nav-link-admin <?= ($currentPage == 'admin_demande.php') ? 'active' : '' ?>"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
+            <a href="admin_contact.php" class="nav-link-admin <?= ($currentPage == 'admin_contact.php') ? 'active' : '' ?>"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
+            <a href="admin_services.php" class="nav-link-admin <?= ($currentPage == 'admin_services.php') ? 'active' : '' ?>"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
+            <a href="admin_archive.php" class="nav-link-admin <?= ($currentPage == 'admin_archive.php') ? 'active' : '' ?>"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
+        </nav>
+
+>>>>>>> a034c0bf9331a0379b399c7ed5141d80ffe477f3
         <div class="mt-auto pt-6 border-t border-white/5">
             <a href="logout.php" class="logout-btn-admin">
                 <i class="fa-solid fa-power-off text-xs"></i> Se déconnecter
@@ -130,11 +146,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     
                     <div class="border-b border-white/5 pb-6 space-y-3">
                         <input type="text" name="txt_1"
-                               value="<?= htmlspecialchars($settings['contact_title'] ?? '') ?>"
+                               value="<?= htmlspecialchars($settings['titre_principal'] ?? '') ?>"
                                class="live-field font-title text-4xl font-black uppercase tracking-tight">
 
                         <textarea name="txt_2" rows="2"
-                                  class="live-field text-sm text-gray-400 leading-relaxed resize-none"><?= htmlspecialchars($settings['contact_subtitle'] ?? '') ?></textarea>
+                                  class="live-field text-sm text-gray-400 leading-relaxed resize-none"><?= htmlspecialchars($settings['responsable_contact'] ?? '') ?></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
@@ -142,20 +158,20 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         <div class="bg-white/[0.02] border border-white/5 p-6 rounded-2xl flex flex-col gap-2">
                             <span class="text-[10px] uppercase tracking-widest text-[var(--crimson)] font-bold"><i class="fa-solid fa-location-dot mr-2"></i>Adresse</span>
                             <textarea name="txt_3" rows="2"
-                                      class="live-field text-xs text-gray-300 font-medium resize-none"><?= htmlspecialchars($settings['company_address'] ?? '') ?></textarea>
+                                      class="live-field text-xs text-gray-300 font-medium resize-none"><?= htmlspecialchars($settings['siege_contact'] ?? '') ?></textarea>
                         </div>
 
                         <div class="bg-white/[0.02] border border-white/5 p-6 rounded-2xl flex flex-col gap-2">
                             <span class="text-[10px] uppercase tracking-widest text-[var(--crimson)] font-bold"><i class="fa-solid fa-phone mr-2"></i>Téléphone</span>
                             <input type="text" name="txt_4"
-                                   value="<?= htmlspecialchars($settings['company_phone'] ?? '') ?>"
+                                   value="<?= htmlspecialchars($settings['tel_contact'] ?? '') ?>"
                                    class="live-field text-xs text-gray-300 font-medium">
                         </div>
 
                         <div class="bg-white/[0.02] border border-white/5 p-6 rounded-2xl flex flex-col gap-2">
                             <span class="text-[10px] uppercase tracking-widest text-[var(--crimson)] font-bold"><i class="fa-solid fa-envelope mr-2"></i>E-mail</span>
                             <input type="text" name="txt_5"
-                                   value="<?= htmlspecialchars($settings['company_email'] ?? '') ?>"
+                                   value="<?= htmlspecialchars($settings['email_contact'] ?? '') ?>"
                                    class="live-field text-xs text-gray-300 font-medium">
                         </div>
 
