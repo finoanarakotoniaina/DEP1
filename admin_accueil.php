@@ -13,12 +13,13 @@ include 'config.php';
     <link rel="stylesheet" href="style.css">
     
     <style>
+        :root { --crimson: #C1121F; }
         /* Zone de texte quand on clique dessus */
         .edit-zone:focus {
             outline: none;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
-            box-shadow: 0 0 0 2px #C1121F; 
+            box-shadow: 0 0 0 2px var(--crimson); 
         }
         /* Cache les boutons par défaut */
         .btn-save {
@@ -29,14 +30,41 @@ include 'config.php';
         
         .admin-badge {
             position: fixed; bottom: 20px; left: 20px; z-index: 100;
-            background: #C1121F; color: white; padding: 12px 24px;
+            background: var(--crimson); color: white; padding: 12px 24px;
             font-family: 'Syncopate'; font-size: 10px; border-radius: 50px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        /* STYLE DU BOUTON RETOUR */
+        .btn-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            font-family: 'Syncopate';
+            font-size: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        .btn-back:hover {
+            background: var(--crimson);
+            border-color: var(--crimson);
         }
     </style>
 </head>
 
 <body class="home-bg text-white">
+
+    <a href="tableaudebord.php" class="btn-back">
+        <i class="fas fa-arrow-left mr-2"></i> RETOUR TABLEAU DE BORD
+    </a>
 
     <div class="admin-badge"><i class="fas fa-edit mr-2"></i> PANEL ADMINISTRATION</div>
 
@@ -104,26 +132,23 @@ include 'config.php';
     </section>
 
     <script>
-        // Affiche le bouton de sauvegarde spécifique
         function showBtn(id) {
             document.getElementById(id).style.display = "block";
         }
 
-        // Sauvegarde générique pour n'importe quel ID
         function saveText(elementId, btnId) {
             const el = document.getElementById(elementId);
-            // Utilise innerHTML pour le titre (si balises span), sinon innerText
             const content = (elementId === 'hero_title') ? el.innerHTML : el.innerText;
             
             executeUpload(elementId, content, btnId);
         }
 
-        // Envoi AJAX vers updatehome.php
         function executeUpload(id, content, btnId) {
             let formData = new FormData();
             formData.append('id', id);
             formData.append('content', content);
 
+            // Envoi vers updatehome.php comme initialement configuré
             fetch('updatehome.php', {
                 method: 'POST',
                 body: formData
@@ -134,7 +159,6 @@ include 'config.php';
                     console.log("Sauvegarde " + id + " : OK");
                     if(btnId) {
                         document.getElementById(btnId).style.display = "none";
-                        // Petit effet visuel de confirmation (flash vert)
                         const target = document.getElementById(id);
                         target.style.transition = "color 0.3s";
                         target.style.color = "#22c55e"; 
