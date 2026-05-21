@@ -1,6 +1,7 @@
 <?php
 /**
- * SUPERCAR - Cockpit de Gestion & Éditeur Live
+ * SUPERCAR - Cockpit de Gestion & Éditeur Live Intégré
+ * Version unifiée avec 3 Onglets : Radar, Éditeur Live & Historique
  */
 session_start();
 require_once 'config.php';
@@ -58,11 +59,11 @@ try {
     $img_path = $ui[6] ?? 'photo_essai.jpeg';
 
     $totalDemandes = $db->query("SELECT COUNT(*) FROM demande_essai")->fetchColumn();
-    $enCours = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'en_attente' OR statut IS NULL")->fetchColumn();
+    $enCours = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'en_attente' OR statut IS NULL OR statut = 'en attente'")->fetchColumn();
     $acceptees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'accepte'")->fetchColumn();
-    $refusees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'refuse'")->fetchColumn();
+    $refusees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'refuse' OR statut = 'refusé'")->fetchColumn();
 
-    // Remplace ton bloc SELECT par celui-ci :
+    // Requête ajustée strictement à votre BDD (Sans heure_souhaitee)
     $demandes = $db->query("
         SELECT 
             de.id_demande,
@@ -92,42 +93,40 @@ try {
     <link rel="stylesheet" href="style.css">
     
     <style>
-        body { background-color: var(--cosmos); }
+        body { background-color: var(--cosmos, #000814); }
         .sidebar { background: rgba(0, 0, 0, 0.2); border-right: 1px solid rgba(255, 255, 255, 0.05); }
         .nav-link-admin { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.25rem; border-radius: 14px; color: rgba(255,255,255,0.6); transition: 0.3s; font-size: 0.85rem; font-weight: 600; }
         .nav-link-admin:hover { color: white; background: rgba(255,255,255,0.05); }
-        .nav-link-admin.active { color: white; background: linear-gradient(90deg, rgba(193, 18, 31, 0.2), transparent); border-left: 3px solid var(--crimson); }
+        .nav-link-admin.active { color: white; background: linear-gradient(90deg, rgba(193, 18, 31, 0.2), transparent); border-left: 3px solid var(--crimson, #c1121f); }
         .logout-btn-admin { display: flex; align-items: center; justify-content: center; gap: 0.75rem; width: 100%; padding: 0.75rem; margin-bottom: 0.8rem; background: rgba(193, 18, 31, 0.1); border: 1px solid rgba(193, 18, 31, 0.2); border-radius: 14px; color: #ff4d4d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .logout-btn-admin:hover { background: var(--crimson); color: white; }
+        .logout-btn-admin:hover { background: var(--crimson, #c1121f); color: white; }
         .stat-icon { position: absolute; right: -10px; bottom: -10px; font-size: 5rem; opacity: 0.05; transform: rotate(-15deg); transition: all 0.5s ease; pointer-events: none; }
         .group:hover .stat-icon { opacity: 0.15; transform: rotate(0deg) scale(1.1); color: white; }
         .table-container { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
-        .status-badge { background: rgba(193, 18, 31, 0.15); color: var(--crimson); border: 1px solid rgba(193, 18, 31, 0.3); }
 
         .tab-btn { padding: 12px 24px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid transparent; transition: 0.3s; opacity: 0.5; cursor: pointer; color: white; }
-        .tab-btn.active { opacity: 1; border-color: var(--crimson); color: var(--crimson); }
+        .tab-btn.active { opacity: 1; border-color: var(--crimson, #c1121f); color: var(--crimson, #c1121f); }
 
         .live-wrap { background-color: #003049; border-radius: 32px; position: relative; overflow: hidden; min-height: 400px; border: 1px solid rgba(255,255,255,0.1); width: 100%; }
         .live-field { background: transparent; border: 1px dashed rgba(255,255,255,0.1); color: white; outline: none; transition: 0.2s; width: 100%; }
         .live-field:hover { border-color: rgba(255,255,255,0.4); }
-        .live-field:focus { border-color: var(--crimson); border-style: solid; background: rgba(255,255,255,0.05); }
+        .live-field:focus { border-color: var(--crimson, #c1121f); border-style: solid; background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-white">
 
-        <aside class="w-72 sidebar p-6 flex flex-col z-20">
+    <aside class="w-72 sidebar p-6 flex flex-col z-20">
         <div class="font-title text-xl tracking-tighter uppercase mb-4">
-            SUPER<span class="text-[var(--crimson)]">CAR</span>
+            SUPER<span class="text-[var(--crimson,#c1121f)]">CAR</span>
         </div>
         
         <nav class="flex-1 space-y-1">
-            <a href="tableaudebord.php" class="nav-link-admin active"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
-             <a href="admin_accueil.php" class="nav-link-admin"><i class="fa-solid fa-house w-5"></i> Page Accueil</a>
+            <a href="tableaudebord.php" class="nav-link-admin"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
+            <a href="admin_accueil.php" class="nav-link-admin"><i class="fa-solid fa-house w-5"></i> Page Accueil</a>
             <a href="admin_voitures.php" class="nav-link-admin"><i class="fa-solid fa-car-side w-5"></i> Inventaire</a>
-            <a href="admin_demande.php" class="nav-link-admin"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
+            <a href="admin_demande.php" class="nav-link-admin active"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
             <a href="admin_contact.php" class="nav-link-admin"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
             <a href="admin_services.php" class="nav-link-admin"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
-            <a href="admin_archive.php" class="nav-link-admin"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-white/5">
@@ -153,13 +152,14 @@ try {
         <header class="mb-8">
             <div class="flex justify-between items-center">
                 <h2 class="text-4xl font-title font-black italic uppercase tracking-tighter">
-                    GESTION DES <span style="color: var(--crimson)">DEMANDES</span>
+                    GESTION DES <span style="color: var(--crimson, #c1121f)">DEMANDES</span>
                 </h2>
             </div>
             
             <div class="flex gap-8 mt-8 border-b border-white/5">
-                <div onclick="switchTab('radar')" id="btn-radar" class="tab-btn active">Radar Demandes</div>
-                <div onclick="switchTab('editor')" id="btn-editor" class="tab-btn">Éditeur Live</div>
+                <div onclick="switchTab('radar')" id="btn-radar" class="tab-btn active">Demandes</div>
+                <div onclick="switchTab('editor')" id="btn-editor" class="tab-btn">Interface</div>
+                <div onclick="switchTab('history')" id="btn-history" class="tab-btn">Historique</div>
             </div>
         </header>
 
@@ -180,38 +180,10 @@ try {
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Approuvées</p>
                     <h3 class="text-3xl font-title font-black italic text-white"><?= $acceptees ?></h3>
                 </div>
-                <div class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md relative overflow-hidden group border-l-4 border-l-[var(--crimson)]">
+                <div class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md relative overflow-hidden group border-l-4 border-l-[var(--crimson,#c1121f)]">
                     <i class="fa-solid fa-ban stat-icon"></i>
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Refusées</p>
                     <h3 class="text-3xl font-title font-black italic text-white"><?= $refusees ?></h3>
-                </div>
-            </div>
-
-            <!-- Légende feu de circulation -->
-            <div class="flex items-center justify-end gap-10 mb-8 mt-2">
-                <!-- Feu de circulation -->
-                <div class="flex items-center gap-6 bg-white/5 border border-white/10 rounded-2xl px-8 py-4 backdrop-blur-sm">
-                    <!-- Feu -->
-                    <div class="flex flex-col items-center gap-1.5 bg-black/40 px-3 py-3 rounded-xl border border-white/10">
-                        <span class="w-4 h-4 rounded-full bg-green-400 shadow-[0_0_8px_2px_rgba(74,222,128,0.6)]"></span>
-                        <span class="w-4 h-4 rounded-full bg-orange-400 shadow-[0_0_8px_2px_rgba(251,146,60,0.6)]"></span>
-                        <span class="w-4 h-4 rounded-full bg-red-500 shadow-[0_0_8px_2px_rgba(239,68,68,0.6)]"></span>
-                    </div>
-                    <!-- Labels -->
-                    <div class="flex flex-col gap-3">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-green-400"></span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-green-400">Accepté</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-orange-400"></span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-orange-400">En attente</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-red-400">Refusé</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -220,88 +192,55 @@ try {
                     <thead class="bg-white/5 text-[10px] uppercase font-title tracking-widest text-gray-400">
                         <tr>
                             <th class="p-5">Client</th>
-                            <th class="p-5">Modèle</th>
+                            <th class="p-5">Modèle Véhicule</th>
                             <th class="p-5">Téléphone</th>
-                            <th class="p-5">Date</th>
-                            <th class="p-5">Heure</th>
-                            <th class="p-5">Statut</th>
+                            <th class="p-5">Date Souhaitée</th>
+                            <th class="p-5 text-center">Statut</th>
                             <th class="p-5 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
-                        <?php foreach($demandes as $d): 
+                        <?php 
+                        $hasActive = false;
+                        foreach($demandes as $d): 
                             $statut = strtolower(trim($d['statut'] ?? ''));
-                            if ($statut === 'accepte' || $statut === 'accepté') {
-                                $dot = 'bg-green-400';
-                                $label = 'Accepté';
-                                $labelColor = 'text-green-400';
-                            } elseif ($statut === 'refuse' || $statut === 'refusé') {
-                                $dot = 'bg-red-500';
-                                $label = 'Refusé';
-                                $labelColor = 'text-red-400';
-                            } else {
-                                $dot = 'bg-orange-400';
-                                $label = 'En attente';
-                                $labelColor = 'text-orange-400';
-                            }
+                            // On filtre pour masquer les dossiers complètement classés de cet onglet
+                            if ($statut === 'termine' || $statut === 'terminé' || $statut === 'refuse' || $statut === 'refusé') continue;
+                            $hasActive = true;
+                            
+                            $dot = 'bg-orange-400'; // Par défaut : en attente
+                            if ($statut === 'accepte' || $statut === 'accepté') { $dot = 'bg-green-400'; }
                         ?>
                         <tr class="hover:bg-white/[0.02] transition-colors">
-                            <!-- Client -->
                             <td class="p-5">
                                 <p class="font-bold text-sm uppercase tracking-tight text-white"><?= htmlspecialchars($d['nom_complet'] ?? 'Anonyme') ?></p>
                                 <p class="text-[9px] text-gray-500 uppercase tracking-widest">#<?= $d['id_demande'] ?></p>
                             </td>
-                            <!-- Modèle -->
                             <td class="p-5">
-                                <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--crimson)]">
+                                <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--crimson,#c1121f)]">
                                     <?= htmlspecialchars($d['modele'] ?? '—') ?>
                                 </span>
                             </td>
-                            <!-- Contact -->
-                            <td class="p-5">
-                                <p class="text-[11px] text-gray-300"><?= htmlspecialchars($d['telephone'] ?? '—') ?></p>
-                            </td>
-                            <!-- Date -->
-                            <td class="p-5">
-                                <span class="text-[11px] text-gray-300">
-                                    <?= $d['date_souhaitee'] ? date('d/m/Y', strtotime($d['date_souhaitee'])) : '—' ?>
-                                </span>
-                            </td>
-                            <!-- Heure -->
-                            <td class="p-5">
-                                <span class="text-[11px] text-gray-300">
-                                    <?= $d['heure_souhaitee'] ? date('H\hi', strtotime($d['heure_souhaitee'])) : '—' ?>
-                                </span>
-                            </td>
-                            <!-- Statut : cercle coloré uniquement -->
-                            <td class="p-5">
-                                <div class="flex items-center justify-center">
-                                    <span class="w-4 h-4 rounded-full <?= $dot ?> shadow-lg"></span>
-                                </div>
-                            </td>
-                            <!-- Actions : icônes centrées -->
+                            <td class="p-5"><p class="text-[11px] text-gray-300"><?= htmlspecialchars($d['telephone'] ?? '—') ?></p></td>
+                            <td class="p-5"><span class="text-[11px] text-gray-300"><?= $d['date_souhaitee'] ? date('d/m/Y', strtotime($d['date_souhaitee'])) : '—' ?></span></td>
+                            <td class="p-5"><div class="flex items-center justify-center"><span class="w-4 h-4 rounded-full <?= $dot ?> shadow-lg"></span></div></td>
                             <td class="p-5">
                                 <div class="flex items-center justify-center gap-3">
                                     <form method="POST">
                                         <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
-                                        <button type="submit" name="action" value="accepte"
-                                                class="w-8 h-8 flex items-center justify-center bg-green-500/10 border border-green-500/30 text-green-400 rounded-full hover:bg-green-500 hover:text-white transition-all"
-                                                title="Accepter">
-                                            <i class="fa-solid fa-check text-xs"></i>
-                                        </button>
+                                        <button type="submit" name="action" value="accepte" class="w-8 h-8 flex items-center justify-center bg-green-500/10 border border-green-500/30 text-green-400 rounded-full hover:bg-green-500 hover:text-white transition-all"><i class="fa-solid fa-check text-xs"></i></button>
                                     </form>
                                     <form method="POST">
                                         <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
-                                        <button type="submit" name="action" value="refuse"
-                                                class="w-8 h-8 flex items-center justify-center bg-red-500/10 border border-red-500/30 text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all"
-                                                title="Refuser">
-                                            <i class="fa-solid fa-xmark text-xs"></i>
-                                        </button>
+                                        <button type="submit" name="action" value="refuse" class="w-8 h-8 flex items-center justify-center bg-red-500/10 border border-red-500/30 text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all"><i class="fa-solid fa-xmark text-xs"></i></button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
+                        <?php if(!$hasActive): ?>
+                            <tr><td colspan="6" class="p-10 text-center text-gray-500 italic text-[11px] uppercase tracking-widest">Aucune nouvelle demande sur le radar.</td></tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -309,64 +248,101 @@ try {
 
         <section id="tab-editor" class="tab-content hidden">
             <form method="POST" enctype="multipart/form-data">
-                <!-- Reproduction fidèle du hero de demande.php -->
                 <div class="live-wrap shadow-2xl mx-auto max-w-5xl" style="min-height: 420px; position: relative; overflow: hidden;">
-
-                    <!-- IMAGE pleine largeur en arrière-plan (comme demande.php) -->
                     <div class="absolute inset-0 z-0">
                         <img id="preview_img" src="<?= $img_path ?>" class="w-full h-full object-cover grayscale opacity-50" style="object-position: right center;">
-                        <!-- Fondu identique à demande.php -->
                         <div class="absolute inset-0" style="background: linear-gradient(to right, #003049 0%, #003049 40%, rgba(0,48,73,0.5) 58%, transparent 72%);"></div>
                     </div>
 
-                    <!-- TEXTE au premier plan à gauche (comme demande.php) -->
                     <div class="relative z-10 w-1/2 h-full p-10 flex flex-col justify-center gap-6">
+                        <input type="text" name="txt_1" value="<?= htmlspecialchars($ui[1] ?? '') ?>" class="live-field text-[9px] font-bold tracking-[0.5em] uppercase text-gray-400">
+                        <textarea name="txt_2" rows="1" class="live-field font-title text-4xl font-black uppercase leading-none resize-none"><?= htmlspecialchars($ui[2] ?? '') ?></textarea>
+                        <textarea name="txt_3" rows="1" class="live-field font-title text-4xl font-black uppercase leading-none resize-none" style="color: var(--crimson, #c1121f);"><?= htmlspecialchars($ui[3] ?? '') ?></textarea>
 
-                        <!-- ID 1 : Accroche -->
-                        <input type="text" name="txt_1"
-                               value="<?= htmlspecialchars($ui[1] ?? '') ?>"
-                               class="live-field text-[9px] font-bold tracking-[0.5em] uppercase text-gray-400">
-
-                        <!-- ID 2 : Titre ligne 1 (blanc) -->
-                        <textarea name="txt_2" rows="1"
-                                  class="live-field font-title text-4xl font-black uppercase leading-none resize-none"><?= htmlspecialchars($ui[2] ?? '') ?></textarea>
-
-                        <!-- ID 3 : Titre ligne 2 (toujours crimson) -->
-                        <textarea name="txt_3" rows="1"
-                                  class="live-field font-title text-4xl font-black uppercase leading-none resize-none"
-                                  style="color: var(--crimson);"><?= htmlspecialchars($ui[3] ?? '') ?></textarea>
-
-                        <!-- ID 4 : Description -->
                         <div class="flex gap-4">
-                            <div class="w-1 flex-shrink-0 bg-[var(--crimson)]"></div>
-                            <textarea name="txt_4" rows="3"
-                                      class="live-field text-[11px] text-gray-400 leading-relaxed resize-none"><?= htmlspecialchars($ui[4] ?? '') ?></textarea>
+                            <div class="w-1 flex-shrink-0 bg-[var(--crimson,#c1121f)]"></div>
+                            <textarea name="txt_4" rows="3" class="live-field text-[11px] text-gray-400 leading-relaxed resize-none"><?= htmlspecialchars($ui[4] ?? '') ?></textarea>
                         </div>
 
-                        <!-- ID 5 : Bouton -->
                         <div class="flex items-center gap-4">
                             <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center flex-shrink-0">
                                 <i class="fa-solid fa-angles-down text-[10px]"></i>
                             </div>
-                            <input type="text" name="txt_5"
-                                   value="<?= htmlspecialchars($ui[5] ?? '') ?>"
-                                   class="live-field text-[9px] font-black uppercase tracking-[0.3em]">
+                            <input type="text" name="txt_5" value="<?= htmlspecialchars($ui[5] ?? '') ?>" class="live-field text-[9px] font-black uppercase tracking-[0.3em]">
                         </div>
                     </div>
 
-                    <!-- Bouton upload photo -->
-                    <label for="image_hero_file" class="absolute bottom-6 right-6 w-12 h-12 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer hover:bg-[var(--crimson)] transition-all z-20" title="Changer l'image">
+                    <label for="image_hero_file" class="absolute bottom-6 right-6 w-12 h-12 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer hover:bg-[var(--crimson,#c1121f)] transition-all z-20" title="Changer l'image">
                         <i class="fa-solid fa-camera text-white"></i>
                         <input type="file" id="image_hero_file" name="image_hero" class="hidden" accept="image/*" onchange="previewHero(event)">
                     </label>
                 </div>
 
                 <div class="mt-8 flex justify-center">
-                    <button type="submit" name="save_ui" class="bg-[var(--crimson)] px-14 py-4 font-title text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all">
+                    <button type="submit" name="save_ui" class="bg-[var(--crimson,#c1121f)] px-14 py-4 font-title text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all">
                         Mettre à jour
                     </button>
                 </div>
             </form>
+        </section>
+
+        <section id="tab-history" class="tab-content hidden">
+            <div class="table-container rounded-[32px] overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-white/5 text-[10px] uppercase font-title tracking-widest text-gray-400">
+                        <tr>
+                            <th class="p-5">Client</th>
+                            <th class="p-5">Modèle Véhicule</th>
+                            <th class="p-5">Téléphone / Email</th>
+                            <th class="p-5">Date Session</th>
+                            <th class="p-5 text-center">État Final</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        <?php 
+                        $hasArchive = false;
+                        foreach($demandes as $row): 
+                            $st = strtolower(trim($row['statut'] ?? ''));
+                            // On retient uniquement ce qui est classé/clôturé
+                            if ($st !== 'refuse' && $st !== 'refusé' && $st !== 'termine' && $st !== 'terminé') continue;
+                            $hasArchive = true;
+
+                            if ($st === 'termine' || $st === 'terminé') {
+                                $badgeStyle = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                                $badgeLabel = "<i class='fa-solid fa-flag-checkered mr-1.5'></i> Terminé";
+                            } else {
+                                $badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20";
+                                $badgeLabel = "<i class='fa-solid fa-ban mr-1.5'></i> Refusé";
+                            }
+                        ?>
+                        <tr class="hover:bg-white/[0.02] transition-colors">
+                            <td class="p-5">
+                                <p class="font-bold text-sm uppercase text-white"><?= htmlspecialchars($row['nom_complet'] ?? 'Anonyme') ?></p>
+                                <p class="text-[9px] text-gray-500">#<?= $row['id_demande'] ?></p>
+                            </td>
+                            <td class="p-5">
+                                <span class="text-[11px] font-bold uppercase tracking-widest text-gray-300"><?= htmlspecialchars($row['modele'] ?? '—') ?></span>
+                            </td>
+                            <td class="p-5">
+                                <p class="text-[11px] text-gray-300"><?= htmlspecialchars($row['telephone'] ?? '—') ?></p>
+                                <p class="text-[10px] text-gray-500 italic"><?= htmlspecialchars($row['email'] ?? '—') ?></p>
+                            </td>
+                            <td class="p-5">
+                                <span class="text-[11px] text-gray-400"><?= $row['date_souhaitee'] ? date('d/m/Y', strtotime($row['date_souhaitee'])) : '—' ?></span>
+                            </td>
+                            <td class="p-5">
+                                <div class="flex items-center justify-center">
+                                    <span class="inline-flex items-center px-4 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-full border <?= $badgeStyle ?>"><?= $badgeLabel ?></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php if(!$hasArchive): ?>
+                            <tr><td colspan="5" class="p-10 text-center text-gray-500 italic text-[11px] uppercase tracking-widest">Aucun historique enregistré.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
