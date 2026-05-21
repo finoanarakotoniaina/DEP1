@@ -159,24 +159,26 @@ $fullName = htmlspecialchars($client['prenom'] . ' ' . $client['nom']);
 <body class="flex h-screen overflow-hidden">
 
     <!-- SIDEBAR -->
-    <aside class="w-72 sidebar p-6 flex flex-col z-20 flex-shrink-0">
-        <div class="font-title text-xl tracking-tighter uppercase mb-10">
+        <aside class="w-72 sidebar p-6 flex flex-col z-20">
+        <div class="font-title text-xl tracking-tighter uppercase mb-4">
             SUPER<span class="text-[var(--crimson)]">CAR</span>
         </div>
-
+        
         <nav class="flex-1 space-y-1">
-            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[2px] mb-4 px-2">Menu Principal</p>
-            <a href="tableaudebord.php" class="nav-link-admin"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
+            <a href="tableaudebord.php" class="nav-link-admin active"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
+             <a href="admin_accueil.php" class="nav-link-admin"><i class="fa-solid fa-house w-5"></i> Page Accueil</a>
             <a href="admin_voitures.php" class="nav-link-admin"><i class="fa-solid fa-car-side w-5"></i> Inventaire</a>
             <a href="admin_demande.php" class="nav-link-admin"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
             <a href="admin_contact.php" class="nav-link-admin"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
             <a href="admin_services.php" class="nav-link-admin"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
+            <a href="admin_archive.php" class="nav-link-admin"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-white/5">
             <a href="logout.php" class="logout-btn-admin">
                 <i class="fa-solid fa-power-off text-xs"></i> Se déconnecter
             </a>
+            
             <div class="bg-white/5 p-4 rounded-2xl flex items-center justify-between border border-white/5">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold border border-white/10 text-white">
