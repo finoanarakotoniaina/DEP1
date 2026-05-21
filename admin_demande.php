@@ -115,18 +115,19 @@ try {
 </head>
 <body class="flex h-screen overflow-hidden text-white">
 
-    <aside class="w-72 sidebar p-6 flex flex-col">
-        <div class="font-title text-xl tracking-tighter uppercase mb-10">
+        <aside class="w-72 sidebar p-6 flex flex-col z-20">
+        <div class="font-title text-xl tracking-tighter uppercase mb-4">
             SUPER<span class="text-[var(--crimson)]">CAR</span>
         </div>
         
         <nav class="flex-1 space-y-1">
-            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[2px] mb-4 px-2">Menu Principal</p>
-            <a href="tableaudebord.php" class="nav-link-admin"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
+            <a href="tableaudebord.php" class="nav-link-admin active"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
+             <a href="admin_accueil.php" class="nav-link-admin"><i class="fa-solid fa-house w-5"></i> Page Accueil</a>
             <a href="admin_voitures.php" class="nav-link-admin"><i class="fa-solid fa-car-side w-5"></i> Inventaire</a>
-            <a href="admin_demande.php" class="nav-link-admin active"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
+            <a href="admin_demande.php" class="nav-link-admin"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
             <a href="admin_contact.php" class="nav-link-admin"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
             <a href="admin_services.php" class="nav-link-admin"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
+            <a href="admin_archive.php" class="nav-link-admin"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-white/5">
@@ -152,7 +153,7 @@ try {
         <header class="mb-8">
             <div class="flex justify-between items-center">
                 <h2 class="text-4xl font-title font-black italic uppercase tracking-tighter">
-                    COCKPIT <span style="color: var(--crimson)">SYSTEM</span>
+                    GESTION DES <span style="color: var(--crimson)">DEMANDES</span>
                 </h2>
             </div>
             
