@@ -109,11 +109,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <a href="admin_contact.php" class="nav-link-admin"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
             <a href="admin_services.php" class="nav-link-admin"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
         </nav>
+<<<<<<< HEAD
 =======            <a href="admin_archive.php" class="nav-link-admin"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
 
 
 >>>>>>> 30fc3c6a15f145f2a8d6a9d825c840acea814e7c
         </nav>
+=======
+>>>>>>> 01662d737553bb0fd24042a9bdcbf34123cb42a2
 
 
         <div class="mt-auto pt-6 border-t border-white/5">
