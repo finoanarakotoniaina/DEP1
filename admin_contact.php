@@ -89,6 +89,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </div>
         
         <nav class="flex-1 space-y-1">
+<<<<<<< HEAD
             <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[2px] mb-4 px-2">Menu Principal</p>
             <a href="tableaudebord.php" class="nav-link-admin <?= ($currentPage == 'tableaudebord.php') ? 'active' : '' ?>"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
             <a href="admin_accueil.php" class="nav-link-admin <?= ($currentPage == 'admin_accueil.php') ? 'active' : '' ?>"><i class="fa-solid fa-house w-5"></i> Page Accueil</a>
@@ -100,6 +101,18 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <a href="admin_archive.php" class="nav-link-admin <?= ($currentPage == 'admin_archive.php') ? 'active' : '' ?>"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
 
             
+=======
+            <a href="tableaudebord.php" class="nav-link-admin"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
+            <a href="admin_accueil.php" class="nav-link-admin"><i class="fa-solid fa-house w-5"></i> Page Accueil</a>
+            <a href="admin_voitures.php" class="nav-link-admin"><i class="fa-solid fa-car-side w-5"></i> Inventaire</a>
+            <a href="admin_demande.php" class="nav-link-admin active"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
+            <a href="admin_contact.php" class="nav-link-admin"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
+            <a href="admin_services.php" class="nav-link-admin"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
+        </nav>
+=======            <a href="admin_archive.php" class="nav-link-admin"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
+
+
+>>>>>>> 30fc3c6a15f145f2a8d6a9d825c840acea814e7c
         </nav>
 
 
