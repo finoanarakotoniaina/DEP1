@@ -123,6 +123,7 @@ try {
         <nav class="flex-1 space-y-1">
             <a href="tableaudebord.php" class="nav-link-admin"><i class="fa-solid fa-gauge-high w-5"></i> Tableau de bord</a>
             <a href="admin_accueil.php" class="nav-link-admin"><i class="fa-solid fa-house w-5"></i> Page Accueil</a>
+             <a href="admin_affichage_contact.php" class="nav-link-admin <?= ($currentPage == 'admin_affichage_contact.php') ? 'active' : '' ?>"><i class="fa-solid fa-address-book w-5"></i> Page Contact</a>
             <a href="admin_voitures.php" class="nav-link-admin"><i class="fa-solid fa-car-side w-5"></i> Inventaire</a>
             <a href="admin_demande.php" class="nav-link-admin active"><i class="fa-solid fa-calendar-check w-5"></i> Demandes</a>
             <a href="admin_contact.php" class="nav-link-admin"><i class="fa-solid fa-envelope w-5"></i> Messages</a>
