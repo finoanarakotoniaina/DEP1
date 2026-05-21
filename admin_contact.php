@@ -99,10 +99,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <a href="admin_services.php" class="nav-link-admin <?= ($currentPage == 'admin_services.php') ? 'active' : '' ?>"><i class="fa-solid fa-screwdriver-wrench w-5"></i> Services</a>
             <a href="admin_archive.php" class="nav-link-admin <?= ($currentPage == 'admin_archive.php') ? 'active' : '' ?>"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
 
-                </nav>
-=======            <a href="admin_archive.php" class="nav-link-admin"><i class="fa-solid fa-box-archive w-5"></i> Archives</a>
-
-
+            
         </nav>
 
 
