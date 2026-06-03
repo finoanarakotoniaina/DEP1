@@ -5,6 +5,9 @@ include 'config.php';
 function e($string) {
     return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
+
+// Récupération dynamique du nom du fichier actuel pour le menu actif
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -24,6 +27,9 @@ function e($string) {
         .desc-font { font-family: 'Times New Roman', serif; }
         .font-title { font-family: 'Syncopate', sans-serif; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        /* Style pour l'état actif des liens de navigation côté client */
+        .nav-link.active { color: var(--crimson); font-weight: 800; border-bottom: 2px solid var(--crimson); pb-1; }
     </style>
 </head>
 
@@ -33,11 +39,12 @@ function e($string) {
         <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
         
         <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.php" class="nav-link">Accueil</a></li>
-            <li><a href="voiture.php" class="nav-link">Voitures</a></li>
-            <li><a href="demande.php" class="nav-link">Essai</a></li>
-            <li><a href="services.php" class="nav-link">Services</a></li>
-            <li><a href="contact.php" class="nav-link">Contact</a></li>
+            <li><a href="accueil.php" class="nav-link <?= ($currentPage == 'accueil.php') ? 'active' : '' ?>">Accueil</a></li>
+            <li><a href="voiture.php" class="nav-link <?= ($currentPage == 'voiture.php') ? 'active' : '' ?>">Voitures</a></li>
+            <li><a href="demande.php" class="nav-link <?= ($currentPage == 'demande.php') ? 'active' : '' ?>">Essai</a></li>
+            <li><a href="services.php" class="nav-link <?= ($currentPage == 'services.php') ? 'active' : '' ?>">Services</a></li>
+            <li><a href="contact.php" class="nav-link <?= ($currentPage == 'contact.php') ? 'active' : '' ?>">Contact</a></li>
+            <li><a href="mentions_legales.php" class="nav-link <?= ($currentPage == 'mentions_legales.php') ? 'active' : '' ?>">Mentions Légales</a></li>
 
             <?php if (isset($_SESSION['id_client'])): ?>
                 <li>
@@ -48,7 +55,7 @@ function e($string) {
             <?php else: ?>
                 <li>
                     <strong>
-                        <a href="connexion.php" class="nav-link flex items-center gap-2">
+                        <a href="connexion.php" class="nav-link flex items-center gap-2 <?= ($currentPage == 'connexion.php') ? 'active' : '' ?>">
                             <i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion
                         </a>
                     </strong>
