@@ -93,7 +93,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <li><i class="fa-solid fa-chevron-right text-[var(--crimson)] text-[10px] mr-2"></i>RAKOTONIAINA Finoana Safidisoa</li>
                 </ul>
                 <p class="text-gray-400 text-xs leading-relaxed desc-font italic border-t border-white/5 pt-3">
-                    Étudiantes en première année de BTS SIO (Solutions Logicielles et Applications Métiers) à la MCCI Business School (Ébène, Île Maurice).
+                    Étudiantes en BTS SIO (Solutions Logicielles et Applications Métiers) à la MCCI Business School (Ébène, Île Maurice).
                 </p>
             </div>
 
