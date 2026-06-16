@@ -32,7 +32,7 @@ try {
     
     <style>
         /* Styles du Panel Admin (Identique Accueil) */
-        .admin-badge {
+        .admin-badge { 
             position: fixed; bottom: 20px; left: 20px; z-index: 100;
             background: #C1121F; color: white; padding: 12px 24px;
             font-family: 'Syncopate'; font-size: 10px; border-radius: 50px;
