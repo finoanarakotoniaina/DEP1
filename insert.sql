@@ -43,7 +43,7 @@ INSERT INTO admin (identifiant, nom, prenom, motdepasse)
 VALUES ('MadisonCarter', 'Carter', 'Madison', 'didison');
 
 -- contenu accueil 
-INSERT INTO table_contenu (id, contenu) VALUES 
+INSERT INTO home_content (id, contenu) VALUES 
 ('brand_1_name', 'BMW'),
 ('brand_1_desc', 'Bien que la marque se soit diversifiee.'),
 ('brand_2_name', 'MERCEDES-BENZ'),
