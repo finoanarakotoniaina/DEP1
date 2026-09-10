@@ -6,6 +6,10 @@ function e($string) {
     return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
 
+
+
+
+
 // Récupération dynamique du nom du fichier actuel pour le menu actif
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
