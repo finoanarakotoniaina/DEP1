@@ -132,3 +132,4 @@ CREATE TABLE contact_client (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
+ALTER TABLE voiture ADD COLUMN archive INT DEFAULT 0;
