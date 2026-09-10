@@ -35,6 +35,7 @@ function e($string) {
             <li><a href="voiture.php" class="nav-link">Voitures</a></li>
             <li><a href="demande.php" class="nav-link">Essai</a></li>
             <li><a href="services.php" class="nav-link">Services</a></li>
+            <li><a href="contact.php" class="nav-link">Contact</a></li>
             |
 
             <?php if (isset($_SESSION['id_client'])): ?>
