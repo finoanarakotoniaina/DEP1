@@ -83,9 +83,11 @@ INSERT INTO services_content (element_id, content) VALUES
 
 
 -- 3. On injecte tes textes par défaut (raccord avec l'Ébène, Maurice !)
-INSERT INTO contact_settings (element_id, content) VALUES
-('contact_title', 'PRENDRE CONTACT'),
-('contact_subtitle', 'Une question ? Un projet d\'acquisition ? Notre équipe d\'experts est à votre entière disposition pour vous accompagner.'),
-('company_address', 'Cybercité, Ébène - Île Maurice'),
-('company_phone', '+230 403 2000'),
-('company_email', 'contact@supercar.mu');
+INSERT INTO `contact_settings` (`element_id`, `content`) VALUES
+('titre_principal', 'NOUS CONTACTER'),
+('image_supercar', 'images/supercar.jpg'),
+('email_contact', 'contact@supercar.com'),
+('tel_contact', '+33 1 23 45 67 89'),
+('siege_contact', 'Paris, France'),
+('responsable_contact', 'Jean Dupont'),
+('map_iframe', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.9916256937595!2d2.2922926156743895!3d48.85837360868869!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66e2964e34e2d%3A0x8ddca9ee380ef7e0!2sTour%20Eiffel!5e0!3m2!1sfr!2sfr!4v1647891234567!5m2!1sfr!2sfr');
