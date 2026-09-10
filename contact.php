@@ -7,7 +7,7 @@ include 'config.php';
 
 // --- NOUVEAU : RÉCUPÉRATION DES RÉGLAGES DYNAMIQUES ---
 // --- RÉCUPÉRATION DES RÉGLAGES DYNAMIQUES ---
-$stmt_settings = $db->query("SELECT cle, valeur FROM contact");
+$stmt_settings = $db->query("SELECT element_id, content FROM contact_settings");
 $s = $stmt_settings->fetchAll(PDO::FETCH_KEY_PAIR);
 
 // Vérification de sécurité (au cas où la table est vide)
