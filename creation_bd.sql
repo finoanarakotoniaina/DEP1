@@ -102,6 +102,8 @@ CREATE TABLE essai_content (
 
 
 
+
+
 -- TABLE CONTACT SETTINGS--
 
 
@@ -112,6 +114,8 @@ CREATE TABLE IF NOT EXISTS contact_settings (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Table CONTACT_CLIENT: --
+
+
 
 
 -- 1. On supprime l'ancienne table si elle existe pour partir sur une base propre
