@@ -311,7 +311,7 @@ main { padding-top: calc(40px + 44px) !important; } /* nav site (~80px) + brand-
 .btn-arc { background:var(--crimson); color:#fff; border:none; padding:9px 20px; border-radius:7px; font-family:'Syncopate',sans-serif; font-size:8px; cursor:pointer; display:flex; align-items:center; gap:6px; }
 .btn-no  { background:rgba(255,255,255,.07); color:#fff; border:1px solid rgba(255,255,255,.12); padding:9px 20px; border-radius:7px; font-family:'Syncopate',sans-serif; font-size:8px; cursor:pointer; }
 
-/* Toast */
+/* Toast */ 
 #toast { position:fixed; bottom:20px; right:20px; z-index:99999; background:#111; border:1px solid rgba(255,255,255,.09); border-radius:11px; padding:12px 17px; display:flex; align-items:center; gap:9px; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; color:#fff; min-width:230px; transform:translateY(18px); opacity:0; transition:all .3s; box-shadow:0 20px 40px rgba(0,0,0,.4); }
 #toast.show { transform:translateY(0); opacity:1; }
 #toast.ok   { border-color:rgba(34,197,94,.4); }

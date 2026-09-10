@@ -43,7 +43,7 @@ INSERT INTO admin (identifiant, nom, prenom, motdepasse)
 VALUES ('MadisonCarter', 'Carter', 'Madison', 'didison');
 
 -- contenu accueil 
-INSERT INTO table_contenu (id, contenu) VALUES 
+INSERT INTO home_content (element_id, content) VALUES 
 ('brand_1_name', 'BMW'),
 ('brand_1_desc', 'Bien que la marque se soit diversifiee.'),
 ('brand_2_name', 'MERCEDES-BENZ'),
@@ -80,25 +80,12 @@ INSERT INTO services_content (element_id, content) VALUES
 ('serv_hero_desc', 'Nos services de maintenance garantissent que chaque kilomètre reste une expérience pure et sans compromis.'),
 ('serv_hero_title', 'Domptez <br> <span class="text-[var(--crimson)]">l\'instinct.</span>');
 
-REPLACE INTO contact_content (element_id, content) VALUES 
-('contact_title', 'CONTACTEZ-NOUS'),
-('contact_subtitle', 'Une question ou un projet d''achat ? L''équipe SuperCar est à votre entière disposition.'),
-('contact_phone', '+230 403 2000'),
-('contact_email', 'contact@supercar.mu'),
-('contact_address', 'Cybercité, Ébène - Île Maurice');
 
-INSERT INTO `contact_settings` (`element_id`, `content`) VALUES
-('contact_title', 'Contactez-Nous'),
-('contact_subtitle', 'Une question ou une demande d\'essai ? Notre équipe est à votre disposition.'),
-('company_address', 'Cybercité, Ébène - Île Maurice'),
-('company_phone', '+230 390 9998'),
-('company_email', 'contact@supercar.mu');
 
--- 3. On injecte les textes par défaut pour que l'Éditeur Live ne soit pas vide au départ
+-- 3. On injecte tes textes par défaut (raccord avec l'Ébène, Maurice !)
 INSERT INTO contact_settings (element_id, content) VALUES
 ('contact_title', 'PRENDRE CONTACT'),
 ('contact_subtitle', 'Une question ? Un projet d\'acquisition ? Notre équipe d\'experts est à votre entière disposition pour vous accompagner.'),
-('company_address', 'MCCI Business School, Ébène, Maurice'),
-('company_phone', '+230 467 1234'),
-('company_email', 'contact@supercar.mu')
-ON DUPLICATE KEY UPDATE content=VALUES(content);
+('company_address', 'Cybercité, Ébène - Île Maurice'),
+('company_phone', '+230 403 2000'),
+('company_email', 'contact@supercar.mu');

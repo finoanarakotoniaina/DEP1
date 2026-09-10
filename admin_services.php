@@ -12,7 +12,7 @@ try {
     die("Erreur de connexion : " . $e->getMessage());
 }
 
-// 2. Fonction de récupération 
+// 2. Fonction de récupération (indispensable pour l'affichage)
 function getContent($id) {
     global $conn;
     $stmt = $conn->prepare("SELECT content FROM services_content WHERE element_id = ?");
