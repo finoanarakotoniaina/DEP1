@@ -1,0 +1,136 @@
+<?php 
+require_once '../config.php'; 
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN | SuperCar Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/style.css">
+    
+    <style>
+        :root { --crimson: #C1121F; }
+        .edit-zone:focus { outline: none; background: rgba(255, 255, 255, 0.05); border-radius: 8px; box-shadow: 0 0 0 2px var(--crimson); }
+        .btn-save { display: none; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .admin-badge { position: fixed; bottom: 20px; left: 20px; z-index: 100; background: var(--crimson); color: white; padding: 12px 24px; font-family: 'Syncopate'; font-size: 10px; border-radius: 50px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .btn-back { position: fixed; top: 20px; left: 20px; z-index: 1000; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 20px; font-family: 'Syncopate'; font-size: 10px; border-radius: 5px; text-decoration: none; transition: 0.3s; display: flex; align-items: center; }
+        .btn-back:hover { background: var(--crimson); border-color: var(--crimson); }
+    </style>
+</head>
+
+<body class="home-bg text-white">
+
+    <a href="tableaudebord.php" class="btn-back">
+        <i class="fas fa-arrow-left mr-2"></i> RETOUR TABLEAU DE BORD
+    </a>
+
+    <div class="admin-badge"><i class="fas fa-edit mr-2"></i> PANEL ADMINISTRATION</div>
+
+    <section class="relative h-screen w-full flex items-center px-6 lg:px-24 overflow-hidden group">
+        <div class="absolute top-0 left-0 w-full h-full z-0">
+            <video id="video_preview" autoplay muted loop playsinline class="w-full h-full object-cover">
+                <source src="<?= ASSETS_URL ?>/video/mercedes.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="relative z-20 w-full mt-20">
+            <div class="relative mb-8 max-w-4xl">
+                <h1 id="hero_title" contenteditable="true" onfocus="showBtn('btn_title')" class="edit-zone font-title text-4xl md:text-7xl font-bold leading-none">
+                    <?php echo getContent('hero_title'); ?>
+                </h1>
+                <button id="btn_title" onclick="saveText('hero_title', 'btn_title')" class="btn-save mt-4 bg-green-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">
+                    <i class="fas fa-check mr-2"></i> Enregistrer le titre
+                </button>
+            </div>
+
+            <div class="relative max-w-xl">
+                <p id="hero_subtitle" contenteditable="true" onfocus="showBtn('btn_subtitle')" class="edit-zone text-lg text-gray-200 font-light leading-relaxed">
+                    <?php echo getContent('hero_subtitle'); ?>
+                </p>
+                <button id="btn_subtitle" onclick="saveText('hero_subtitle', 'btn_subtitle')" class="btn-save mt-4 bg-green-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">
+                    <i class="fas fa-check mr-2"></i> Enregistrer le texte
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-32 px-6 lg:px-24 relative">
+        <div class="relative z-10 flex flex-col gap-16 max-w-3xl mx-auto">
+            
+            <?php for($i=1; $i<=4; $i++): 
+                $id_name = "brand_".$i."_name";
+                $id_desc = "brand_".$i."_desc";
+                $btn_name = "btn_brand_".$i."_name";
+                $btn_desc = "btn_brand_".$i."_desc";
+            ?>
+            <div class="brand-card p-8 bg-white/5 backdrop-blur-sm border border-white/10 relative">
+                
+                <div class="mb-6">
+                    <h3 id="<?php echo $id_name; ?>" contenteditable="true" onfocus="showBtn('<?php echo $btn_name; ?>')" class="edit-zone font-title text-2xl mb-2">
+                        <?php echo getContent($id_name); ?>
+                    </h3>
+                    <button id="<?php echo $btn_name; ?>" onclick="saveText('<?php echo $id_name; ?>', '<?php echo $btn_name; ?>')" class="btn-save bg-green-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">
+                        <i class="fas fa-save mr-2"></i> Enregistrer le nom
+                    </button>
+                </div>
+                
+                <div>
+                    <p id="<?php echo $id_desc; ?>" contenteditable="true" onfocus="showBtn('<?php echo $btn_desc; ?>')" class="edit-zone text-gray-300 text-lg leading-relaxed mb-2">
+                        <?php echo getContent($id_desc); ?>
+                    </p>
+                    <button id="<?php echo $btn_desc; ?>" onclick="saveText('<?php echo $id_desc; ?>', '<?php echo $btn_desc; ?>')" class="btn-save bg-green-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">
+                        <i class="fas fa-save mr-2"></i> Enregistrer la description
+                    </button>
+                </div>
+
+            </div>
+            <?php endfor; ?>
+
+        </div>
+    </section>
+
+    <script>
+        function showBtn(id) {
+            document.getElementById(id).style.display = "block";
+        }
+
+        function saveText(elementId, btnId) {
+            const el = document.getElementById(elementId);
+            const content = (elementId === 'hero_title') ? el.innerHTML : el.innerText;
+            executeUpload(elementId, content, btnId);
+        }
+
+        function executeUpload(id, content, btnId) {
+            let formData = new FormData();
+            formData.append('id', id);
+            formData.append('content', content);
+
+            fetch('../updatehome.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.text())
+            .then(data => {
+                if(data.trim() === "Succès") {
+                    if(btnId) {
+                        document.getElementById(btnId).style.display = "none";
+                        const target = document.getElementById(id);
+                        target.style.transition = "color 0.3s";
+                        target.style.color = "#22c55e"; 
+                        setTimeout(() => { target.style.color = ""; }, 1000);
+                    }
+                } else {
+                    alert("Erreur retournée : " + data);
+                }
+            })
+            .catch(err => alert("Erreur de connexion au serveur"));
+        }
+    </script>
+
+</body>
+</html>
