@@ -1,6 +1,24 @@
 <?php require_once '../config.php'; ?>
 <?php
-$adminName = $_SESSION['admin_nom'] ?? $_SESSION['nom'] ?? 'Administrateur';
+if (!isset($_SESSION['admin_id'])) {
+    header('Location: login.php');
+    exit();
+}
+
+$db = $pdo ?? $db ?? $conn;
+
+try {
+    $stmtAdmin = $db->prepare("SELECT nom, prenom FROM admin WHERE id_admin = ?");
+    $stmtAdmin->execute([$_SESSION['admin_id']]);
+    $resAdmin = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
+    $adminFullName = $resAdmin ? $resAdmin['prenom'] . " " . $resAdmin['nom'] : "Admin";
+    $adminName = $adminFullName;
+} catch (PDOException $e) {
+    $adminFullName = "Admin";
+    $adminName = "Admin";
+}
+
+$currentPage = basename($_SERVER['PHP_SELF']);
 
 // --- TRAITEMENT AJAX ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
@@ -112,49 +130,16 @@ try {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
  <link rel="stylesheet" href="../style.css">
 <style>
-#admin-bar {
-    position: fixed; top: 0; left: 0; right: 0; height: 54px;
-    background: linear-gradient(90deg, #060e1e 0%, #0b1729 60%, #060e1e 100%);
-    border-bottom: 2px solid var(--crimson);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 22px; z-index: 9999;
-    box-shadow: 0 4px 30px rgba(193,18,31,0.2);
-}
-.abl { display:flex; align-items:center; gap:16px; }
-.abr { display:flex; align-items:center; gap:8px; }
-.ab-logo { font-family:'Syncopate',sans-serif; font-size:14px; font-weight:700; color:#fff; letter-spacing:0.08em; }
-.ab-logo span { color:var(--crimson); }
-.ab-sep { width:1px; height:22px; background:rgba(255,255,255,0.1); }
-.ab-user {
-    display:flex; align-items:center; gap:9px;
-    background: rgba(193,18,31,0.1); border:1px solid rgba(193,18,31,0.25);
-    border-radius:8px; padding:5px 12px;
-}
-.ab-av {
-    width:24px; height:24px; border-radius:50%; background:var(--crimson);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Syncopate',sans-serif; font-size:10px; font-weight:700; color:#fff;
-}
-.ab-uname { font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; color:rgba(255,255,255,0.8); font-weight:500; }
-.ab-live {
-    display:flex; align-items:center; gap:7px;
-    font-family:'Syncopate',sans-serif; font-size:8px; letter-spacing:0.18em; color:rgba(255,255,255,0.4);
-}
-.ab-live-dot { width:6px; height:6px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e; animation:blink 1.5s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
-.ab-btn {
-    display:flex; align-items:center; gap:6px; padding:7px 14px;
-    border-radius:7px; border:none; cursor:pointer;
-    font-family:'Syncopate',sans-serif; font-size:8px; letter-spacing:0.13em;
-    text-decoration:none; transition:all .2s;
-}
-.ab-ghost { background:rgba(26,44,80,0.6); color:rgba(255,255,255,0.65); border:1px solid rgba(26,44,80,0.9); }
-.ab-ghost:hover { background:rgba(26,44,80,.95); color:#fff; }
-
-body { padding-top: 54px; }
+:root { --crimson: #C1121F; --cosmos: #000814; }
+body { background-color: var(--cosmos); }
+.sidebar { background: rgba(0, 0, 0, 0.2); border-right: 1px solid rgba(255, 255, 255, 0.05); }
+.nav-link-admin { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.25rem; border-radius: 14px; color: rgba(255,255,255,0.6); transition: 0.3s; font-size: 0.85rem; font-weight: 600; }
+.nav-link-admin:hover { color: white; background: rgba(255,255,255,0.05); }
+.nav-link-admin.active { color: white; background: linear-gradient(90deg, rgba(193, 18, 31, 0.2), transparent); border-left: 3px solid var(--crimson); }
+.logout-btn-admin { display: flex; align-items: center; justify-content: center; gap: 0.75rem; width: 100%; padding: 0.75rem; margin-bottom: 0.8rem; background: rgba(193, 18, 31, 0.1); border: 1px solid rgba(193, 18, 31, 0.2); border-radius: 14px; color: #ff4d4d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+.logout-btn-admin:hover { background: var(--crimson); color: white; }
 
 #brand-add-bar {
-    position: fixed; top: 54px; left: 0; right: 0; z-index: 9998;
     background: rgba(6,14,30,0.97);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(193,18,31,0.2);
@@ -180,8 +165,6 @@ body { padding-top: 54px; }
     display:flex; align-items:center; gap:7px; transition:all .2s; white-space:nowrap;
 }
 .bab-btn:hover { background:#e01a2a; transform:translateY(-1px); }
-
-main { padding-top: calc(40px + 44px) !important; }
 
 .row-wrapper { position:relative; padding:0 40px; margin-bottom:60px; overflow:visible!important; }
 .story-row   { display:flex; overflow-x:auto; scroll-behavior:smooth; gap:25px; padding:20px 10px; scrollbar-width:none; overflow-y:visible!important; scroll-snap-type:x mandatory; }
@@ -305,241 +288,225 @@ main { padding-top: calc(40px + 44px) !important; }
 #toast.err  .ti { color:var(--crimson); font-size:15px; }
 #toast.wait .ti { color:rgba(255,255,255,.4); animation:spin 1s linear infinite; display:inline-block; font-size:15px; }
 @keyframes spin { to { transform:rotate(360deg); } }
-
-.nav-link.active { color:var(--crimson) !important; font-weight:700; }
 </style>
 </head>
-<body class="split-bg text-white">
+<body class="flex h-screen overflow-hidden text-white">
 
-<div id="admin-bar">
-    <div class="abl">
-        <div class="ab-logo">SUPER<span>CAR</span></div>
-        <div class="ab-sep"></div>
-        <div class="ab-user">
-            <div class="ab-av"><?php echo strtoupper(mb_substr($adminName,0,1)); ?></div>
-            <span class="ab-uname"><?php echo htmlspecialchars($adminName); ?></span>
-        </div>
-        <div class="ab-live"><div class="ab-live-dot"></div>LIVE EDITOR</div>
-    </div>
-    <div class="abr">
-        <a href="tableaudebord.php" class="ab-btn ab-ghost"><i class="fas fa-gauge-high"></i> TABLEAU DE BORD</a>
-        <a href="<?= BASE_URL ?>/client/voiture.php" target="_blank" class="ab-btn ab-ghost"><i class="fas fa-eye"></i> VUE CLIENT</a>
-    </div>
-</div>
+    <?php include 'composants/sidebar.php'; ?>
 
-<div id="brand-add-bar">
-    <span class="bab-label"><i class="fas fa-layer-group"></i>NOUVELLE MARQUE</span>
-    <input type="text" id="new-brand-input" class="bab-input" placeholder="Ex: Bugatti, Koenigsegg..." onkeydown="if(event.key==='Enter') addBrand()">
-    <button class="bab-btn" onclick="addBrand()"><i class="fas fa-plus"></i> CRÉER</button>
-</div>
-
-<main class="pt-40" id="main-content">
-    <div class="px-6 lg:px-24 mb-12">
-        <h1 style="font-family:'Syncopate';font-size:clamp(1.8rem,5vw,3rem);font-weight:700;line-height:1;letter-spacing:-0.02em;text-transform:uppercase">
-            <span
-                contenteditable="true"
-                class="titre-editable"
-                data-field="titre_nos_modeles"
-                onblur="saveTitre(this)"
-                title="Cliquez pour modifier le titre"
-            >NOS </span><span class="titre-span-red"
-                contenteditable="true"
-                data-field="titre_nos_modeles_rouge"
-                onblur="saveTitre(this)"
-                title="Cliquez pour modifier"
-            >MODÈLES</span>
-        </h1>
-        <div class="w-20 h-1 mt-4" style="background:var(--crimson)"></div>
-        <p class="mt-4 text-[10px] font-mono tracking-widest" style="color:rgba(193,18,31,.5)">
-            <i class="fas fa-pen mr-1"></i>TEXTE · <i class="fas fa-camera mr-1 ml-2"></i>PHOTO · <i class="fas fa-plus-circle mr-1 ml-2"></i>AJOUTER
-        </p>
-    </div>
-
-    <?php foreach ($voituresParMarque as $nomMarque => $voitures):
-        $idMarque = $voitures[0]['id_marque'] ?? 0;
-        $rowId = "row-".strtolower(preg_replace('/[^a-zA-Z0-9]/','',$nomMarque));
-    ?>
-    <section class="mb-10" data-brand-section="<?php echo htmlspecialchars($nomMarque); ?>">
-        <div class="brand-wrap">
-            <span class="brand-name"
-                  contenteditable="true"
-                  data-id-marque="<?php echo $idMarque; ?>"
-                  data-original="<?php echo htmlspecialchars($nomMarque); ?>"
-                  onblur="saveBrand(this)"
-                  title="Cliquez pour renommer la marque"
-            ><?php echo htmlspecialchars($nomMarque); ?></span>
-            <span style="font-family:'Syncopate',sans-serif;font-size:8px;color:rgba(255,255,255,.13);letter-spacing:.15em">✎</span>
+    <main class="flex-1 overflow-y-auto">
+        <div id="brand-add-bar" class="sticky top-0 z-50">
+            <span class="bab-label"><i class="fas fa-layer-group"></i>NOUVELLE MARQUE</span>
+            <input type="text" id="new-brand-input" class="bab-input" placeholder="Ex: Bugatti, Koenigsegg..." onkeydown="if(event.key==='Enter') addBrand()">
+            <button class="bab-btn" onclick="addBrand()"><i class="fas fa-plus"></i> CRÉER</button>
         </div>
 
-        <div class="row-wrapper">
-            <button class="nav-btn btn-prev" onclick="scrollBy3('<?php echo $rowId; ?>',-1)">❮</button>
-            <div class="story-row" id="<?php echo $rowId; ?>">
+        <div class="px-6 lg:px-24 mb-12 pt-10">
+            <h1 style="font-family:'Syncopate';font-size:clamp(1.8rem,5vw,3rem);font-weight:700;line-height:1;letter-spacing:-0.02em;text-transform:uppercase">
+                <span
+                    contenteditable="true"
+                    class="titre-editable"
+                    data-field="titre_nos_modeles"
+                    onblur="saveTitre(this)"
+                    title="Cliquez pour modifier le titre"
+                >NOS </span><span class="titre-span-red"
+                    contenteditable="true"
+                    data-field="titre_nos_modeles_rouge"
+                    onblur="saveTitre(this)"
+                    title="Cliquez pour modifier"
+                >MODÈLES</span>
+            </h1>
+            <div class="w-20 h-1 mt-4" style="background:var(--crimson)"></div>
+            <p class="mt-4 text-[10px] font-mono tracking-widest" style="color:rgba(193,18,31,.5)">
+                <i class="fas fa-pen mr-1"></i>TEXTE · <i class="fas fa-camera mr-1 ml-2"></i>PHOTO · <i class="fas fa-plus-circle mr-1 ml-2"></i>AJOUTER
+            </p>
+        </div>
 
-                <?php foreach ($voitures as $car): ?>
-                <div class="car-card"
-                     data-id="<?php echo $car['id_voiture']; ?>"
-                     data-modele="<?php echo htmlspecialchars($car['modele']); ?>"
-                     data-prix="<?php echo $car['prix']; ?>"
-                     data-annee="<?php echo $car['annee']; ?>"
-                     data-etat="<?php echo htmlspecialchars($car['etat']); ?>"
-                     data-type="<?php echo htmlspecialchars($car['type']); ?>"
-                     data-image="<?php echo htmlspecialchars($car['image_url']); ?>">
+        <?php foreach ($voituresParMarque as $nomMarque => $voitures):
+            $idMarque = $voitures[0]['id_marque'] ?? 0;
+            $rowId = "row-".strtolower(preg_replace('/[^a-zA-Z0-9]/','',$nomMarque));
+        ?>
+        <section class="mb-10" data-brand-section="<?php echo htmlspecialchars($nomMarque); ?>">
+            <div class="brand-wrap">
+                <span class="brand-name"
+                      contenteditable="true"
+                      data-id-marque="<?php echo $idMarque; ?>"
+                      data-original="<?php echo htmlspecialchars($nomMarque); ?>"
+                      onblur="saveBrand(this)"
+                      title="Cliquez pour renommer la marque"
+                ><?php echo htmlspecialchars($nomMarque); ?></span>
+                <span style="font-family:'Syncopate',sans-serif;font-size:8px;color:rgba(255,255,255,.13);letter-spacing:.15em">✎</span>
+            </div>
 
-                    <div class="edit-ring"></div>
+            <div class="row-wrapper">
+                <button class="nav-btn btn-prev" onclick="scrollBy3('<?php echo $rowId; ?>',-1)">❮</button>
+                <div class="story-row" id="<?php echo $rowId; ?>">
 
-                    <button class="del-btn"
-                            onclick="confirmArchive(<?php echo $car['id_voiture']; ?>,'<?php echo htmlspecialchars(addslashes($car['modele'])); ?>')"
-                            title="Archiver ce véhicule">
-                        <i class="fas fa-box-archive"></i>
-                    </button>
+                    <?php foreach ($voitures as $car): ?>
+                    <div class="car-card"
+                         data-id="<?php echo $car['id_voiture']; ?>"
+                         data-modele="<?php echo htmlspecialchars($car['modele']); ?>"
+                         data-prix="<?php echo $car['prix']; ?>"
+                         data-annee="<?php echo $car['annee']; ?>"
+                         data-etat="<?php echo htmlspecialchars($car['etat']); ?>"
+                         data-type="<?php echo htmlspecialchars($car['type']); ?>"
+                         data-image="<?php echo htmlspecialchars($car['image_url']); ?>">
 
-                    <div class="hover-specs">
-                        <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase" style="font-family:'Syncopate'">Fiche Technique</p>
-                        <div class="spec-item"><span>Année</span>
-                            <span contenteditable="true"
-                                  data-car-id="<?php echo $car['id_voiture']; ?>"
-                                  data-field="annee"
-                                  data-original="<?php echo $car['annee']; ?>"
-                                  onblur="saveField(this)"
-                            ><?php echo $car['annee']; ?></span>
+                        <div class="edit-ring"></div>
+
+                        <button class="del-btn"
+                                onclick="confirmArchive(<?php echo $car['id_voiture']; ?>,'<?php echo htmlspecialchars(addslashes($car['modele'])); ?>')"
+                                title="Archiver ce véhicule">
+                            <i class="fas fa-box-archive"></i>
+                        </button>
+
+                        <div class="hover-specs">
+                            <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase" style="font-family:'Syncopate'">Fiche Technique</p>
+                            <div class="spec-item"><span>Année</span>
+                                <span contenteditable="true"
+                                      data-car-id="<?php echo $car['id_voiture']; ?>"
+                                      data-field="annee"
+                                      data-original="<?php echo $car['annee']; ?>"
+                                      onblur="saveField(this)"
+                                ><?php echo $car['annee']; ?></span>
+                            </div>
+                            <div class="spec-item"><span>État</span>
+                                <span contenteditable="true"
+                                      data-car-id="<?php echo $car['id_voiture']; ?>"
+                                      data-field="etat"
+                                      data-original="<?php echo htmlspecialchars($car['etat']); ?>"
+                                      onblur="saveField(this)"
+                                ><?php echo htmlspecialchars($car['etat']); ?></span>
+                            </div>
+                            <div class="spec-item"><span>Type</span>
+                                <span contenteditable="true"
+                                      data-car-id="<?php echo $car['id_voiture']; ?>"
+                                      data-field="type"
+                                      data-original="<?php echo htmlspecialchars($car['type']); ?>"
+                                      onblur="saveField(this)"
+                                ><?php echo htmlspecialchars($car['type']); ?></span>
+                            </div>
+                            <p class="text-[9px] mt-4 text-center opacity-50 italic">✎ Cliquez sur une valeur pour modifier</p>
                         </div>
-                        <div class="spec-item"><span>État</span>
-                            <span contenteditable="true"
-                                  data-car-id="<?php echo $car['id_voiture']; ?>"
-                                  data-field="etat"
-                                  data-original="<?php echo htmlspecialchars($car['etat']); ?>"
-                                  onblur="saveField(this)"
-                            ><?php echo htmlspecialchars($car['etat']); ?></span>
-                        </div>
-                        <div class="spec-item"><span>Type</span>
-                            <span contenteditable="true"
-                                  data-car-id="<?php echo $car['id_voiture']; ?>"
-                                  data-field="type"
-                                  data-original="<?php echo htmlspecialchars($car['type']); ?>"
-                                  onblur="saveField(this)"
-                            ><?php echo htmlspecialchars($car['type']); ?></span>
-                        </div>
-                        <p class="text-[9px] mt-4 text-center opacity-50 italic">✎ Cliquez sur une valeur pour modifier</p>
-                    </div>
 
-                    <div class="img-wrap" title="Cliquer pour changer la photo">
-                        <div class="img-ov">
-                            <div class="img-ov-inner">
-                                <i class="fas fa-camera"></i>
-                                <span>CHANGER PHOTO</span>
+                        <div class="img-wrap" title="Cliquer pour changer la photo">
+                            <div class="img-ov">
+                                <div class="img-ov-inner">
+                                    <i class="fas fa-camera"></i>
+                                    <span>CHANGER PHOTO</span>
+                                </div>
+                            </div>
+                            <input type="file" class="img-file" accept="image/*"
+                                   data-car-id="<?php echo $car['id_voiture']; ?>"
+                                   onchange="uploadImg(this)">
+                            <img src="<?= UPLOAD_URL ?>/voitures/<?php echo htmlspecialchars($car['image_url']); ?>"
+                                 class="w-full h-64 object-cover rounded-t-[24px]"
+                                 id="img-<?php echo $car['id_voiture']; ?>"
+                                 alt="<?php echo htmlspecialchars($car['modele']); ?>">
+                        </div>
+
+                        <div class="p-8 bg-white/5 rounded-b-[24px]">
+                            <h3 class="font-title text-[13px] mb-4 text-white uppercase leading-tight" style="font-family:'Syncopate';min-height:40px">
+                                <span contenteditable="true"
+                                      data-car-id="<?php echo $car['id_voiture']; ?>"
+                                      data-field="modele"
+                                      data-original="<?php echo htmlspecialchars($car['modele']); ?>"
+                                      onblur="saveField(this)"
+                                      title="Cliquer pour modifier le modèle"
+                                ><?php echo htmlspecialchars($car['modele']); ?></span>
+                            </h3>
+                            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+                                <span contenteditable="true"
+                                      class="font-bold text-xl text-white"
+                                      data-car-id="<?php echo $car['id_voiture']; ?>"
+                                      data-field="prix"
+                                      data-original="<?php echo $car['prix']; ?>"
+                                      onblur="saveField(this)"
+                                      title="Cliquer pour modifier le prix"
+                                ><?php echo number_format($car['prix'],0,'.', ' '); ?></span>
+                                <span class="font-bold text-xl text-white">Rs</span>
                             </div>
                         </div>
-                        <input type="file" class="img-file" accept="image/*"
-                               data-car-id="<?php echo $car['id_voiture']; ?>"
-                               onchange="uploadImg(this)">
-                        <img src="<?= UPLOAD_URL ?>/voitures/<?php echo htmlspecialchars($car['image_url']); ?>"
-                             class="w-full h-64 object-cover rounded-t-[24px]"
-                             id="img-<?php echo $car['id_voiture']; ?>"
-                             alt="<?php echo htmlspecialchars($car['modele']); ?>">
                     </div>
+                    <?php endforeach; ?>
 
-                    <div class="p-8 bg-white/5 rounded-b-[24px]">
-                        <h3 class="font-title text-[13px] mb-4 text-white uppercase leading-tight" style="font-family:'Syncopate';min-height:40px">
-                            <span contenteditable="true"
-                                  data-car-id="<?php echo $car['id_voiture']; ?>"
-                                  data-field="modele"
-                                  data-original="<?php echo htmlspecialchars($car['modele']); ?>"
-                                  onblur="saveField(this)"
-                                  title="Cliquer pour modifier le modèle"
-                            ><?php echo htmlspecialchars($car['modele']); ?></span>
-                        </h3>
-                        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-                            <span contenteditable="true"
-                                  class="font-bold text-xl text-white"
-                                  data-car-id="<?php echo $car['id_voiture']; ?>"
-                                  data-field="prix"
-                                  data-original="<?php echo $car['prix']; ?>"
-                                  onblur="saveField(this)"
-                                  title="Cliquer pour modifier le prix"
-                            ><?php echo number_format($car['prix'],0,'.', ' '); ?></span>
-                            <span class="font-bold text-xl text-white">Rs</span>
+                    <div class="add-card"
+                         onclick="openAddModal('<?php echo htmlspecialchars($nomMarque); ?>','<?php echo $rowId; ?>')"
+                         title="Ajouter un véhicule <?php echo htmlspecialchars($nomMarque); ?>">
+                        <div class="add-circle"><i class="fas fa-plus"></i></div>
+                        <div class="add-label">AJOUTER<br><?php echo htmlspecialchars($nomMarque); ?></div>
+                    </div>
+                </div>
+                <button class="nav-btn btn-next" onclick="scrollBy3('<?php echo $rowId; ?>',1)">❯</button>
+            </div>
+        </section>
+        <?php endforeach; ?>
+
+        <div class="modal-bg" id="add-modal">
+            <div class="mbox">
+                <div class="mhead">
+                    <h3 id="modal-title">AJOUTER UN VÉHICULE</h3>
+                    <button class="mclose" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="mbody">
+                    <input type="hidden" id="m-brand">
+                    <input type="hidden" id="m-row">
+                    <div class="fg">
+                        <label class="fl">Marque</label>
+                        <select id="m-marque" class="inp" style="background:#141414">
+                            <?php foreach ($marquesAll as $mk): ?>
+                            <option value="<?php echo htmlspecialchars($mk['nom_marque']); ?>"><?php echo htmlspecialchars($mk['nom_marque']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="fg">
+                        <label class="fl">Modèle</label>
+                        <input type="text" id="m-modele" class="inp" placeholder="Ex: Ferrari 488 GTB">
+                    </div>
+                    <div class="fgrid">
+                        <div class="fg"><label class="fl">Prix (Rs)</label><input type="number" id="m-prix" class="inp" placeholder="8500000"></div>
+                        <div class="fg"><label class="fl">Année</label><input type="number" id="m-annee" class="inp" value="<?php echo date('Y'); ?>" min="1900" max="2099"></div>
+                    </div>
+                    <div class="fgrid">
+                        <div class="fg">
+                            <label class="fl">État</label>
+                            <select id="m-etat" class="inp" style="background:#141414"><option>Neuf</option><option>Occasion</option><option>Démonstration</option></select>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Type</label>
+                            <select id="m-type" class="inp" style="background:#141414"><option>Coupé</option><option>Berline</option><option>SUV</option><option>Cabriolet</option><option>Break</option><option>Citadine</option></select>
+                        </div>
+                    </div>
+                    <div class="fg">
+                        <label class="fl">Photo</label>
+                        <div class="mimg-zone" id="m-img-zone" onclick="document.getElementById('m-img-input').click()">
+                            <img id="m-img-prev" src="" alt="">
+                            <div class="mph" id="m-img-ph"><i class="fas fa-cloud-upload-alt"></i>Cliquez pour ajouter une photo<br><small style="opacity:.45">JPG, PNG, WEBP</small></div>
+                            <input type="file" id="m-img-input" accept="image/*" style="display:none" onchange="prevModalImg(this)">
                         </div>
                     </div>
                 </div>
-                <?php endforeach; ?>
-
-                <div class="add-card"
-                     onclick="openAddModal('<?php echo htmlspecialchars($nomMarque); ?>','<?php echo $rowId; ?>')"
-                     title="Ajouter un véhicule <?php echo htmlspecialchars($nomMarque); ?>">
-                    <div class="add-circle"><i class="fas fa-plus"></i></div>
-                    <div class="add-label">AJOUTER<br><?php echo htmlspecialchars($nomMarque); ?></div>
-                </div>
-            </div>
-            <button class="nav-btn btn-next" onclick="scrollBy3('<?php echo $rowId; ?>',1)">❯</button>
-        </div>
-    </section>
-    <?php endforeach; ?>
-</main>
-
-<div class="modal-bg" id="add-modal">
-    <div class="mbox">
-        <div class="mhead">
-            <h3 id="modal-title">AJOUTER UN VÉHICULE</h3>
-            <button class="mclose" onclick="closeModal()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="mbody">
-            <input type="hidden" id="m-brand">
-            <input type="hidden" id="m-row">
-            <div class="fg">
-                <label class="fl">Marque</label>
-                <select id="m-marque" class="inp" style="background:#141414">
-                    <?php foreach ($marquesAll as $mk): ?>
-                    <option value="<?php echo htmlspecialchars($mk['nom_marque']); ?>"><?php echo htmlspecialchars($mk['nom_marque']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="fg">
-                <label class="fl">Modèle</label>
-                <input type="text" id="m-modele" class="inp" placeholder="Ex: Ferrari 488 GTB">
-            </div>
-            <div class="fgrid">
-                <div class="fg"><label class="fl">Prix (Rs)</label><input type="number" id="m-prix" class="inp" placeholder="8500000"></div>
-                <div class="fg"><label class="fl">Année</label><input type="number" id="m-annee" class="inp" value="<?php echo date('Y'); ?>" min="1900" max="2099"></div>
-            </div>
-            <div class="fgrid">
-                <div class="fg">
-                    <label class="fl">État</label>
-                    <select id="m-etat" class="inp" style="background:#141414"><option>Neuf</option><option>Occasion</option><option>Démonstration</option></select>
-                </div>
-                <div class="fg">
-                    <label class="fl">Type</label>
-                    <select id="m-type" class="inp" style="background:#141414"><option>Coupé</option><option>Berline</option><option>SUV</option><option>Cabriolet</option><option>Break</option><option>Citadine</option></select>
-                </div>
-            </div>
-            <div class="fg">
-                <label class="fl">Photo</label>
-                <div class="mimg-zone" id="m-img-zone" onclick="document.getElementById('m-img-input').click()">
-                    <img id="m-img-prev" src="" alt="">
-                    <div class="mph" id="m-img-ph"><i class="fas fa-cloud-upload-alt"></i>Cliquez pour ajouter une photo<br><small style="opacity:.45">JPG, PNG, WEBP</small></div>
-                    <input type="file" id="m-img-input" accept="image/*" style="display:none" onchange="prevModalImg(this)">
+                <div class="mfoot">
+                    <button class="btn-cx" onclick="closeModal()">Annuler</button>
+                    <button class="btn-sv" onclick="submitAdd()"><i class="fas fa-save"></i> AJOUTER</button>
                 </div>
             </div>
         </div>
-        <div class="mfoot">
-            <button class="btn-cx" onclick="closeModal()">Annuler</button>
-            <button class="btn-sv" onclick="submitAdd()"><i class="fas fa-save"></i> AJOUTER</button>
-        </div>
-    </div>
-</div>
 
-<div id="confirm-ov">
-    <div class="cbox">
-        <div class="ci"><i class="fas fa-box-archive"></i></div>
-        <h4>ARCHIVER CE VÉHICULE ?</h4>
-        <p id="confirm-text">Il sera retiré de l'inventaire et accessible dans les archives.</p>
-        <div class="cact">
-            <button class="btn-no" onclick="closeConfirm()">Annuler</button>
-            <button class="btn-arc" id="btn-yes"><i class="fas fa-box-archive"></i> ARCHIVER</button>
+        <div id="confirm-ov">
+            <div class="cbox">
+                <div class="ci"><i class="fas fa-box-archive"></i></div>
+                <h4>ARCHIVER CE VÉHICULE ?</h4>
+                <p id="confirm-text">Il sera retiré de l'inventaire et accessible dans les archives.</p>
+                <div class="cact">
+                    <button class="btn-no" onclick="closeConfirm()">Annuler</button>
+                    <button class="btn-arc" id="btn-yes"><i class="fas fa-box-archive"></i> ARCHIVER</button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-<div id="toast"><span class="ti" id="ti"></span><span id="tm"></span></div>
+        <div id="toast"><span class="ti" id="ti"></span><span id="tm"></span></div>
+    </main>
 
 <script>
 function scrollBy3(id, d) {
