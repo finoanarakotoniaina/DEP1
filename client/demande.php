@@ -65,7 +65,7 @@ $src_img = (strpos($img_hero, 'image_url/') === 0)
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/style.css">
+     <link rel="stylesheet" href="../style.css">
     <style>
         :root { --crimson: #C1121F; }
         .modal-blur { backdrop-filter: blur(10px); }

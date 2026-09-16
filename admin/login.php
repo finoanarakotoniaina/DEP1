@@ -60,7 +60,7 @@ $instruction = $marques[$_SESSION['captcha_target']];
     <title>Administration | Supercar</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/style.css?v=3.0">
+     <link rel="stylesheet" href="../style.css">
 </head>
 
 <body class="login-body">
