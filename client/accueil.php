@@ -14,7 +14,7 @@ function e($string) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-     <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../style.css">
     
     <style>
         .reveal-right { transform: translateX(100px); opacity: 0; transition: all 1s ease-out; }
@@ -26,34 +26,7 @@ function e($string) {
 
 <body class="home-bg">
 
-    <nav class="fixed top-0 w-full z-50 px-6 lg:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
-        <div class="font-title text-xl tracking-tighter">SUPER<span class="text-[var(--crimson)]">CAR</span></div>
-        
-        <ul class="hidden md:flex gap-8 font-title text-[10px] tracking-[0.2em] uppercase items-center">
-            <li><a href="accueil.php" class="nav-link active">Accueil</a></li>
-            <li><a href="voiture.php" class="nav-link">Voitures</a></li>
-            <li><a href="demande.php" class="nav-link">Essai</a></li>
-            <li><a href="services.php" class="nav-link">Services</a></li>
-            <li><a href="contact.php" class="nav-link">Contact</a></li>
-            |
-
-            <?php if (isset($_SESSION['id_client'])): ?>
-                <li>
-                    <a href="deconnexion.php" class="bg-[var(--crimson)] px-4 py-2 rounded text-white hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2">
-                        <i class="fa-solid fa-door-open text-[18px]"></i> Déconnexion
-                    </a>
-                </li>
-            <?php else: ?>
-                <li>
-                    <strong>
-                        <a href="connexion.php" class="nav-link flex items-center gap-2">
-                            <i class="fa-solid fa-user text-[var(--crimson)] text-[18px]"></i> Connexion
-                        </a>
-                    </strong>
-                </li>
-            <?php endif; ?>
-        </ul>
-    </nav>
+    <?php include 'composants_client/navbar.php'; ?>
 
     <section class="relative h-screen w-full flex items-center px-6 lg:px-24 overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full z-0">
@@ -117,10 +90,6 @@ function e($string) {
         </div>
     </section>
 
-    <footer class="py-10 text-center border-t border-white/5 text-gray-500 text-xs tracking-widest font-title">
-        &copy; 2024 SUPERCAR MAURITIUS - TOUS DROITS RÉSERVÉS
-    </footer>
-
     <script>
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -157,5 +126,5 @@ function e($string) {
             });
         });
     </script>
-</body>
-</html>
+
+    <?php include 'composants_client/footer.php'; ?>
