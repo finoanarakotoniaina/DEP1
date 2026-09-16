@@ -57,4 +57,26 @@ function getContent($element_id) {
         return "Erreur SQL : " . $e->getMessage();
     }
 }
+
+/**
+ * 5. RÉCUPÉRATION DES RÉGLAGES CONTACT (chargés une seule fois)
+ * Utilisable partout via $GLOBALS['contactSettings']['email_contact'], etc.
+ * Évite de refaire une requête dans chaque page (footer, contact, etc.)
+ */
+$contactSettings = [];
+try {
+    $stmt = $db->query("SELECT element_id, content FROM contact_settings");
+    $contactSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch (Exception $e) {
+    // Si la table n'existe pas encore, on garde un tableau vide
+    $contactSettings = [];
+}
+
+/**
+ * Helper pour récupérer un réglage contact avec fallback
+ */
+function getContact($key, $default = '—') {
+    global $contactSettings;
+    return !empty($contactSettings[$key]) ? $contactSettings[$key] : $default;
+}
 ?>
