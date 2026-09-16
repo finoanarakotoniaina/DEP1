@@ -29,7 +29,8 @@ try {
  * Ces constantes centralisent TOUS les chemins d'images.
  * Si tu changes un dossier un jour, tu modifies UNIQUEMENT ici.
  */
-define('BASE_URL',   '/xamp/SUPERCAR/DEP1');  // ⚠️ vérifie ce chemin
+define('BASE_URL',   '/supercar');
+define('CLIENT_URL', BASE_URL . '/client');
 define('UPLOAD_URL', BASE_URL . '/image_url');
 define('ASSETS_URL', BASE_URL . '/assets');
 
@@ -60,7 +61,7 @@ function getContent($element_id) {
 
 /**
  * 5. RÉCUPÉRATION DES RÉGLAGES CONTACT (chargés une seule fois)
- * Utilisable partout via $GLOBALS['contactSettings']['email_contact'], etc.
+ * Utilisable partout via $contactSettings['email_contact'], etc.
  * Évite de refaire une requête dans chaque page (footer, contact, etc.)
  */
 $contactSettings = [];
