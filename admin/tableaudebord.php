@@ -38,8 +38,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Syncopate:wght@700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/style.css">
-    
+     <link rel="stylesheet" href="../style.css">
     <style>
         body { background-color: var(--cosmos); color: #fff; }
         .sidebar { background: rgba(0, 0, 0, 0.2); border-right: 1px solid rgba(255, 255, 255, 0.05); }
