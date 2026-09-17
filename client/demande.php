@@ -1,7 +1,6 @@
 <?php 
 require_once '../config.php'; 
 
-// Récupération des textes dynamiques
 try {
     $query_ui = $db->query("SELECT id, contenu FROM essai_content");
     $ui = $query_ui->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -16,19 +15,17 @@ $txt_desc     = $ui[4] ?? "Prenez les commandes de l'exceptionnel. Choisissez vo
 $txt_btn      = $ui[5] ?? "RÉSERVER MON CRÉNEAU";
 $img_hero     = $ui[6] ?? "photo_essai.jpeg";
 
-// Récupération des données véhicule
-$id_voiture_hidden = $_GET['id_v'] ?? $_POST['id_voiture_cache'] ?? '';
+$id_voiture_hidden  = $_GET['id_v'] ?? $_POST['id_voiture_cache'] ?? '';
 $modele_selectionne = $_GET['modele'] ?? $_POST['modele_affiche'] ?? '';
 
 $message = "";
 
-// Traitement de la réservation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['valider_essai'])) {
     $id_client = $_SESSION['id_client'] ?? null;
     
     if ($id_client) {
-        $date_essai = $_POST['date_essai'];
-        $heure_essai = $_POST['heure_essai'];
+        $date_essai     = $_POST['date_essai'];
+        $heure_essai    = $_POST['heure_essai'];
         $id_v_a_inserer = $_POST['id_voiture_cache']; 
 
         if ($heure_essai < "08:00" || $heure_essai > "17:00") {
@@ -51,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['valider_essai'])) {
 
 $isLoggedIn = isset($_SESSION['id_client']); 
 
-// Construit le chemin complet de l'image hero
 $src_img = (strpos($img_hero, 'image_url/') === 0) 
     ? BASE_URL . '/' . $img_hero 
     : ASSETS_URL . '/hero/' . $img_hero;
@@ -62,147 +58,124 @@ $src_img = (strpos($img_hero, 'image_url/') === 0)
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperCar | L'Inévitable</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
-    <style>
-        :root { --crimson: #C1121F; }
-        .modal-blur { backdrop-filter: blur(10px); }
-        input[type="date"]::-webkit-calendar-picker-indicator,
-        input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
-        .no-caps { text-transform: none !important; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        body, html { background-color: #0a0a0a; scroll-behavior: smooth; }
-        .hero-fade-left { background: linear-gradient(to right, #0d1b2a 0%, #0d1b2a00 100%); }
-    </style>
 </head>
-<body class="split-bg text-white">
+<body class="bg">
 
-    <div id="authModal" class="<?php echo $isLoggedIn ? 'hidden' : 'flex'; ?> fixed inset-0 z-[100] items-center justify-center modal-blur px-6 animate-fade-in">
-        <div class="bg-[#0a0a0a] border border-white/10 p-10 rounded-[20px] max-w-md w-full text-center relative shadow-2xl">
-            <button onclick="closeModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <h2 class="font-title text-2xl mb-4 uppercase tracking-tighter">Accès Réservé</h2>
-            <p class="text-gray-400 text-sm mb-8 leading-relaxed">Veuillez vous identifier pour accéder au configurateur d'essai.</p>
-            <div class="flex flex-col gap-4">
-                <a href="connexion.php?redirect=demande.php" class="bg-[var(--crimson)] py-4 font-title text-[10px] tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all">Connexion</a>
-                <a href="inscription.php" class="border border-white/20 py-4 font-title text-[10px] tracking-[0.2em] uppercase hover:border-[var(--crimson)] transition-all">Inscription</a>
+    <!-- MODAL AUTH -->
+    <div id="authModal" class="modal-overlay <?= $isLoggedIn ? 'hidden' : '' ?>">
+        <div class="modal-box">
+            <span class="modal-close" onclick="closeModal()">✕</span>
+            <h2>Accès Réservé</h2>
+            <p class="text-muted mt-1 mb-2">Veuillez vous identifier pour accéder au configurateur d'essai.</p>
+            <div class="flex flex-col gap-2 mt-2">
+                <a href="connexion.php?redirect=demande.php" class="btn btn-primary btn-block">Connexion</a>
+                <a href="inscription.php" class="btn btn-outline btn-block">Inscription</a>
             </div>
         </div>
     </div>
 
     <?php include 'composants_client/navbar.php'; ?>
 
-    <section class="relative h-screen flex items-center px-6 lg:px-24 overflow-hidden">
-        <div class="z-10 max-w-4xl relative">
-            <span class="text-gray-500 font-bold tracking-[0.5em] uppercase mb-4 block text-[10px]">
-                <?= htmlspecialchars($txt_accroche) ?>
-            </span>
-
-            <h1 class="font-title text-5xl md:text-7xl font-bold leading-none mb-8 uppercase">
-                <?= htmlspecialchars($txt_ligne1) ?> <br>
-                <span style="color: var(--crimson);"><?= htmlspecialchars($txt_ligne2) ?></span>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <p class="hero-subtitle"><?= htmlspecialchars($txt_accroche) ?></p>
+            <h1>
+                <?= htmlspecialchars($txt_ligne1) ?><br>
+                <span class="title-accent"><?= htmlspecialchars($txt_ligne2) ?></span>
             </h1>
-            
-            <p class="text-gray-400 max-w-md mb-12 text-sm leading-relaxed border-l border-[var(--crimson)] pl-6">
-                <?= htmlspecialchars($txt_desc) ?>
-            </p>
-
-            <a href="#booking" class="inline-flex items-center gap-8 group">
-                <div class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[var(--crimson)] transition-all duration-500">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="group-hover:text-[var(--crimson)] transform group-hover:translate-y-1 transition-all">
-                        <path d="M7 13l5 5 5-5M7 6l5 5 5-5" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </div>
-                <span class="font-title text-[10px] tracking-[0.2em] uppercase">
-                    <?= htmlspecialchars($txt_btn) ?>
-                </span>
-            </a>
+            <p class="hero-desc"><?= htmlspecialchars($txt_desc) ?></p>
+            <a href="#booking" class="btn btn-outline"><?= htmlspecialchars($txt_btn) ?></a>
         </div>
-        
-        <div class="absolute inset-0 z-0">
-            <img src="<?= $src_img ?>" alt="Essai" class="w-full h-full object-cover grayscale opacity-50 block" style="object-position: right center;">
-            <div class="absolute inset-0" style="background: linear-gradient(to right, #003049 0%, #003049 40%, rgba(0,48,73,0.5) 58%, transparent 72%);"></div>
+
+        <div class="hero-bg">
+            <img src="<?= $src_img ?>" alt="Essai">
+            <div class="hero-overlay"></div>
         </div>
     </section>
 
-    <section id="booking" class="min-h-screen pt-10 pb-24 px-6 lg:px-24 border-t border-white/5 flex flex-col justify-center">
-        <div class="max-w-5xl mx-auto w-full grid lg:grid-cols-2 gap-20">
-            <div class="space-y-12">
-                <h2 class="font-title text-4xl uppercase">Configurateur <br> d'essai</h2>
-                <?php if($message): ?>
-                    <div class="p-4 bg-white/5 border-l-2 border-[var(--crimson)] text-[10px] tracking-widest uppercase animate-pulse"><?php echo $message; ?></div>
-                <?php endif; ?>
-                <div class="flex items-start gap-4">
-                    <span class="text-[var(--crimson)] font-title text-2xl">01</span>
-                    <div><h3 class="font-bold text-lg uppercase text-white">Sélection</h3><p class="text-gray-500 text-sm">Choisissez votre monture et votre date.</p></div>
-                </div>
-            </div>
+    <!-- BOOKING -->
+    <section id="booking" class="section" style="border-top: 1px solid rgba(255,255,255,0.05);">
+        <div class="container">
+            <div class="booking-grid">
 
-            <form action="demande.php#booking" method="POST" class="space-y-8 bg-white/5 p-10 rounded-[40px] border border-white/10 backdrop-blur-sm">
-                <input type="hidden" name="id_voiture_cache" value="<?php echo htmlspecialchars($id_voiture_hidden); ?>">
+                <!-- GAUCHE : titre + message -->
+                <div>
+                    <h2 class="mb-2">Configurateur<br>d'essai</h2>
 
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="space-y-1 border-b border-white/10">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">Nom</label>
-                        <input type="text" value="<?php echo strtoupper($_SESSION['nom'] ?? ''); ?>" readonly class="bg-transparent w-full p-2 text-xs outline-none text-gray-400 cursor-default">
-                    </div>
-                    <div class="space-y-1 border-b border-white/10">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">Prénom</label>
-                        <input type="text" value="<?php echo ucfirst(strtolower($_SESSION['prenom'] ?? '')); ?>" readonly class="bg-transparent w-full p-2 text-xs outline-none no-caps text-gray-400 cursor-default">
-                    </div>
-                </div>
+                    <?php if ($message): ?>
+                        <div class="form-msg"><?= $message ?></div>
+                    <?php endif; ?>
 
-                <div class="space-y-1 border-b border-white/10">
-                    <label class="text-[10px] text-gray-500 font-bold uppercase">Email</label>
-                    <input type="email" value="<?php echo $_SESSION['email'] ?? ''; ?>" readonly class="w-full bg-transparent p-2 text-xs text-gray-400 outline-none cursor-default">
-                </div>
-
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">Modèle</label>
-                        <div class="flex items-center gap-2 border-b border-white/20">
-                            <input type="text" name="modele_affiche" 
-                                   value="<?php echo htmlspecialchars($modele_selectionne); ?>" 
-                                   placeholder="VOTRE MODÈLE" 
-                                   readonly required 
-                                   class="bg-transparent w-full p-4 text-xs outline-none text-[var(--crimson)] font-bold tracking-widest">
-                            <a href="voiture.php" class="pr-2 text-[var(--crimson)] hover:scale-125 transition-transform text-xl" title="Ouvrir le catalogue">
-                                <i class="fa-solid fa-circle-plus"></i>
-                            </a>
+                    <div class="booking-number">
+                        <span>01</span>
+                        <div>
+                            <h3>Sélection</h3>
+                            <p>Choisissez votre monture et votre date.</p>
                         </div>
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">Téléphone</label>
-                        <input type="tel" name="mobile" value="<?php echo $_SESSION['telephone'] ?? ''; ?>" required class="bg-transparent border-b border-white/20 w-full p-4 text-xs outline-none focus:border-[var(--crimson)] transition-colors">
-                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">Date préférée</label>
-                        <input type="date" name="date_essai" id="d" required class="bg-transparent border border-white/10 rounded-lg w-full p-3 text-xs focus:border-[var(--crimson)] outline-none">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">Créneau (08h-17h)</label>
-                        <input type="time" name="heure_essai" id="h" min="08:00" max="17:00" required class="bg-transparent border border-white/10 rounded-lg w-full p-3 text-xs focus:border-[var(--crimson)] outline-none">
-                    </div>
-                </div>
+                <!-- DROITE : formulaire -->
+                <form action="demande.php#booking" method="POST" class="form-card">
+                    <input type="hidden" name="id_voiture_cache" value="<?= htmlspecialchars($id_voiture_hidden) ?>">
 
-                <button type="submit" name="valider_essai" class="w-full bg-[var(--crimson)] py-6 font-title text-xs tracking-[0.4em] uppercase hover:bg-white hover:text-black transition-all duration-500">
-                    Confirmer la demande
-                </button>
-            </form>
+                    <div class="grid grid-2" style="gap:1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Nom</label>
+                            <input type="text" value="<?= strtoupper($_SESSION['nom'] ?? '') ?>" readonly class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Prénom</label>
+                            <input type="text" value="<?= ucfirst(strtolower($_SESSION['prenom'] ?? '')) ?>" readonly class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" value="<?= $_SESSION['email'] ?? '' ?>" readonly class="form-input">
+                    </div>
+
+                    <div class="grid grid-2" style="gap:1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Modèle</label>
+                            <input type="text" name="modele_affiche" 
+                                   value="<?= htmlspecialchars($modele_selectionne) ?>" 
+                                   placeholder="VOTRE MODÈLE" readonly required 
+                                   class="form-input input-crimson">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Téléphone</label>
+                            <input type="tel" name="mobile" value="<?= $_SESSION['telephone'] ?? '' ?>" required class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-2" style="gap:1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Date préférée</label>
+                            <input type="date" name="date_essai" id="d" required class="form-input" style="border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.75rem;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Créneau (08h-17h)</label>
+                            <input type="time" name="heure_essai" min="08:00" max="17:00" required class="form-input" style="border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.75rem;">
+                        </div>
+                    </div>
+
+                    <button type="submit" name="valider_essai" class="btn btn-primary btn-block">
+                        Confirmer la demande
+                    </button>
+                </form>
+
+            </div>
         </div>
     </section>
 
     <script>
         function closeModal() { window.location.href = 'accueil.php'; }
+
         const dateIn = document.getElementById('d');
-        if(dateIn) {
+        if (dateIn) {
             const today = new Date();
             today.setDate(today.getDate() + 1);
             dateIn.min = today.toISOString().split('T')[0];

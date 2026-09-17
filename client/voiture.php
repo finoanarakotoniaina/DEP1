@@ -1,7 +1,6 @@
 <?php 
 require_once '../config.php'; 
 
-// --- CONFIGURATION ET CONNEXION BDD ---
 try {
     $query = "SELECT v.*, m.nom_marque 
               FROM voiture v 
@@ -19,100 +18,96 @@ try {
     die("Erreur : " . $e->getMessage());
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventaire | SuperCar Luxury</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../style.css">
-    
-    <style>
-        .row-wrapper { position: relative; padding: 0 40px; margin-bottom: 60px; overflow: visible !important; }
-        .story-row { display: flex; overflow-x: auto; scroll-behavior: smooth; gap: 25px; padding: 20px 10px; scrollbar-width: none; overflow-y: visible !important; scroll-snap-type: x mandatory; }
-        .story-row::-webkit-scrollbar { display: none; }
-        .car-card { min-width: calc(33.333% - 20px); flex-shrink: 0; position: relative; transition: transform 0.4s ease; z-index: 10; scroll-snap-align: start; }
-        
-        .hover-specs { position: absolute; top: 0; width: 280px; height: 100%; background: #C1121F; color: white; padding: 30px; border-radius: 24px; opacity: 0; visibility: hidden; transition: all 0.4s ease; display: flex; flex-direction: column; justify-content: center; pointer-events: none; }
-        .car-card .hover-specs { left: 105%; }
-        .car-card:nth-child(3n) .hover-specs { left: auto !important; right: 105% !important; }
-        .car-card:hover { transform: scale(1.05); z-index: 1000 !important; }
-        .car-card:hover .hover-specs { opacity: 1; visibility: visible; }
-        
-        .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 35px; height: 35px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; backdrop-filter: blur(5px); transition: 0.3s; font-size: 12px; }
-        .nav-btn:hover { background: white; color: black; border-color: white; }
-        .btn-prev { left: 0; } .btn-next { right: 0; }
-        .spec-item { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.2); padding: 12px 0; font-size: 11px; text-transform: uppercase; }
-
-        .nav-link.active { color: #C1121F !important; font-weight: 700; }
-    </style>
 </head>
 
-<body class="split-bg text-white">
+<body class="bg">
 
     <?php include 'composants_client/navbar.php'; ?>
 
-    <main class="pt-40"> 
-        <div class="px-6 lg:px-24 mb-12"> 
-            <h1 class="font-title text-3xl md:text-5xl font-bold leading-none uppercase tracking-tight" style="font-family: 'Syncopate';">
-                NOS <span style="color: #C1121F;">MODÈLES</span>
-            </h1>
-            <div class="w-20 h-1 mt-4" style="background-color: #C1121F;"></div>
+    <main style="padding-top: 6rem;">
+        <div class="container page-header">
+            <div>
+                <h2>NOS <span class="title-accent">MODÈLES</span></h2>
+                <div class="title-bar"></div>
+            </div>
+
+            <div class="search-wrapper">
+                <input type="text" id="searchCar" class="search-bar" 
+                    placeholder="RECHERCHER UN MODÈLE...">
+            </div>
         </div>
 
         <?php foreach ($voituresParMarque as $nomMarque => $voitures): ?>
-        <section class="mb-10"> 
-            <h2 class="font-title text-sm px-6 lg:px-24 mb-4 text-gray-500 uppercase tracking-[0.3em]" style="font-family: 'Syncopate';">
-                <?php echo htmlspecialchars($nomMarque); ?>
-            </h2>
-            
+        <section class="brand-section">
+            <h2 class="brand-title"><?= htmlspecialchars($nomMarque) ?></h2>
+
             <div class="row-wrapper">
                 <?php $rowId = "row-" . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $nomMarque)); ?>
-                
-                <button class="nav-btn btn-prev" onclick="scrollByThree('<?php echo $rowId; ?>', -1)">❮</button>
-                
-                <div class="story-row" id="<?php echo $rowId; ?>">
+
+                <button class="nav-arrow prev" onclick="scrollByThree('<?= $rowId ?>', -1)">❮</button>
+
+                <div class="story-row" id="<?= $rowId ?>">
                     <?php foreach ($voitures as $car): ?>
-                    <a href="demande.php?id_v=<?php echo $car['id_voiture']; ?>&modele=<?php echo urlencode($car['modele']); ?>#booking" class="car-card block no-underline">
+                    <a href="demande.php?id_v=<?= $car['id_voiture'] ?>&modele=<?= urlencode($car['modele']) ?>#booking" class="car-card">
                         <div class="hover-specs">
-                            <p class="font-title text-[10px] mb-4 border-b border-white/20 pb-2 text-center uppercase" style="font-family: 'Syncopate';">Fiche Technique</p>
-                            <div class="spec-item"><span>Année</span> <span><?php echo $car['annee']; ?></span></div>
-                            <div class="spec-item"><span>Etat</span> <span><?php echo htmlspecialchars($car['etat']); ?></span></div>
-                            <div class="spec-item"><span>Type</span> <span><?php echo htmlspecialchars($car['type']); ?></span></div>
-                            <p class="text-[9px] mt-4 text-center opacity-70 italic">Cliquez pour réserver un essai</p>
+                            <p class="spec-title">Fiche Technique</p>
+                            <div class="spec-item"><span>Année</span> <span><?= $car['annee'] ?></span></div>
+                            <div class="spec-item"><span>Etat</span>  <span><?= htmlspecialchars($car['etat']) ?></span></div>
+                            <div class="spec-item"><span>Type</span>  <span><?= htmlspecialchars($car['type']) ?></span></div>
+                            <p style="font-size:0.65rem; margin-top:1rem; text-align:center; opacity:0.7; font-style:italic;">
+                                Cliquez pour réserver un essai
+                            </p>
                         </div>
 
-                        <img src="<?= UPLOAD_URL ?>/voitures/<?php echo htmlspecialchars($car['image_url']); ?>" class="w-full h-64 object-cover rounded-t-[24px]" alt="<?php echo htmlspecialchars($car['modele']); ?>">
-                        
-                        <div class="p-8 bg-white/5 rounded-b-[24px]">
-                            <h3 class="font-title text-[13px] mb-4 text-white uppercase h-10 leading-tight" style="font-family: 'Syncopate';">
-                                <?php echo htmlspecialchars($car['modele']); ?>
-                            </h3>
-                            <p class="font-bold text-xl text-white"><?php echo number_format($car['prix'], 0, '.', ' '); ?> Rs</p>
+                        <img src="<?= UPLOAD_URL ?>/voitures/<?= htmlspecialchars($car['image_url']) ?>" alt="<?= htmlspecialchars($car['modele']) ?>">
+
+                        <div class="car-info">
+                            <h3><?= htmlspecialchars($car['modele']) ?></h3>
+                            <p class="car-price"><?= number_format($car['prix'], 0, '.', ' ') ?> Rs</p>
                         </div>
                     </a>
                     <?php endforeach; ?>
                 </div>
 
-                <button class="nav-btn btn-next" onclick="scrollByThree('<?php echo $rowId; ?>', 1)">❯</button>
+                <button class="nav-arrow next" onclick="scrollByThree('<?= $rowId ?>', 1)">❯</button>
             </div>
         </section>
         <?php endforeach; ?>
     </main>
 
     <script>
+        // 1. Carrousel : scroll de 3 cartes
         function scrollByThree(id, direction) {
             const container = document.getElementById(id);
             const card = container.querySelector('.car-card');
-            if(card) {
-                const cardWidth = card.offsetWidth + 25; 
-                container.scrollBy({ left: direction * (cardWidth * 3), behavior: 'smooth' });
+            if (card) {
+                const w = card.offsetWidth + 24;
+                container.scrollBy({ left: direction * (w * 3), behavior: 'smooth' });
             }
         }
+
+        // 2. Recherche dynamique
+        document.getElementById('searchCar').addEventListener('input', function(e) {
+            const q = e.target.value.toLowerCase().trim();
+
+            document.querySelectorAll('.car-card').forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(q) ? '' : 'none';
+            });
+
+            // Masque les marques sans voiture visible
+            document.querySelectorAll('.brand-section').forEach(sec => {
+                const visible = sec.querySelectorAll('.car-card:not([style*="display: none"])').length;
+                sec.style.display = visible > 0 ? '' : 'none';
+            });
+        });
     </script>
 
     <?php include 'composants_client/footer.php'; ?>

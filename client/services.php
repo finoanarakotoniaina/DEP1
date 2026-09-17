@@ -1,7 +1,6 @@
 <?php 
 require_once '../config.php';
 
-// Données des 4 services depuis la BDD
 $services = [];
 for ($i = 1; $i <= 4; $i++) {
     $services[$i] = [
@@ -11,23 +10,21 @@ for ($i = 1; $i <= 4; $i++) {
     ];
 }
 
-// Fallbacks si la BDD est vide
 $fallbacks = [
-    1 => ['img' => 'vidange.webp',        'title' => 'Vidange',    'text' => 'Lubrification haute performance avec huiles synthétiques certifiées. Nous protégeons les composants internes pour une fluidité mécanique absolue.'],
-    2 => ['img' => 'pneux.jpg',           'title' => 'Pneus',      'text' => 'Contrôle de l\'usure et équilibrage de précision. Maximisez votre grip latéral et votre sécurité sur tous les types de revêtements.'],
-    3 => ['img' => 'testdiagnostic.webp', 'title' => 'Diagnostic', 'text' => 'Scan complet des calculateurs et mise à jour des systèmes embarqués. Nous identifions la moindre anomalie avant qu\'elle ne devienne critique.'],
-    4 => ['img' => 'moteur.jpg',          'title' => 'Moteur',     'text' => 'Calage et réglages fins de la distribution. Redonnez à votre supercar sa sonorité iconique et son couple dévastateur d\'origine.'],
+    1 => ['img' => 'vidange.webp',        'title' => 'Vidange',    'text' => 'Lubrification haute performance avec huiles synthétiques certifiées.'],
+    2 => ['img' => 'pneux.jpg',           'title' => 'Pneus',      'text' => 'Contrôle de l\'usure et équilibrage de précision.'],
+    3 => ['img' => 'testdiagnostic.webp', 'title' => 'Diagnostic', 'text' => 'Scan complet des calculateurs et mise à jour des systèmes embarqués.'],
+    4 => ['img' => 'moteur.jpg',          'title' => 'Moteur',     'text' => 'Calage et réglages fins de la distribution.'],
 ];
 
 foreach ($services as $i => $s) {
-    if (empty($s['img']))    $services[$i]['img']   = $fallbacks[$i]['img'];
-    if (empty($s['title']))  $services[$i]['title'] = $fallbacks[$i]['title'];
-    if (empty($s['text']))   $services[$i]['text']  = $fallbacks[$i]['text'];
+    if (empty($s['img']))   $services[$i]['img']   = $fallbacks[$i]['img'];
+    if (empty($s['title'])) $services[$i]['title'] = $fallbacks[$i]['title'];
+    if (empty($s['text']))  $services[$i]['text']  = $fallbacks[$i]['text'];
 }
 
-// Titre et description hero depuis BDD
-$heroTitle = getContent('serv_hero_title') ?: 'Domptez <br> <span class="text-[var(--crimson)]">l\'instinct.</span>';
-$heroDesc  = getContent('serv_hero_desc')  ?: 'Nos services de maintenance garantissent que chaque kilomètre reste une expérience pure et sans compromis. L\'excellence au service de votre performance.';
+$heroTitle = getContent('serv_hero_title') ?: 'Domptez <span class="title-accent">l\'instinct.</span>';
+$heroDesc  = getContent('serv_hero_desc')  ?: 'Nos services de maintenance garantissent que chaque kilomètre reste une expérience pure et sans compromis.';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -35,63 +32,48 @@ $heroDesc  = getContent('serv_hero_desc')  ?: 'Nos services de maintenance garan
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperCar | Expertise Technique</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../style.css">
 </head>
-<body class="split-bg text-white font-['Plus_Jakarta_Sans']">
-    
+
+<body class="bg">
+
     <?php include 'composants_client/navbar.php'; ?>
 
-    <!-- SECTION HAUTE -->
-    <section class="relative h-[80vh] flex items-center px-6 lg:px-24 overflow-hidden">
-        <div class="z-10 max-w-4xl relative">
-            <span class="text-gray-500 font-bold tracking-[0.5em] uppercase mb-4 block text-[10px]">Ingénierie de pointe</span>
-            <h1 class="font-title text-5xl md:text-7xl font-bold leading-none mb-8 uppercase">
-                <?= $heroTitle ?>
-            </h1>
-            <p class="text-xl text-gray-400 font-light max-w-2xl leading-relaxed mb-10">
-                <?= $heroDesc ?>
-            </p>
-            <a href="#services-list" class="inline-flex items-center gap-8 group">
-                <div class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[var(--crimson)] transition-all duration-500">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="group-hover:text-[var(--crimson)] transform group-hover:translate-y-1 transition-all">
-                        <path d="M7 13l5 5 5-5M7 6l5 5 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <span class="font-title text-[10px] tracking-[0.2em] group-hover:text-[var(--crimson)] transition-colors uppercase">Découvrir l'expertise</span>
-            </a>
+    <!-- HERO -->
+    <section class="hero" style="min-height: 80vh;">
+        <div class="hero-content">
+            <p class="hero-subtitle">Ingénierie de pointe</p>
+            <h1><?= $heroTitle ?></h1>
+            <p class="hero-desc" style="max-width:650px;"><?= $heroDesc ?></p>
+            <a href="#services-list" class="btn btn-outline">Découvrir l'expertise</a>
         </div>
-        <div class="absolute inset-y-0 right-0 w-full md:w-1/2 z-0">
-            <img src="<?= ASSETS_URL ?>/hero/connexionimg.jpg" alt="Garage" class="w-full h-full object-cover grayscale opacity-30 [mask-image:linear-gradient(to_left,black_40%,transparent_100%)]">
+
+        <div class="hero-bg">
+            <img src="<?= ASSETS_URL ?>/hero/connexionimg.jpg" alt="Garage">
+            <div class="hero-overlay"></div>
         </div>
     </section>
 
-    <!-- SECTION SERVICES -->
-    <section id="services-list" class="py-32 px-6 lg:px-24 relative">
-        <div class="mb-24">
-            <h2 class="font-title text-3xl md:text-5xl mb-4 uppercase">Notre <span class="text-[var(--crimson)]">Expertise</span></h2>
-            <div class="w-24 h-1 bg-[var(--crimson)]"></div>
-        </div>
+    <!-- SERVICES -->
+    <section id="services-list" class="section">
+        <div class="container">
+            <div class="mb-3">
+                <h2>Notre <span class="title-accent">Expertise</span></h2>
+                <div style="width:6rem; height:4px; background:var(--crimson); margin-top:1rem;"></div>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            <?php for ($i = 1; $i <= 4; $i++): ?>
-            <div class="service-card p-8 bg-white/5 border border-white/10 rounded-2xl group transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 hover:z-50 hover:bg-[#051622] hover:border-[var(--crimson)]/50 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
-                <div class="mb-6 overflow-hidden rounded-xl h-44 bg-gray-900">
+            <div class="grid grid-4">
+                <?php for ($i = 1; $i <= 4; $i++): ?>
+                <div class="service-card">
                     <img src="<?= ASSETS_URL ?>/services/<?= htmlspecialchars($services[$i]['img']) ?>" 
                          alt="<?= htmlspecialchars($services[$i]['title']) ?>" 
-                         class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                         class="service-img">
+                    <span class="service-num">0<?= $i ?></span>
+                    <h3><?= htmlspecialchars($services[$i]['title']) ?></h3>
+                    <p><?= htmlspecialchars($services[$i]['text']) ?></p>
                 </div>
-                <span class="text-[var(--crimson)] font-title text-sm mb-2 block uppercase">0<?= $i ?></span>
-                <h3 class="font-title text-xl leading-tight mb-4 uppercase">
-                    <?= htmlspecialchars($services[$i]['title']) ?>
-                </h3>
-                <p class="text-gray-400 group-hover:text-white text-[14px] leading-relaxed font-light transition-colors">
-                    <?= htmlspecialchars($services[$i]['text']) ?>
-                </p>
+                <?php endfor; ?>
             </div>
-            <?php endfor; ?>
         </div>
     </section>
 
