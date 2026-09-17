@@ -12,7 +12,7 @@ $gestionPages = ['tableaudebord.php', 'admin_voitures.php', 'admin_demande.php',
 $editionPages = ['admin_accueil.php', 'admin_affichage_contact.php', 'admin_services.php'];
 
 // Chemin absolu du logo (depuis la racine web)
-$logoPath = '/xamp/SUPERCAR/DEP1/assets/logos/superlogo.png';
+$logoPath = '../assets/logos/superlogo.png';
 ?>
 <aside class="w-72 sidebar p-6 flex flex-col z-20">
     
