@@ -96,7 +96,7 @@ $instruction = $marques[$_SESSION['captcha_target']];
                     <?php foreach($marques as $key => $name): ?>
                     <label class="logo-item">
                         <input type="radio" name="brand_verify" value="<?php echo $key; ?>" required>
-                        <img src="<?= ASSETS_URL ?>/logos/logo<?php echo $key; ?>.jpg" alt="<?php echo $name; ?>">
+                        <img src="../assets/logos/logo<?php echo $key; ?>.jpg" alt="<?php echo $name; ?>">                     </label>
                     </label>
                     <?php endforeach; ?>
                 </div>
