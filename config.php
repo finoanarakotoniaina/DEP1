@@ -29,7 +29,8 @@ try {
  * Ces constantes centralisent TOUS les chemins d'images.
  * Si tu changes un dossier un jour, tu modifies UNIQUEMENT ici.
  */
-define('BASE_URL',   '/xamp/SUPERCAR/DEP1');  // ⚠️ vérifie ce chemin
+define('BASE_URL',   '/supercar');
+define('CLIENT_URL', BASE_URL . '/client');
 define('UPLOAD_URL', BASE_URL . '/image_url');
 define('ASSETS_URL', BASE_URL . '/assets');
 
@@ -56,5 +57,27 @@ function getContent($element_id) {
     } catch (Exception $e) {
         return "Erreur SQL : " . $e->getMessage();
     }
+}
+
+/**
+ * 5. RÉCUPÉRATION DES RÉGLAGES CONTACT (chargés une seule fois)
+ * Utilisable partout via $contactSettings['email_contact'], etc.
+ * Évite de refaire une requête dans chaque page (footer, contact, etc.)
+ */
+$contactSettings = [];
+try {
+    $stmt = $db->query("SELECT element_id, content FROM contact_settings");
+    $contactSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch (Exception $e) {
+    // Si la table n'existe pas encore, on garde un tableau vide
+    $contactSettings = [];
+}
+
+/**
+ * Helper pour récupérer un réglage contact avec fallback
+ */
+function getContact($key, $default = '—') {
+    global $contactSettings;
+    return !empty($contactSettings[$key]) ? $contactSettings[$key] : $default;
 }
 ?>
