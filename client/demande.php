@@ -2,7 +2,7 @@
 require_once '../config.php'; 
 
 try {
-    $query_ui = $db->query("SELECT id, contenu FROM essai_content");
+    $query_ui = $db->query("SELECT element_id, content FROM essai_content");
     $ui = $query_ui->fetchAll(PDO::FETCH_KEY_PAIR);
 } catch (Exception $e) {
     $ui = []; 

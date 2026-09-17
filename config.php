@@ -71,7 +71,7 @@ function getContent($element_id) {
  */
 $contactSettings = [];
 try {
-    $stmt = $db->query("SELECT element_id, content FROM contact_settings");
+    $stmt = $db->query("SELECT element_id, content FROM contact_content");
     $contactSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 } catch (Exception $e) {
     // Si la table n'existe pas encore, on garde un tableau vide
