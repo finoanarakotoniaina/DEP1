@@ -11,6 +11,7 @@ function e($string) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperCar | L'Élégance d'Occasion</title>
+    <!-- Correct : cherche style.css au même niveau que votre fichier PHP/HTML -->
     <link rel="stylesheet" href="../style.css">
 </head>
 

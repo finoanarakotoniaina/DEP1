@@ -10,10 +10,23 @@ if (!isset($adminFullName)) {
 $gestionPages = ['tableaudebord.php', 'admin_voitures.php', 'admin_demande.php', 'admin_contact.php'];
 // Pages considérées comme "Modification de page"
 $editionPages = ['admin_accueil.php', 'admin_affichage_contact.php', 'admin_services.php'];
+
+// Chemin absolu du logo (depuis la racine web)
+$logoPath = '/xamp/SUPERCAR/DEP1/assets/logos/superlogo.png';
 ?>
 <aside class="w-72 sidebar p-6 flex flex-col z-20">
-    <div class="font-title text-xl tracking-tighter uppercase mb-6">
-        SUPER<span class="text-[var(--crimson,#c1121f)]">CAR</span>
+    
+    <!-- LOGO EN HAUT, CENTRÉ -->
+    <div class="mb-4 flex items-center justify-center">
+        <a href="tableaudebord.php" class="block">
+            <img src="<?= htmlspecialchars($logoPath) ?>" 
+                 alt="SUPERCAR Logo" 
+                 class="h-32 w-auto object-contain mx-auto"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span class="font-title text-xl tracking-tighter uppercase hidden">
+                SUPER<span class="text-[var(--crimson,#c1121f)]">CAR</span>
+            </span>
+        </a>
     </div>
     
     <nav class="flex-1 space-y-6">
