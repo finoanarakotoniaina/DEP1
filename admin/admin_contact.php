@@ -56,7 +56,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SuperCar | Inbox Messages</title>
+    <title>SuperCar | Inbox  Messages</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
