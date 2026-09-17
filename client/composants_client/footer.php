@@ -25,6 +25,7 @@
             <!-- COLONNE 3 : MENTIONS + COPYRIGHT -->
             <div class="footer-col">
                 <a href="mentions-legales.php" class="footer-link">Mentions légales</a>
+                <a href="<?= defined('BASE_URL') ? BASE_URL : '/supercar' ?>/cgu.php" class="footer-link">CGU</a>
                 <p class="footer-copy">
                     &copy; 2026 SUPERCAR<br>
                     Tous droits réservés
