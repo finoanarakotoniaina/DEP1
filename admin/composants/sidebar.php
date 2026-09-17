@@ -6,6 +6,12 @@ if (!isset($adminFullName)) {
     $adminFullName = "Admin";
 }
 
+// Pages considérées comme "Gestion"
+$gestionPages = ['tableaudebord.php', 'admin_voitures.php', 'admin_demande.php', 'admin_contact.php'];
+// Pages considérées comme "Modification de page"
+$editionPages = ['admin_accueil.php', 'admin_affichage_contact.php', 'admin_services.php'];
+
+// Chemin absolu du logo (depuis la racine web)
 $logoPath = '../assets/logos/superlogo.png';
 ?>
 <aside class="sidebar">

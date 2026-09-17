@@ -1216,6 +1216,22 @@ body.login-body {
 .w-full { width: 100%; }
 .relative { position: relative; }
 
+/* Logo image (navbar + footer) */
+.logo-img {
+    height: 32px;
+    width: auto;
+    display: block;
+    transform: scale(2.5);          /* ← agrandit visuellement x1.6 */
+    transform-origin: left center;  /* ← grandit vers la droite, pas vers le centre */
+}
+
+/* Variante footer */
+.footer-logo .logo-img {
+    height: 38px;
+    transform: scale(2.5);
+    transform-origin: left center;
+}
+
 
 /* =========================================================
    20. RESPONSIVE

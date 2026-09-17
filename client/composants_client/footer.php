@@ -10,7 +10,7 @@
 
             <!-- COLONNE 1 : LOGO -->
             <div class="footer-logo">
-                SUPER<span>CAR</span>
+                <img src="<?= ASSETS_URL ?>/logos/superlogo.png" alt="SuperCar" class="logo-img">
             </div>
 
             <!-- COLONNE 2 : REDIRECTIONS -->
