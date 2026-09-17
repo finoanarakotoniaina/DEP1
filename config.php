@@ -25,11 +25,16 @@ try {
 }
 
 /**
- * 3. CONSTANTES DE CHEMINS
- * Ces constantes centralisent TOUS les chemins d'images.
- * Si tu changes un dossier un jour, tu modifies UNIQUEMENT ici.
+ * 3. CONSTANTES DE CHEMINS (auto-détectées)
+ * Le chemin de base est calculé automatiquement à partir de l'emplacement
+ * de ce fichier config.php. Ainsi, le projet fonctionne sur n'importe quel PC
+ * (peu importe le nom du dossier) sans modification.
  */
-define('BASE_URL',   '/supercar');
+$basePath = str_replace('\\', '/', dirname(__FILE__));         // .../htdocs/supercar
+$docRoot  = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']); // .../htdocs
+$autoBase = str_replace($docRoot, '', $basePath);              // /supercar
+
+define('BASE_URL',   $autoBase);
 define('CLIENT_URL', BASE_URL . '/client');
 define('UPLOAD_URL', BASE_URL . '/image_url');
 define('ASSETS_URL', BASE_URL . '/assets');
