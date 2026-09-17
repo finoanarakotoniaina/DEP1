@@ -54,6 +54,7 @@ CREATE TABLE voiture(
    kilometrage INT,
    disponibilite BOOLEAN DEFAULT TRUE,
    description TEXT,
+   archive INT DEFAULT 0;
    image_url VARCHAR(200),
    id_service INT,
    id_marque INT,
@@ -132,4 +133,3 @@ CREATE TABLE contact_client (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-ALTER TABLE voiture ADD COLUMN archive INT DEFAULT 0;
