@@ -18,7 +18,6 @@ $logoPath = '../assets/logos/superlogo.png';
     <div class="sidebar-logo">
         <a href="tableaudebord.php">
             <img src="<?= htmlspecialchars($logoPath) ?>" alt="SUPERCAR Logo">
-            <span class="navbar-logo">SUPER<span>CAR</span></span>
         </a>
     </div>
 
