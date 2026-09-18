@@ -12,12 +12,19 @@ if (!isset($_SESSION['captcha_reponse'])) {
 $message = ""; 
 
 if (isset($_POST['connexion'])) {
-    $email_saisi    = htmlspecialchars($_POST['email']);
-    $mdp_saisi      = $_POST['password'];
-    $captcha_saisi  = isset($_POST['captcha']) ? intval($_POST['captcha']) : -1;
-    
-    if ($captcha_saisi !== $_SESSION['captcha_reponse']) {
-        $message = "CAPTCHA incorrect.";
+    $email_saisi   = trim($_POST['email'] ?? '');
+    $mdp_saisi     = $_POST['password'] ?? '';
+    $captcha_saisi = isset($_POST['captcha']) ? intval($_POST['captcha']) : -1;
+
+    // --- VALIDATION SERVEUR ---
+    if (!filter_var($email_saisi, FILTER_VALIDATE_EMAIL)) {
+        $message = "Adresse email invalide.";
+    } elseif (strlen($mdp_saisi) < 1) {
+        $message = "Mot de passe requis.";
+    } elseif ($captcha_saisi < 0) {
+        $message = "Captcha invalide (nombre positif attendu).";
+    } elseif ($captcha_saisi !== $_SESSION['captcha_reponse']) {
+        $message = "Captcha incorrect.";
     } else {
         try {
             $sql = "SELECT l.password, c.id_client, c.prenom, c.nom, c.email, c.telephone 
@@ -54,6 +61,7 @@ if (isset($_POST['connexion'])) {
             $message = "Erreur de base de données : " . $e->getMessage();
         }
     }
+
     // Régénérer le captcha
     $n1 = rand(0, 3); $n2 = rand(0, 3);
     $_SESSION['captcha_reponse'] = $n1 + $n2;
@@ -80,31 +88,54 @@ if (isset($_POST['connexion'])) {
                 <div class="title-bar"></div>
 
                 <?php if ($message != ""): ?>
-                    <div class="form-msg"><?= $message ?></div>
+                    <div class="form-msg"><?= htmlspecialchars($message) ?></div>
                 <?php endif; ?>
 
-                <form action="connexion.php" method="POST">
+                <form action="connexion.php" method="POST" id="formConnexion" novalidate>
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required class="form-input">
+                        <input type="email" 
+                               name="email" 
+                               id="email"
+                               placeholder="nom@gmail.com" 
+                               required 
+                               class="form-input"
+                               autocomplete="email">
+                        <span class="form-error" id="error-email"></span>
                     </div>
 
                     <div class="grid grid-2" style="gap:2rem;">
                         <div class="form-group">
                             <label class="form-label">Mot de passe</label>
-                            <input type="password" name="password" placeholder="••••••••" required class="form-input">
+                            <input type="password" 
+                                   name="password" 
+                                   id="password"
+                                   placeholder="••••••••" 
+                                   required 
+                                   class="form-input"
+                                   autocomplete="current-password">
+                            <span class="form-error" id="error-password"></span>
                         </div>
                         <div class="form-group">
                             <label class="form-label" style="color:var(--crimson);">
                                 Calcul : <?= $_SESSION['captcha_question'] ?>
                             </label>
                             <div class="number-input-wrapper">
-                                <input type="number" name="captcha" id="captcha" placeholder="RÉPONSE" required class="form-input">
+                                <input type="number" 
+                                       name="captcha" 
+                                       id="captcha" 
+                                       placeholder="0" 
+                                       required 
+                                       min="0" 
+                                       max="999" 
+                                       step="1"
+                                       class="form-input">
                                 <div class="number-arrows">
                                     <button type="button" class="arrow-up" onclick="document.getElementById('captcha').stepUp()">▲</button>
                                     <button type="button" class="arrow-down" onclick="document.getElementById('captcha').stepDown()">▼</button>
                                 </div>
                             </div>
+                            <span class="form-error" id="error-captcha"></span>
                         </div>
                     </div>
 
@@ -125,5 +156,83 @@ if (isset($_POST['connexion'])) {
             <img src="<?= ASSETS_URL ?>/hero/connexionimg.jpg" alt="Ferrari">
         </div>
     </main>
+
+    <script>
+        // =========================================================
+        // VALIDATION CLIENT — Connexion
+        // Mode : blur (par champ) + submit (global)
+        // =========================================================
+
+        // --- Règles de validation par champ ---
+        const rulesConnexion = {
+            email: (v) => {
+                if (!v.trim()) return "Email requis.";
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) return "Format email invalide.";
+                return "";
+            },
+            password: (v) => {
+                if (!v) return "Mot de passe requis.";
+                return "";
+            },
+            captcha: (v) => {
+                const n = parseInt(v, 10);
+                if (v === "" || isNaN(n)) return "Réponse requise.";
+                if (n < 0) return "Nombre positif attendu.";
+                return "";
+            }
+        };
+
+        // --- Fonction générique de validation d'un champ ---
+        function validateField(input, errorId) {
+            const value = input.value;
+            const errorEl = document.getElementById(errorId);
+            const rule = rulesConnexion[input.id];
+            if (!rule) return true;
+
+            const msg = rule(value);
+            errorEl.textContent = msg;
+            input.classList.toggle('input-error', msg !== "");
+            return msg === "";
+        }
+
+        // --- Attache : blur (validation immédiate) + input (efface l'erreur) ---
+        const formConnexion = document.getElementById('formConnexion');
+
+        formConnexion.querySelectorAll('.form-input').forEach(input => {
+            const errorId = 'error-' + input.id;
+
+            // Au blur : on valide
+            input.addEventListener('blur', function() {
+                if (this.value !== "") validateField(this, errorId);
+            });
+
+            // Au input : si l'erreur était affichée et que ça devient valide, on efface
+            input.addEventListener('input', function() {
+                const errorEl = document.getElementById(errorId);
+                if (errorEl.textContent !== "" && validateField(this, errorId)) {
+                    errorEl.textContent = "";
+                }
+            });
+        });
+
+        // --- Validation finale à la soumission ---
+        formConnexion.addEventListener('submit', function(e) {
+            let allValid = true;
+
+            formConnexion.querySelectorAll('.form-input').forEach(input => {
+                const errorId = 'error-' + input.id;
+                if (!validateField(input, errorId)) {
+                    allValid = false;
+                }
+            });
+
+            if (!allValid) {
+                e.preventDefault();
+                // Focus sur le premier champ en erreur
+                const firstError = formConnexion.querySelector('.input-error');
+                if (firstError) firstError.focus();
+            }
+        });
+    </script>
 </body>
 </html>

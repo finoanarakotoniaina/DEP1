@@ -4,14 +4,35 @@ require_once '../config.php';
 $message = ""; 
 
 if (isset($_POST['inscription'])) {
-    $prenom = htmlspecialchars($_POST['prenom']);
-    $nom    = htmlspecialchars($_POST['nom']);
-    $email  = htmlspecialchars($_POST['email']);
-    $tel    = htmlspecialchars($_POST['telephone']); 
-    $mdp    = $_POST['password'];
-    $mdp_confirm = $_POST['confirm_password'];
+    $prenom      = trim($_POST['prenom'] ?? '');
+    $nom         = trim($_POST['nom'] ?? '');
+    $email       = trim($_POST['email'] ?? '');
+    $tel         = trim($_POST['telephone'] ?? '');
+    $mdp         = $_POST['password'] ?? '';
+    $mdp_confirm = $_POST['confirm_password'] ?? '';
 
-    if ($mdp !== $mdp_confirm) {
+    // --- VALIDATION SERVEUR ---
+    if (empty($prenom) || empty($nom)) {
+        $message = "Nom et prénom requis.";
+    } elseif (strlen($prenom) < 2 || strlen($nom) < 2) {
+        $message = "Nom et prénom doivent contenir au moins 2 caractères.";
+    } elseif (!preg_match("/^[a-zA-ZÀ-ÿ\s\-']+$/u", $prenom) || !preg_match("/^[a-zA-ZÀ-ÿ\s\-']+$/u", $nom)) {
+        $message = "Nom et prénom ne doivent contenir que des lettres.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = "Adresse email invalide.";
+    } elseif (!preg_match("/^[0-9\s\+\-\(\)]{8,20}$/", $tel)) {
+        $message = "Numéro de téléphone invalide.";
+    } elseif (strlen($mdp) < 8) {
+        $message = "Le mot de passe doit contenir au moins 8 caractères.";
+    } elseif (!preg_match("/[A-Z]/", $mdp)) {
+        $message = "Le mot de passe doit contenir au moins une majuscule.";
+    } elseif (!preg_match("/[a-z]/", $mdp)) {
+        $message = "Le mot de passe doit contenir au moins une minuscule.";
+    } elseif (!preg_match("/[0-9]/", $mdp)) {
+        $message = "Le mot de passe doit contenir au moins un chiffre.";
+    } elseif (!preg_match("/[\W_]/", $mdp)) {
+        $message = "Le mot de passe doit contenir au moins un caractère spécial.";
+    } elseif ($mdp !== $mdp_confirm) {
         $message = "Les mots de passe ne correspondent pas.";
     } else {
         $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);
@@ -55,41 +76,95 @@ if (isset($_POST['inscription'])) {
                 <div class="title-bar"></div>
 
                 <?php if ($message != ""): ?>
-                    <div class="form-msg"><?= $message ?></div>
+                    <div class="form-msg"><?= htmlspecialchars($message) ?></div>
                 <?php endif; ?>
 
-                <form action="inscription.php" method="POST">
+                <form action="inscription.php" method="POST" id="formInscription" novalidate>
                     <div class="grid grid-2" style="gap:1.5rem;">
                         <div class="form-group">
                             <label class="form-label">Prénom</label>
-                            <input type="text" name="prenom" placeholder="JEAN" required class="form-input">
+                            <input type="text" 
+                                   name="prenom" 
+                                   id="prenom"
+                                   placeholder="JEAN" 
+                                   required 
+                                   minlength="2"
+                                   class="form-input"
+                                   autocomplete="given-name">
+                            <span class="form-error" id="error-prenom"></span>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nom</label>
-                            <input type="text" name="nom" placeholder="DUPONT" required class="form-input">
+                            <input type="text" 
+                                   name="nom" 
+                                   id="nom"
+                                   placeholder="DUPONT" 
+                                   required 
+                                   minlength="2"
+                                   class="form-input"
+                                   autocomplete="family-name">
+                            <span class="form-error" id="error-nom"></span>
                         </div>
                     </div>
 
                     <div class="grid grid-2" style="gap:1.5rem;">
                         <div class="form-group">
                             <label class="form-label">Email</label>
-                            <input type="email" name="email" placeholder="VOTRE@EMAIL.COM" required class="form-input">
+                            <input type="email" 
+                                   name="email" 
+                                   id="email"
+                                   placeholder="VOTRE@EMAIL.COM" 
+                                   required 
+                                   class="form-input"
+                                   autocomplete="email">
+                            <span class="form-error" id="error-email"></span>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Téléphone</label>
-                            <input type="tel" name="telephone" placeholder="5000 0000" required class="form-input">
+                            <input type="tel" 
+                                   name="telephone" 
+                                   id="telephone"
+                                   placeholder="5000 0000" 
+                                   required 
+                                   class="form-input"
+                                   autocomplete="tel">
+                            <span class="form-error" id="error-telephone"></span>
                         </div>
                     </div>
 
                     <div class="grid grid-2" style="gap:1.5rem;">
                         <div class="form-group">
                             <label class="form-label">Mot de passe</label>
-                            <input type="password" name="password" placeholder="••••••••" required class="form-input">
+                            <input type="password" 
+                                   name="password" 
+                                   id="password"
+                                   placeholder="••••••••" 
+                                   required 
+                                   minlength="8"
+                                   class="form-input"
+                                   autocomplete="new-password">
+                            <span class="form-error" id="error-password"></span>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Confirmation</label>
-                            <input type="password" name="confirm_password" placeholder="••••••••" required class="form-input">
+                            <input type="password" 
+                                   name="confirm_password" 
+                                   id="confirm_password"
+                                   placeholder="••••••••" 
+                                   required 
+                                   minlength="8"
+                                   class="form-input"
+                                   autocomplete="new-password">
+                            <span class="form-error" id="error-confirm_password"></span>
                         </div>
+                    </div>
+
+                    <!-- Indicateur de robustesse -->
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <span class="strength-fill" id="strength-fill"></span>
+                        </div>
+                        <p class="strength-text" id="strength-text">Force du mot de passe</p>
                     </div>
 
                     <div class="auth-actions">
@@ -109,3 +184,130 @@ if (isset($_POST['inscription'])) {
             <img src="<?= ASSETS_URL ?>/hero/connexionimg.jpg" alt="Ferrari">
         </div>
     </main>
+
+    <script>
+        // =========================================================
+        // VALIDATION CLIENT — Inscription
+        // Mode : blur (par champ) + input (efface erreur) + submit
+        // =========================================================
+
+        // --- Règles de validation par champ ---
+        const rulesInscription = {
+            prenom: (v) => {
+                if (!v.trim()) return "Prénom requis.";
+                if (v.trim().length < 2) return "Prénom trop court (2 min).";
+                if (!/^[a-zA-ZÀ-ÿ\s\-']+$/.test(v.trim())) return "Lettres uniquement.";
+                return "";
+            },
+            nom: (v) => {
+                if (!v.trim()) return "Nom requis.";
+                if (v.trim().length < 2) return "Nom trop court (2 min).";
+                if (!/^[a-zA-ZÀ-ÿ\s\-']+$/.test(v.trim())) return "Lettres uniquement.";
+                return "";
+            },
+            email: (v) => {
+                if (!v.trim()) return "Email requis.";
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) return "Format email invalide.";
+                return "";
+            },
+            telephone: (v) => {
+                if (!v.trim()) return "Téléphone requis.";
+                if (!/^[0-9\s\+\-\(\)]{8,20}$/.test(v.trim())) return "Numéro invalide (8-20 chiffres).";
+                return "";
+            },
+            password: (v) => {
+                if (!v) return "Mot de passe requis.";
+                if (v.length < 8) return "8 caractères minimum.";
+                if (!/[A-Z]/.test(v)) return "Au moins une majuscule.";
+                if (!/[a-z]/.test(v)) return "Au moins une minuscule.";
+                if (!/[0-9]/.test(v)) return "Au moins un chiffre.";
+                if (!/[\W_]/.test(v)) return "Au moins un caractère spécial.";
+                return "";
+            },
+            confirm_password: (v) => {
+                if (!v) return "Confirmation requise.";
+                if (v !== document.getElementById('password').value) return "Les mots de passe ne correspondent pas.";
+                return "";
+            }
+        };
+
+        // --- Fonction générique de validation ---
+        function validateField(input, errorId) {
+            const errorEl = document.getElementById(errorId);
+            const rule = rulesInscription[input.id];
+            if (!rule) return true;
+
+            const msg = rule(input.value);
+            errorEl.textContent = msg;
+            input.classList.toggle('input-error', msg !== "");
+            return msg === "";
+        }
+
+        const formInscription = document.getElementById('formInscription');
+        const passwordInput = document.getElementById('password');
+        const strengthFill = document.getElementById('strength-fill');
+        const strengthText = document.getElementById('strength-text');
+
+        // --- Indicateur de robustesse en temps réel ---
+        passwordInput.addEventListener('input', function() {
+            const val = passwordInput.value;
+            let score = 0;
+
+            if (val.length >= 8)    score++;
+            if (/[A-Z]/.test(val))  score++;
+            if (/[a-z]/.test(val))  score++;
+            if (/[0-9]/.test(val))  score++;
+            if (/[\W_]/.test(val))  score++;
+
+            const colors = ['#6b7280', '#C1121F', '#e07c00', '#e0c000', '#4CAF50', '#4CAF50'];
+            const labels = ['Force du mot de passe', 'Très faible', 'Faible', 'Moyen', 'Fort', 'Très fort'];
+
+            strengthFill.style.width = (score * 20) + '%';
+            strengthFill.style.background = colors[score];
+            strengthText.textContent = labels[score];
+            strengthText.style.color = colors[score];
+        });
+
+        // --- Attache : blur (validation) + input (efface erreur) ---
+        formInscription.querySelectorAll('.form-input').forEach(input => {
+            const errorId = 'error-' + input.id;
+
+            // Au blur : on valide
+            input.addEventListener('blur', function() {
+                if (this.value !== "") validateField(this, errorId);
+            });
+
+            // Au input : efface l'erreur si ça devient valide
+            input.addEventListener('input', function() {
+                const errorEl = document.getElementById(errorId);
+                if (errorEl.textContent !== "" && validateField(this, errorId)) {
+                    errorEl.textContent = "";
+                }
+
+                // Cas spécial : si on modifie le mot de passe, on revalide la confirmation
+                if (this.id === 'password' && document.getElementById('confirm_password').value !== "") {
+                    validateField(document.getElementById('confirm_password'), 'error-confirm_password');
+                }
+            });
+        });
+
+        // --- Validation finale à la soumission ---
+        formInscription.addEventListener('submit', function(e) {
+            let allValid = true;
+
+            formInscription.querySelectorAll('.form-input').forEach(input => {
+                const errorId = 'error-' + input.id;
+                if (!validateField(input, errorId)) {
+                    allValid = false;
+                }
+            });
+
+            if (!allValid) {
+                e.preventDefault();
+                const firstError = formInscription.querySelector('.input-error');
+                if (firstError) firstError.focus();
+            }
+        });
+    </script>
+</body>
+</html>

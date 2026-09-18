@@ -27,7 +27,7 @@ try {
     <link rel="stylesheet" href="../style.css">
 </head>
 
-<body class="bg">
+<body class="bg page-voiture">
 
     <?php include 'composants_client/navbar.php'; ?>
 
