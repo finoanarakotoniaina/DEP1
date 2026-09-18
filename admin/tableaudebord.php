@@ -35,117 +35,77 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperCar | Command Center</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Syncopate:wght@700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-     <link rel="stylesheet" href="../style.css">
-    <style>
-        body { background-color: var(--cosmos); color: #fff; }
-        .sidebar { background: rgba(0, 0, 0, 0.2); border-right: 1px solid rgba(255, 255, 255, 0.05); }
-        .nav-link-admin { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.25rem; border-radius: 14px; color: rgba(255,255,255,0.6); transition: 0.3s; font-size: 0.85rem; font-weight: 600; }
-        .nav-link-admin:hover { color: white; background: rgba(255,255,255,0.05); }
-        .nav-link-admin.active { color: white; background: linear-gradient(90deg, rgba(193, 18, 31, 0.2), transparent); border-left: 3px solid var(--crimson); }
-        .logout-btn-admin { display: flex; align-items: center; justify-content: center; gap: 0.75rem; width: 100%; padding: 0.75rem; margin-bottom: 0.8rem; background: rgba(193, 18, 31, 0.1); border: 1px solid rgba(193, 18, 31, 0.2); border-radius: 14px; color: #ff4d4d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .logout-btn-admin:hover { background: var(--crimson); color: white; }
-        .stat-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .stat-card:hover { transform: translateY(-5px); border-color: rgba(193, 18, 31, 0.3); background: rgba(255, 255, 255, 0.04); }
-        .stat-icon { position: absolute; right: -10px; bottom: -10px; font-size: 4rem; opacity: 0.03; transform: rotate(-15deg); transition: all 0.5s ease; pointer-events: none; }
-        .group:hover .stat-icon { opacity: 0.1; transform: rotate(0deg) scale(1.1); }
-        .table-container { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .grid-bg-overlay { background-image: linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px); background-size: 40px 40px; }
-    </style>
+    <link rel="stylesheet" href="../style.css">
 </head>
-<body class="flex h-screen overflow-hidden">
+<body class="admin-body">
 
     <?php include 'composants/sidebar.php'; ?>
 
-    <main class="flex-1 p-10 overflow-y-auto grid-bg-overlay">
-        <header class="mb-12 flex justify-between items-end">
+    <main class="admin-main">
+        <header class="admin-header">
             <div>
-                <h2 class="text-4xl font-title font-black italic uppercase tracking-tighter">
-                    COMMAND <span style="color: var(--crimson)">CENTER</span>
-                </h2>
-                <p class="text-[10px] text-green-500 font-bold uppercase tracking-[3px] mt-2">
-                    <i class="fa-solid fa-circle text-[6px] mr-2 animate-pulse"></i> System Status: Nominal
-                </p>
+                <h2 class="font-title">COMMAND <span class="title-accent">CENTER</span></h2>
+                <p class="status-live">● System Status: Nominal</p>
             </div>
-            <div class="hidden md:block">
-                <span class="px-6 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">
-                    Session ID: <?= session_id() ?>
-                </span>
+            <div>
+                <span class="session-badge">Session ID: <?= session_id() ?></span>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <div class="stat-card p-8 rounded-3xl relative overflow-hidden group">
-                <i class="fa-solid fa-car-side stat-icon"></i>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Inventaire</p>
-                <h3 class="text-5xl font-m font-black italic text-white"><?= $countCars ?></h3>
-                <p class="text-[9px] text-gray-600 mt-2 font-bold uppercase">Véhicules en stock</p>
-                <div class="w-12 h-1 mt-4 bg-[var(--crimson)] rounded-full"></div>
+        <div class="admin-stats">
+            <div class="stat-card">
+                <p class="stat-label">Inventaire</p>
+                <h3 class="stat-value"><?= $countCars ?></h3>
+                <p class="stat-sub">Véhicules en stock</p>
+                <div class="stat-bar"></div>
             </div>
 
-            <div class="stat-card p-8 rounded-3xl relative overflow-hidden group">
-                <i class="fa-solid fa-user-astronaut stat-icon"></i>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Registre</p>
-                <h3 class="text-5xl font-m font-black italic text-white"><?= $countClients ?></h3>
-                <p class="text-[9px] text-gray-600 mt-2 font-bold uppercase">Pilotes certifiés</p>
-                <div class="w-12 h-1 mt-4 bg-white/20 rounded-full"></div>
+            <div class="stat-card">
+                <p class="stat-label">Registre</p>
+                <h3 class="stat-value"><?= $countClients ?></h3>
+                <p class="stat-sub">Pilotes certifiés</p>
+                <div class="stat-bar"></div>
             </div>
 
-            <div class="stat-card p-8 rounded-3xl relative overflow-hidden group">
-                <i class="fa-solid fa-satellite-dish stat-icon"></i>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Messages</p>
-                <h3 class="text-5xl font-m font-black italic text-white"><?= $countMessages ?></h3>
-                <p class="text-[9px] text-gray-600 mt-2 font-bold uppercase">Flux live reçu</p>
-                <div class="w-12 h-1 mt-4 bg-green-500/50 rounded-full"></div>
+            <div class="stat-card">
+                <p class="stat-label">Messages</p>
+                <h3 class="stat-value"><?= $countMessages ?></h3>
+                <p class="stat-sub">Flux live reçu</p>
+                <div class="stat-bar"></div>
             </div>
 
-            <div class="stat-card p-8 rounded-3xl relative overflow-hidden group border-l-4 border-l-[var(--crimson)]">
-                <i class="fa-solid fa-gauge-simple-high stat-icon"></i>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Performance</p>
-                <div class="flex items-baseline gap-1">
-                    <h3 class="text-5xl font-m font-black italic text-white">98</h3>
-                    <span class="text-[var(--crimson)] font-bold text-xl">%</span>
-                </div>
-                <div class="mt-4 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <div class="h-full bg-[var(--crimson)] shadow-[0_0_15px_#C1121F]" style="width: 98%"></div>
-                </div>
+            <div class="stat-card stat-card-accent">
+                <p class="stat-label">Performance</p>
+                <h3 class="stat-value">98<span class="stat-unit">%</span></h3>
+                <div class="progress-bar"><div class="progress-fill" style="width:98%"></div></div>
             </div>
         </div>
 
-        <div class="table-container rounded-[32px] overflow-hidden backdrop-blur-md">
-            <div class="p-8 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
-                <h3 class="text-[11px] font-title uppercase tracking-[3px] text-gray-400 italic">Derniers Pilotes Enregistrés</h3>
-                <div class="text-[9px] font-bold uppercase text-green-500 tracking-tighter">Live Telemetry</div>
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Derniers Pilotes Enregistrés</h3>
+                <span class="status-live">Live Telemetry</span>
             </div>
             
-            <table class="w-full text-left">
-                <tbody class="divide-y divide-white/5">
+            <table class="admin-table">
+                <tbody>
                     <?php if (empty($recentDrivers)): ?>
-                        <tr><td class="p-10 text-center text-gray-600 italic uppercase text-[10px] tracking-widest">Aucun signal détecté</td></tr>
+                        <tr><td colspan="3" class="table-empty">Aucun signal détecté</td></tr>
                     <?php else: ?>
                         <?php foreach($recentDrivers as $driver): ?>
-                        <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="p-6 flex items-center gap-5">
-                                <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center font-bold text-lg text-[var(--crimson)] border border-white/5 group-hover:border-[var(--crimson)]/30 transition-all">
-                                    <?= strtoupper(substr($driver['nom'], 0, 1)) ?>
-                                </div>
-                                <div>
-                                    <p class="font-bold text-sm uppercase italic tracking-tight text-white">
-                                        <?= htmlspecialchars($driver['nom'] . ' ' . $driver['prenom']) ?>
-                                    </p>
-                                    <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Status: Verified Pilot</p>
+                        <tr>
+                            <td>
+                                <div class="driver-cell">
+                                    <div class="driver-avatar"><?= strtoupper(substr($driver['nom'], 0, 1)) ?></div>
+                                    <div>
+                                        <p class="driver-name"><?= htmlspecialchars($driver['nom'] . ' ' . $driver['prenom']) ?></p>
+                                        <p class="driver-status">Status: Verified Pilot</p>
+                                    </div>
                                 </div>
                             </td>
-                            <td class="p-6 font-mono text-xs text-gray-500">
-                                <i class="fa-solid fa-at mr-2 opacity-30"></i><?= htmlspecialchars($driver['email']) ?>
-                            </td>
-                            <td class="p-6 text-right">
-                                <a href="admin_client_detail.php?id=<?= $driver['id_client'] ?>"
-                                   class="px-5 py-2 bg-white/5 text-[8px] font-black uppercase rounded-lg border border-white/5 hover:bg-[var(--crimson)] hover:text-white transition-all italic tracking-widest">
-                                    Consulter
-                                </a>
+                            <td class="driver-email"><?= htmlspecialchars($driver['email']) ?></td>
+                            <td class="text-right">
+                                <a href="admin_client_detail.php?id=<?= $driver['id_client'] ?>" class="btn-consulter">Consulter</a>
                             </td>
                         </tr>
                         <?php endforeach; ?>

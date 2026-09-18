@@ -1,8 +1,4 @@
 <?php
-/**
- * SUPERCAR - Cockpit de Gestion
- * Module : Boîte de Réception des Messages Contact
- */
 require_once '../config.php';
 
 if (!isset($_SESSION['admin_id'])) {
@@ -13,7 +9,6 @@ if (!isset($_SESSION['admin_id'])) {
 $db = $pdo ?? $db ?? $conn;
 $message_status = "";
 
-// --- TRAITEMENT DES ACTIONS ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_contact'])) {
     try {
         if ($_POST['action'] === 'delete') {
@@ -35,13 +30,7 @@ try {
     $totalMessages = $db->query("SELECT COUNT(*) FROM contact_client")->fetchColumn();
 
     $messages = $db->query("
-        SELECT 
-            id_contact,
-            nom,
-            prenom,
-            email,
-            message,
-            date_envoi
+        SELECT id_contact, nom, prenom, email, message, date_envoi
         FROM contact_client
         ORDER BY id_contact DESC
     ")->fetchAll(PDO::FETCH_ASSOC);
@@ -57,111 +46,66 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <title>SuperCar | Inbox Messages</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Syncopate:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-     <link rel="stylesheet" href="../style.css">
-    
-    <style>
-        body { background-color: var(--cosmos); }
-        .sidebar { background: rgba(0, 0, 0, 0.2); border-right: 1px solid rgba(255, 255, 255, 0.05); }
-        .nav-link-admin { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.25rem; border-radius: 14px; color: rgba(255,255,255,0.6); transition: 0.3s; font-size: 0.85rem; font-weight: 600; }
-        .nav-link-admin:hover { color: white; background: rgba(255,255,255,0.05); }
-        .nav-link-admin.active { color: white; background: linear-gradient(90deg, rgba(193, 18, 31, 0.2), transparent); border-left: 3px solid var(--crimson); }
-        .logout-btn-admin { display: flex; align-items: center; justify-content: center; gap: 0.75rem; width: 100%; padding: 0.75rem; margin-bottom: 0.8rem; background: rgba(193, 18, 31, 0.1); border: 1px solid rgba(193, 18, 31, 0.2); border-radius: 14px; color: #ff4d4d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .logout-btn-admin:hover { background: var(--crimson); color: white; }
-        .stat-icon { position: absolute; right: -10px; bottom: -10px; font-size: 5rem; opacity: 0.05; transform: rotate(-15deg); transition: all 0.5s ease; pointer-events: none; }
-        .group:hover .stat-icon { opacity: 0.15; transform: rotate(0deg) scale(1.1); color: white; }
-        .table-container { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
-    </style>
+    <link rel="stylesheet" href="../style.css">
 </head>
-<body class="flex h-screen overflow-hidden text-white">
+<body class="admin-body">
 
     <?php include 'composants/sidebar.php'; ?>
 
-    <main class="flex-1 p-10 overflow-y-auto split-bg">
-        <header class="mb-8">
-            <h2 class="text-4xl font-title font-black italic uppercase tracking-tighter">
-                INBOX <span style="color: var(--crimson)">MESSAGES</span>
-            </h2>
-            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[3px] mt-2">Gestion des retours et messages du formulaire de contact client</p>
+    <main class="admin-main">
+        <header class="admin-header">
+            <div>
+                <h2 class="font-title">INBOX <span class="title-accent">MESSAGES</span></h2>
+                <p class="admin-subtitle">Gestion des retours et messages du formulaire de contact client</p>
+            </div>
         </header>
 
         <?php if (!empty($message_status)): ?>
-            <div class="mb-6 p-4 bg-white/5 border-l-4 border-[var(--crimson)] rounded-r-xl text-sm flex items-center gap-3 font-semibold tracking-wide">
-                <?= $message_status ?>
-            </div>
+            <div class="alert-message"><?= $message_status ?></div>
         <?php endif; ?>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-            <div class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md relative overflow-hidden group">
-                <i class="fa-solid fa-envelope-open-text stat-icon"></i>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Messages Reçus</p>
-                <h3 class="text-3xl font-title font-black italic text-white"><?= $totalMessages ?></h3>
+        <div class="admin-stats">
+            <div class="stat-card">
+                <p class="stat-label">Messages Reçus</p>
+                <h3 class="stat-value"><?= $totalMessages ?></h3>
             </div>
         </div>
 
-        <div class="table-container rounded-[32px] overflow-hidden">
-            <table class="w-full text-left">
-                <thead class="bg-white/5 text-[10px] uppercase font-title tracking-widest text-gray-400">
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
                     <tr>
-                        <th class="p-5 w-1/5">Expéditeur</th>
-                        <th class="p-5 w-1/5">Email</th>
-                        <th class="p-5 w-1/5">Date Envoi</th>
-                        <th class="p-5 w-1/3">Message</th>
-                        <th class="p-5 text-center w-1/12">Actions</th>
+                        <th>Expéditeur</th>
+                        <th>Email</th>
+                        <th>Date Envoi</th>
+                        <th>Message</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
+                <tbody>
                     <?php if (count($messages) > 0): ?>
                         <?php foreach($messages as $m): ?>
-                            <tr class="hover:bg-white/[0.02] transition-colors">
-                                <td class="p-5 align-top">
-                                    <p class="font-bold text-sm uppercase tracking-tight text-white">
-                                        <?= htmlspecialchars(($m['prenom'] ?? '') . ' ' . ($m['nom'] ?? '')) ?>
-                                    </p>
-                                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">
-                                        ID #<?= $m['id_contact'] ?>
-                                    </p>
+                            <tr>
+                                <td>
+                                    <p class="driver-name"><?= htmlspecialchars(($m['prenom'] ?? '') . ' ' . ($m['nom'] ?? '')) ?></p>
+                                    <p class="driver-status">ID #<?= $m['id_contact'] ?></p>
                                 </td>
-
-                                <td class="p-5 align-top">
-                                    <span class="text-[11px] font-semibold text-gray-300">
-                                        <?= htmlspecialchars($m['email'] ?? '—') ?>
-                                    </span>
+                                <td><?= htmlspecialchars($m['email'] ?? '—') ?></td>
+                                <td class="driver-email"><?= !empty($m['date_envoi']) ? date('d/m/Y H:i', strtotime($m['date_envoi'])) : '—' ?></td>
+                                <td>
+                                    <div class="message-box"><?= htmlspecialchars($m['message'] ?? '') ?></div>
                                 </td>
-
-                                <td class="p-5 align-top">
-                                    <span class="text-[11px] text-gray-400 font-mono">
-                                        <?= !empty($m['date_envoi']) ? date('d/m/Y H:i', strtotime($m['date_envoi'])) : '—' ?>
-                                    </span>
-                                </td>
-
-                                <td class="p-5 align-top">
-                                    <div class="text-xs text-gray-300 leading-relaxed bg-white/[0.01] border border-white/5 p-4 rounded-2xl whitespace-pre-line">
-                                        <?= htmlspecialchars($m['message'] ?? '') ?>
-                                    </div>
-                                </td>
-
-                                <td class="p-5 align-top text-center">
-                                    <div class="flex items-center justify-center gap-3">
-                                        <form method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer ce message ?');">
-                                            <input type="hidden" name="id_contact" value="<?= $m['id_contact'] ?>">
-                                            <button type="submit" name="action" value="delete"
-                                                    class="w-8 h-8 flex items-center justify-center bg-red-500/10 border border-red-500/30 text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all"
-                                                    title="Supprimer définitivement">
-                                                <i class="fa-solid fa-trash-can text-xs"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+                                <td class="text-center">
+                                    <form method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer ce message ?');" style="display:inline">
+                                        <input type="hidden" name="id_contact" value="<?= $m['id_contact'] ?>">
+                                        <button type="submit" name="action" value="delete" class="btn-delete">Supprimer</button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5" class="p-10 text-center text-sm text-gray-500 italic uppercase tracking-wider">
-                                <i class="fa-solid fa-folder-open block text-2xl mb-2 text-white/10"></i> Boîte de réception vide
-                            </td>
+                            <td colspan="5" class="table-empty">Boîte de réception vide</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
