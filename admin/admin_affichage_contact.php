@@ -1,6 +1,5 @@
 <?php
 require_once '../config.php';
-
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
     exit();
@@ -11,9 +10,9 @@ $message_status = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
     try {
-        $stmt_text = $db->prepare("UPDATE contact_settings SET valeur = ? WHERE cle = ?");
+        $stmt_text = $db->prepare("UPDATE contact_content SET content = ? WHERE element_id = ?");
         $stmt_text->execute([trim($_POST['txt_1'] ?? ''), 'titre_principal']);
-        $stmt_text->execute([trim($_POST['txt_2'] ?? ''), 'responsable_contact']); 
+        $stmt_text->execute([trim($_POST['txt_2'] ?? ''), 'responsable_contact']);
         $stmt_text->execute([trim($_POST['txt_3'] ?? ''), 'siege_contact']);
         $stmt_text->execute([trim($_POST['txt_4'] ?? ''), 'tel_contact']);
         $stmt_text->execute([trim($_POST['txt_5'] ?? ''), 'email_contact']);
@@ -29,7 +28,7 @@ try {
     $resAdmin = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
     $adminFullName = $resAdmin ? $resAdmin['prenom'] . " " . $resAdmin['nom'] : "Admin";
 
-    $settings = $db->query("SELECT cle, valeur FROM contact_settings")->fetchAll(PDO::FETCH_KEY_PAIR);
+    $settings = $db->query("SELECT element_id, content FROM contact_content")->fetchAll(PDO::FETCH_KEY_PAIR);
 } catch (PDOException $e) {
     die("Erreur Système : " . $e->getMessage());
 }
@@ -40,6 +39,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperCar | Contact Config</title>
     <link rel="stylesheet" href="../style.css">
 </head>

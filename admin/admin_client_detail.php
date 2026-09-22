@@ -21,12 +21,14 @@ try {
 
     if (!$client) { header('Location: tableaudebord.php'); exit(); }
 
+    // --- Demandes d'essai du client ---
     $demandes = [];
     try {
         $stmtDemandes = $db->prepare("
-            SELECT d.*, v.marque, v.modele 
+            SELECT d.*, m.nom_marque AS marque, v.modele 
             FROM demande_essai d 
             LEFT JOIN voiture v ON d.id_voiture = v.id_voiture 
+            LEFT JOIN marque m ON v.id_marque = m.id_marque 
             WHERE d.id_client = ? 
             ORDER BY d.id_demande DESC
         ");
@@ -34,10 +36,11 @@ try {
         $demandes = $stmtDemandes->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {}
 
+    // --- Messages de contact liés par email ---
     $messages = [];
     try {
-        $stmtMessages = $db->prepare("SELECT * FROM contact WHERE id_contact = ? ORDER BY id_contact DESC");
-        $stmtMessages->execute([$client['id_contact']]);
+        $stmtMessages = $db->prepare("SELECT * FROM contact_client WHERE email = ? ORDER BY id_contact DESC");
+        $stmtMessages->execute([$client['email']]);
         $messages = $stmtMessages->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {}
 
@@ -57,6 +60,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperCar | Fiche Pilote — <?= $fullName ?></title>
     <link rel="stylesheet" href="../style.css">
 </head>
@@ -85,7 +89,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <h1 class="font-title"><?= $fullName ?></h1>
                     <div class="pilot-badges">
                         <span>Login #<?= $client['id_login'] ?? 'N/A' ?></span>
-                        <span>Contact #<?= $client['id_contact'] ?? 'N/A' ?></span>
+                        <span>Client #<?= $client['id_client'] ?></span>
                     </div>
                 </div>
             </div>
@@ -139,7 +143,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                 ?>
                                 <span class="badge <?= $cls ?>"><?= htmlspecialchars($statut) ?></span>
                             </td>
-                            <td class="font-mono"><?= htmlspecialchars($d['date_demande'] ?? '—') ?></td>
+                            <td class="font-mono"><?= htmlspecialchars($d['date_souhaitee'] ?? '—') ?></td>
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -154,7 +158,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="message-item">
                 <p class="driver-status">Sujet : <?= htmlspecialchars($msg['sujet'] ?? 'Sans sujet') ?></p>
                 <p><?= htmlspecialchars($msg['message'] ?? '') ?></p>
-                <span class="driver-status"><?= htmlspecialchars($msg['date'] ?? '') ?></span>
+                <span class="driver-status"><?= htmlspecialchars($msg['date_envoi'] ?? '') ?></span>
             </div>
             <?php endforeach; ?>
         </div>

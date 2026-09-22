@@ -92,8 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($action === 'update_titre') {
             $val = trim($_POST['valeur']);
             $cle = trim($_POST['cle']);
-            if (!in_array($cle, ['titre_nos_modeles'])) { echo json_encode(['success'=>false]); exit; }
-            $db->prepare("INSERT INTO config (cle,valeur) VALUES (?,?) ON DUPLICATE KEY UPDATE valeur=?")->execute([$cle,$val,$val]);
+            $allowed = ['titre_nos_modeles', 'titre_nos_modeles_rouge'];
+            if (!in_array($cle, $allowed)) { echo json_encode(['success'=>false]); exit; }
+            $db->prepare("INSERT INTO home_content (element_id, content) VALUES (?,?) ON DUPLICATE KEY UPDATE content=?")->execute([$cle,$val,$val]);
             echo json_encode(['success'=>true]); exit;
         }
     } catch (PDOException $e) {
