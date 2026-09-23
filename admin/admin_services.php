@@ -54,6 +54,74 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <meta charset="UTF-8">
     <title>ADMIN | Services SuperCar</title>
     <link rel="stylesheet" href="../style.css">
+    <style>
+        /* ===== SUPPRESSION TOTALE DES PADDINGS/MARGES SUPÉRIEURS ===== */
+
+        html, body.admin-body {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Main : collé tout en haut */
+        .admin-main {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Hero : collé tout en haut */
+        .admin-main .hero,
+        .admin-main > .hero {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            min-height: auto !important;
+        }
+
+        /* Contenu du hero : collé tout en haut */
+        .hero-content {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Titre "Dopter l'instinct" tout en haut */
+        .hero-content h1,
+        .hero-content .edit-zone {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Premier edit-block sans marge */
+        .hero-content .edit-block:first-of-type,
+        .hero-content > .edit-block:first-child {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* ===== SECTION "NOTRE EXPERTISE" REMONTÉE ===== */
+        .admin-main .hero + .section,
+        .admin-main section.hero + section.section,
+        .admin-main > .section {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Header de la section Expertise */
+        .admin-main .section .section-header,
+        .admin-main .section-header {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Titre "Notre Expertise" */
+        .section-header h2 {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Grille des services */
+        .services-grid {
+            margin-top: 0 !important;
+        }
+    </style>
 </head>
 
 <body class="admin-body">
@@ -61,11 +129,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <?php include 'composants/sidebar.php'; ?>
 
     <main class="admin-main">
-        <div class="admin-badge">🛠 ADMINISTRATION SERVICES</div>
 
         <section class="hero">
             <div class="hero-content">
-                <span class="hero-subtitle">Ingénierie de pointe</span>
                 
                 <div class="edit-block">
                     <h1 id="serv_hero_title" contenteditable="true" onfocus="showBtn('btn_serv_title')" class="edit-zone font-title">

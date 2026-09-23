@@ -2903,8 +2903,194 @@ body.login-body {
         width: 100%;
     }
 
-    .tabs {
+        .tabs {
         flex-wrap: wrap;
         gap: 1rem;
+    }
+}  
+/* ============================
+   PARTIE 4 — POLITIQUE DE CONFIDENTIALITÉ
+   ============================ */
+
+/* 42. En-tête de page (retour + titre) */
+.privacy-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.privacy-topbar .logo-mini {
+    font-family: Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: -0.05em;
+    color: var(--white);
+}
+.privacy-topbar .logo-mini span { color: var(--crimson); }
+
+.privacy-topbar .back-link-inline {
+    color: var(--gray);
+    transition: color 0.3s ease;
+}
+.privacy-topbar .back-link-inline:hover { color: var(--crimson); }
+
+/* 43. Intro de la page */
+.privacy-intro {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto 3rem auto;
+}
+
+.privacy-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+}
+
+.privacy-intro h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: 0.75rem;
+    color: var(--white);
+}
+
+.privacy-intro .privacy-subtitle {
+    color: var(--gray-dark);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* 44. Bandeau d'avertissement */
+.privacy-warning {
+    background: rgba(193, 18, 31, 0.08);
+    border: 1px solid rgba(193, 18, 31, 0.3);
+    border-left: 4px solid var(--crimson);
+    border-radius: 0 12px 12px 0;
+    padding: 1rem 1.5rem;
+    font-size: 0.85rem;
+    color: var(--varden);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.privacy-warning strong { color: var(--crimson); }
+
+/* 45. Bloc de contenu principal */
+.privacy-content {
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* 46. Sections internes */
+.privacy-section {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.privacy-section:last-child { border-bottom: none; }
+
+.privacy-section h2 {
+    font-family: Georgia, serif;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.privacy-section h2::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--crimson);
+    flex-shrink: 0;
+    transform: translateY(-4px);
+}
+
+.privacy-section p {
+    color: var(--gray);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+}
+
+.privacy-section p:last-child { margin-bottom: 0; }
+
+.privacy-section .muted { color: var(--gray-dark); }
+
+.privacy-section code {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--marble);
+    font-family: 'Courier New', monospace;
+}
+
+/* 47. Listes */
+.privacy-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0 0 0;
+}
+
+.privacy-list li {
+    color: var(--white);
+    font-size: 0.85rem;
+    padding: 0.35rem 0 0.35rem 1.5rem;
+    position: relative;
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+}
+
+.privacy-list li::before {
+    content: '›';
+    color: var(--crimson);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+/* 48. Responsive */
+@media (max-width: 768px) {
+    .privacy-content {
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
+    }
+
+    .privacy-intro h1 {
+        font-size: clamp(1.6rem, 7vw, 2.2rem);
+    }
+
+    .privacy-section h2 {
+        font-size: 1rem;
+    }
+
+    .privacy-topbar {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
     }
 }
