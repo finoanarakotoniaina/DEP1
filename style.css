@@ -647,16 +647,19 @@ html {
 .row-wrapper {
     position: relative;
     padding: 0 3rem;
+    z-index: 1;
 }
 
 .story-row {
     display: flex;
     gap: 1.5rem;
     overflow-x: auto;
+    overflow-y: visible;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
     padding: 1.5rem 0.5rem;
     scrollbar-width: none;
+    position: relative;
 }
 .story-row::-webkit-scrollbar { display: none; }
 
@@ -727,7 +730,7 @@ html {
 
 .car-card:hover {
     transform: scale(1.03);
-    z-index: 200;
+    z-index: 9999;
     border-color: var(--crimson);
 }
 
