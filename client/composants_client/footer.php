@@ -26,6 +26,7 @@
             <div class="footer-col">
                 <a href="mentions-legales.php" class="footer-link">Mentions légales</a>
                 <a href="cgu.php" class="footer-link">Conditions Générales d'Utilisation</a>
+                <a href="politique-confidentialite.php" class="footer-link">Politique de confidentialité</a>
                 <p class="footer-copy">
                     &copy; 2026 SUPERCAR<br>
                     Tous droits réservés
