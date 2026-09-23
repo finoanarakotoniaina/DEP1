@@ -26,6 +26,30 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADMIN | SuperCar Edition</title>
     <link rel="stylesheet" href="../style.css">
+
+    <style>
+        /* === HERO : cadre réduit + coupe le haut de la vidéo === */
+        .hero {
+            height: 65vh !important;
+            min-height: 420px;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .hero-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 80%;
+            transform: scale(1.15);
+            transform-origin: center bottom;
+        }
+    </style>
 </head>
 
 <body class="admin-body">
@@ -33,7 +57,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
    <?php include 'composants/sidebar.php'; ?>
 
     <main class="admin-main">
-        <div class="admin-badge">✎ PANEL ADMINISTRATION</div>
 
         <section class="hero">
             <div class="hero-bg">
