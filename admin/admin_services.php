@@ -82,13 +82,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             padding-top: 0 !important;
         }
 
-        /* Sous-titre "Ingénierie de pointe" tout en haut */
-        .hero-content .hero-subtitle {
-            margin-top: 0 !important;
-            padding-top: 0 !important;
-            display: block !important;
-        }
-
         /* Titre "Dopter l'instinct" tout en haut */
         .hero-content h1,
         .hero-content .edit-zone {
@@ -139,7 +132,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
         <section class="hero">
             <div class="hero-content">
-                <span class="hero-subtitle">Ingénierie de pointe</span>
                 
                 <div class="edit-block">
                     <h1 id="serv_hero_title" contenteditable="true" onfocus="showBtn('btn_serv_title')" class="edit-zone font-title">
