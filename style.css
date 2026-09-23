@@ -1725,6 +1725,20 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
     border-radius: 50px;
 }
 
+/* Carte stat cliquable (lien) */
+.stat-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    cursor: pointer;
+}
+
+.stat-card-link:hover {
+    transform: translateY(-3px);
+    border-color: var(--crimson);
+    background: rgba(255,255,255,0.04);
+}
+
 /* 26. Tables */
 .table-container {
     background: rgba(255,255,255,0.02);
