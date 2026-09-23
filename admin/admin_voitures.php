@@ -160,7 +160,6 @@ try {
                 <div class="story-row" id="<?php echo $rowId; ?>">
                     <?php foreach ($voitures as $car): ?>
                     <div class="car-card" data-id="<?php echo $car['id_voiture']; ?>">
-                        <button class="del-btn" onclick="confirmArchive(<?php echo $car['id_voiture']; ?>,'<?php echo htmlspecialchars(addslashes($car['modele'])); ?>')">📦</button>
 
                         <div class="hover-specs">
                             <p class="spec-title">Fiche Technique</p>
@@ -190,17 +189,34 @@ try {
                         </div>
 
                         <div class="img-wrap">
-                            <label for="file-<?php echo $car['id_voiture']; ?>" class="img-ov">📷 CHANGER PHOTO</label>
-                            <input type="file" id="file-<?php echo $car['id_voiture']; ?>" class="hidden" accept="image/*" data-car-id="<?php echo $car['id_voiture']; ?>" onchange="uploadImg(this)">
                             <img src="<?= UPLOAD_URL ?>/voitures/<?php echo htmlspecialchars($car['image_url']); ?>" id="img-<?php echo $car['id_voiture']; ?>" alt="<?php echo htmlspecialchars($car['modele']); ?>">
+
+                            <div class="img-overlay">
+                                <label for="file-<?php echo $car['id_voiture']; ?>" class="img-overlay-btn" title="Changer la photo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                        <circle cx="12" cy="13" r="4"></circle>
+                                    </svg>
+                                </label>
+                                <input type="file" id="file-<?php echo $car['id_voiture']; ?>" class="hidden" accept="image/*" data-car-id="<?php echo $car['id_voiture']; ?>" onchange="uploadImg(this)">
+                            </div>
                         </div>
 
                         <div class="car-info">
                             <h3>
                                 <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="modele" onblur="saveField(this)"><?php echo htmlspecialchars($car['modele']); ?></span>
                             </h3>
-                            <div class="car-price">
-                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="prix" onblur="saveField(this)"><?php echo number_format($car['prix'],0,'.', ' '); ?></span> Rs
+                            <div class="car-price-row">
+                                <div class="car-price">
+                                    <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="prix" onblur="saveField(this)"><?php echo number_format($car['prix'],0,'.', ' '); ?></span> Rs
+                                </div>
+                                <button class="archive-btn" onclick="confirmArchive(<?php echo $car['id_voiture']; ?>,'<?php echo htmlspecialchars(addslashes($car['modele'])); ?>')" title="Archiver ce véhicule">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                                        <rect x="1" y="3" width="22" height="5"></rect>
+                                        <line x1="10" y1="12" x2="14" y2="12"></line>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>

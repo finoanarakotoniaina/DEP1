@@ -633,6 +633,7 @@ html {
 .brand-section {
     margin-bottom: 4rem;
     margin-top: 2rem;
+    transition: filter 0.4s ease, opacity 0.4s ease;
 }
 
 .brand-title {
@@ -647,7 +648,6 @@ html {
 .row-wrapper {
     position: relative;
     padding: 0 3rem;
-    isolation: isolate;
 }
 
 .story-row {
@@ -671,7 +671,7 @@ html {
     border-radius: 24px;
     overflow: visible;
     position: relative;
-    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, filter 0.4s ease, opacity 0.4s ease;
     scroll-snap-align: start;
     display: block;
     z-index: 1;
@@ -719,7 +719,7 @@ html {
     border-radius: 20px;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.4s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -728,29 +728,32 @@ html {
     box-shadow: 0 25px 50px rgba(0,0,0,0.5);
 }
 
-/* Fiche à gauche pour les dernières cartes (évite le débordement à droite) */
 .car-card.specs-left .hover-specs {
     left: auto;
     right: 105%;
 }
 
-/* Survol : la carte passe devant TOUT */
-.car-card:hover {
+.car-card:hover,
+.car-card:has(.hover-specs:hover) {
     z-index: 9999;
     border-color: var(--crimson);
     box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    filter: blur(0) !important;
+    opacity: 1 !important;
 }
 
-.car-card:hover .hover-specs {
+.car-card:hover .hover-specs,
+.car-card:has(.hover-specs:hover) .hover-specs {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 .spec-item {
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid rgba(255,255,255,0.2);
-    padding: 0.75rem 0;
+    padding: 0.6rem 0;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -774,6 +777,7 @@ html {
     line-height: 1.5;
     border-top: 1px solid rgba(255,255,255,0.2);
     padding-top: 0.75rem;
+    outline: none;
 }
 
 .nav-arrow {
@@ -798,31 +802,29 @@ html {
 .nav-arrow.prev { left: 0; }
 .nav-arrow.next { right: 0; }
 
-/* ============================================
-   EFFET FLOU GLOBAL quand une carte est survolée
-   ============================================ */
-body.page-voiture main .brand-section {
-    transition: filter 0.4s ease, opacity 0.4s ease;
-}
-
-body.page-voiture:has(.car-card:hover) main .brand-section {
+/* Effet flou global (CLIENT uniquement - page-voiture) */
+body.page-voiture:has(.car-card:hover) .brand-section,
+body.page-voiture:has(.hover-specs:hover) .brand-section {
     filter: blur(8px);
     opacity: 0.4;
     pointer-events: none;
 }
 
-body.page-voiture:has(.car-card:hover) main .brand-section:has(.car-card:hover) {
+body.page-voiture:has(.car-card:hover) .brand-section:has(.car-card:hover),
+body.page-voiture:has(.hover-specs:hover) .brand-section:has(.hover-specs:hover) {
     filter: blur(0);
     opacity: 1;
     pointer-events: auto;
 }
 
-body.page-voiture:has(.car-card:hover) main .brand-section:has(.car-card:hover) .car-card:not(:hover) {
+body.page-voiture:has(.car-card:hover) .brand-section:has(.car-card:hover) .car-card:not(:hover):not(:has(.hover-specs:hover)),
+body.page-voiture:has(.hover-specs:hover) .brand-section:has(.hover-specs:hover) .car-card:not(:hover):not(:has(.hover-specs:hover)) {
     filter: blur(4px);
     opacity: 0.5;
 }
 
-body.page-voiture:has(.car-card:hover) .navbar {
+body.page-voiture:has(.car-card:hover) .navbar,
+body.page-voiture:has(.hover-specs:hover) .navbar {
     opacity: 0;
     pointer-events: none;
 }
@@ -1407,7 +1409,7 @@ body.page-voiture:has(.car-card:hover) .navbar {
 
 .admin-main {
     flex: 1;
-    padding: 1.75rem;
+    padding: 6rem 1.75rem 1.75rem 1.75rem;   /* ← top 6rem pour la barre fixe */
     overflow-y: overlay;
     background-image: linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
                       linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
@@ -2229,25 +2231,33 @@ body.page-voiture:has(.car-card:hover) .navbar {
 }
 
 /* 34. Brands (voitures) */
+
+/* Barre d'ajout de marque — flottante comme la navbar */
 .brand-add-bar {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgba(6,14,30,0.97);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(193,18,31,0.2);
-    padding: 10px 24px;
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: rgba(0, 48, 73, 0.55);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: none;
+    border-radius: 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    padding: 0.85rem 1.5rem;
     display: flex;
     align-items: center;
     gap: 14px;
-    margin: -2.5rem -2.5rem 2rem -2.5rem;
+    width: fit-content;
+    max-width: calc(100% - 4rem);
 }
 
 .bab-label {
     font-family: 'Syncopate', Georgia, serif;
     font-size: 8px;
     letter-spacing: 0.2em;
-    color: rgba(255,255,255,0.35);
+    color: rgba(255,255,255,0.55);
     white-space: nowrap;
 }
 
@@ -2335,28 +2345,37 @@ body.page-voiture:has(.car-card:hover) .navbar {
 
 .edit-ring { display: none; }
 
-.del-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 30;
-    width: 30px;
-    height: 30px;
-    border-radius: 7px;
-    background: rgba(5,0,0,0.75);
-    border: 1px solid rgba(193,18,31,0.35);
-    color: rgba(255,255,255,0.5);
+/* Bouton archive à côté du prix */
+.car-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.archive-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    padding: 0.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    font-size: 11px;
-    opacity: 0;
-    transition: all 0.2s;
-    backdrop-filter: blur(8px);
+    transition: all 0.25s ease;
+    flex-shrink: 0;
 }
-.car-card:hover .del-btn { opacity: 1; color: var(--white); border-color: var(--crimson); }
-.del-btn:hover { background: var(--crimson) !important; }
+
+.archive-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+}
+
+.archive-btn:hover {
+    color: var(--crimson);
+    transform: scale(1.15);
+}
 
 /* 35. Carousel row (admin) */
 .story-row {
@@ -2376,13 +2395,14 @@ body.page-voiture:has(.car-card:hover) .navbar {
     min-width: calc(33.333% - 20px);
     flex-shrink: 0;
     position: relative;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, filter 0.4s ease, opacity 0.4s ease;
     z-index: 1;
     scroll-snap-align: start;
     display: block;
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.05);
     border-radius: 24px;
+    overflow: visible;
 }
 
 .story-row .car-card img {
@@ -2392,19 +2412,25 @@ body.page-voiture:has(.car-card:hover) .navbar {
     border-radius: 24px 24px 0 0;
 }
 
-/* Survol admin : passe devant */
-.story-row .car-card:hover {
+/* Survol admin : carte + fiche devant */
+.story-row .car-card:hover,
+.story-row .car-card:has(.hover-specs:hover) {
     z-index: 9999;
     border-color: var(--crimson);
     box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    filter: blur(0) !important;
+    opacity: 1 !important;
 }
 
-.story-row .car-card:hover .hover-specs {
+/* Fiche visible + interactive */
+.story-row .car-card:hover .hover-specs,
+.story-row .car-card:has(.hover-specs:hover) .hover-specs {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
-/* En admin, on centre la fiche technique à droite */
+/* Position fiche */
 .story-row .car-card .hover-specs {
     top: 50%;
     transform: translateY(-50%);
@@ -2413,14 +2439,183 @@ body.page-voiture:has(.car-card:hover) .navbar {
     min-height: 200px;
 }
 
-/* Admin : position à gauche pour la dernière carte de la rangée */
-.story-row .car-card:nth-child(3n) .hover-specs {
+.story-row .car-card.specs-left .hover-specs {
     left: auto;
     right: 105%;
 }
 
+/* ============================================
+   ADMIN — FLOU GLOBAL au survol
+   Sidebar NETTE / Carte + fiche NETTES / Reste FLOU
+   ============================================ */
+.admin-main .brand-section,
+.admin-main .section-header,
+.admin-main .brand-add-bar {
+    transition: filter 0.4s ease, opacity 0.4s ease;
+}
+
+body.admin-body:has(.car-card:hover) .admin-main .brand-section,
+body.admin-body:has(.hover-specs:hover) .admin-main .brand-section,
+body.admin-body:has(.car-card:hover) .admin-main .section-header,
+body.admin-body:has(.hover-specs:hover) .admin-main .section-header,
+body.admin-body:has(.car-card:hover) .admin-main .brand-add-bar,
+body.admin-body:has(.hover-specs:hover) .admin-main .brand-add-bar {
+    filter: blur(8px);
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* La section qui contient la carte survolée reste nette */
+body.admin-body:has(.car-card:hover) .admin-main .brand-section:has(.car-card:hover),
+body.admin-body:has(.hover-specs:hover) .admin-main .brand-section:has(.hover-specs:hover) {
+    filter: blur(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Les autres cartes de la même section floutées */
+body.admin-body:has(.car-card:hover) .admin-main .brand-section:has(.car-card:hover) .car-card:not(:hover):not(:has(.hover-specs:hover)),
+body.admin-body:has(.hover-specs:hover) .admin-main .brand-section:has(.hover-specs:hover) .car-card:not(:hover):not(:has(.hover-specs:hover)) {
+    filter: blur(4px);
+    opacity: 0.5;
+}
+
+/* Carte + fiche survolées restent NETTES */
+body.admin-body .admin-main .car-card:hover,
+body.admin-body .admin-main .car-card:has(.hover-specs:hover) {
+    filter: blur(0) !important;
+    opacity: 1 !important;
+}
+
+/* SIDEBAR reste TOUJOURS nette */
+.admin-body:has(.car-card:hover) .sidebar,
+.admin-body:has(.hover-specs:hover) .sidebar {
+    filter: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* ============================================
+   IMAGE WRAPPER + OVERLAY AU SURVOL
+   ============================================ */
+.img-wrap {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 24px 24px 0 0;
+}
+
+.img-wrap img {
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.img-wrap:hover img {
+    transform: scale(1.04);
+}
+
+/* Overlay rouge transparent */
+.img-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(193, 18, 31, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    border-radius: 24px 24px 0 0;
+    z-index: 15;
+}
+
+.img-wrap:hover .img-overlay {
+    opacity: 1;
+    background: rgba(193, 18, 31, 0.55);
+}
+
+/* Bouton icône caméra au centre */
+.img-overlay-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--white);
+    transition: all 0.3s ease;
+    transform: scale(0.9);
+}
+
+.img-wrap:hover .img-overlay-btn {
+    transform: scale(1);
+}
+
+.img-overlay-btn:hover {
+    background: var(--white);
+    color: var(--crimson);
+    border-color: var(--white);
+    transform: scale(1.08);
+}
+
+/* Carousel row arrows */
 .nav-arrow.prev { left: 0; }
 .nav-arrow.next { right: 0; }
+
+/* Add card */
+.add-card {
+    min-width: calc(33.333% - 20px);
+    flex-shrink: 0;
+    border-radius: 24px;
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    cursor: pointer;
+    scroll-snap-align: start;
+    background: rgba(193,18,31,0.04);
+    border: 2px dashed rgba(193,18,31,0.22);
+    transition: all 0.3s;
+}
+.add-card:hover {
+    background: rgba(193,18,31,0.09);
+    border-color: rgba(193,18,31,0.65);
+    transform: scale(1.02);
+}
+
+.add-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--crimson);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    transition: all 0.3s;
+    box-shadow: 0 8px 24px rgba(193,18,31,0.35);
+}
+.add-card:hover .add-circle {
+    transform: scale(1.12);
+    box-shadow: 0 12px 32px rgba(193,18,31,0.55);
+}
+
+.add-label {
+    font-family: 'Syncopate', Georgia, serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: rgba(193,18,31,0.65);
+    text-align: center;
+    line-height: 1.9;
+    text-transform: uppercase;
+}
 
 /* 36. Modal */
 .modal-bg {
