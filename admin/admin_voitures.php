@@ -1,11 +1,8 @@
 <?php require_once '../config.php'; ?>
 <?php
-if (!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
-    exit();
-}
+requireAdmin();
 
-$db = $pdo ?? $db ?? $conn;
+/** @var PDO $db */
 
 try {
     $stmtAdmin = $db->prepare("SELECT nom, prenom FROM admin WHERE id_admin = ?");
@@ -28,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $id = intval($_POST['id_voiture']);
             $field = $_POST['field'];
             $value = $_POST['value'];
-            $allowed = ['modele','prix','annee','etat','type'];
+            $allowed = ['modele','prix','annee','etat','type','kilometrage','description'];
             if (!in_array($field, $allowed)) { echo json_encode(['success'=>false,'message'=>'Champ interdit']); exit; }
             $db->prepare("UPDATE voiture SET $field = ? WHERE id_voiture = ?")->execute([$value, $id]);
             echo json_encode(['success'=>true]); exit;
@@ -68,8 +65,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if (!is_dir($dir)) mkdir($dir, 0777, true);
                 move_uploaded_file($_FILES['image']['tmp_name'], $dir.$imageName);
             }
-            $db->prepare("INSERT INTO voiture (modele,prix,annee,etat,type,image_url,id_marque,archive) VALUES (?,?,?,?,?,?,?,0)")
-               ->execute([$_POST['modele'],$_POST['prix'],$_POST['annee'],$_POST['etat'],$_POST['type'],$imageName,$id_marque]);
+            $db->prepare("INSERT INTO voiture (modele,prix,annee,etat,type,kilometrage,description,image_url,id_marque,archive) VALUES (?,?,?,?,?,?,?,?,?,0)")
+               ->execute([
+                   $_POST['modele'],
+                   $_POST['prix'],
+                   $_POST['annee'],
+                   $_POST['etat'],
+                   $_POST['type'],
+                   $_POST['kilometrage'] ?? 0,
+                   $_POST['description'] ?? '',
+                   $imageName,
+                   $id_marque
+               ]);
             $newId = $db->lastInsertId();
             echo json_encode(['success'=>true,'id'=>$newId,'image'=>$imageName,
                 'modele'=>$_POST['modele'],'prix'=>$_POST['prix'],'annee'=>$_POST['annee'],
@@ -157,9 +164,29 @@ try {
 
                         <div class="hover-specs">
                             <p class="spec-title">Fiche Technique</p>
-                            <div class="spec-item"><span>Année</span><span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="annee" onblur="saveField(this)"><?php echo $car['annee']; ?></span></div>
-                            <div class="spec-item"><span>État</span><span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="etat" onblur="saveField(this)"><?php echo htmlspecialchars($car['etat']); ?></span></div>
-                            <div class="spec-item"><span>Type</span><span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="type" onblur="saveField(this)"><?php echo htmlspecialchars($car['type']); ?></span></div>
+                            <div class="spec-item">
+                                <span>Année</span>
+                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="annee" onblur="saveField(this)"><?php echo $car['annee']; ?></span>
+                            </div>
+                            <div class="spec-item">
+                                <span>État</span>
+                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="etat" onblur="saveField(this)"><?php echo htmlspecialchars($car['etat']); ?></span>
+                            </div>
+                            <div class="spec-item">
+                                <span>Type</span>
+                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="type" onblur="saveField(this)"><?php echo htmlspecialchars($car['type']); ?></span>
+                            </div>
+                            <div class="spec-item">
+                                <span>Kilométrage</span>
+                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="kilometrage" onblur="saveField(this)"><?php echo $car['kilometrage']; ?></span>
+                            </div>
+                            <p class="spec-desc"
+                               contenteditable="true"
+                               data-car-id="<?php echo $car['id_voiture']; ?>"
+                               data-field="description"
+                               onblur="saveField(this)">
+                                <?= htmlspecialchars($car['description'] ?? 'Ajouter une description...') ?>
+                            </p>
                         </div>
 
                         <div class="img-wrap">
@@ -220,6 +247,14 @@ try {
                             <select id="m-type" class="form-select"><option>Coupé</option><option>Berline</option><option>SUV</option><option>Cabriolet</option><option>Break</option><option>Citadine</option></select>
                         </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Kilométrage</label>
+                            <input type="number" id="m-kilometrage" class="form-input" value="0">
+                        </div>
+                        <div class="form-group"><label>Description</label>
+                            <input type="text" id="m-description" class="form-input" placeholder="Courte description...">
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label>Photo</label>
                         <div class="mimg-zone" onclick="document.getElementById('m-img-input').click()">
@@ -267,10 +302,17 @@ function toast(msg, type='ok') {
 async function saveField(el) {
     const id = el.dataset.carId, field = el.dataset.field;
     let val = el.textContent.trim();
-    if (field === 'prix') val = val.replace(/[\s\u00a0]/g,'').replace('Rs','').trim();
-    if (!val) return;
+
+    if (field === 'prix')        val = val.replace(/[\s\u00a0]/g,'').replace('Rs','').trim();
+    if (field === 'kilometrage') val = val.replace(/[\s\u00a0]/g,'').replace('km','').trim();
+    if (!val && field !== 'description') return;
+
     const fd = new FormData();
-    fd.append('action','update_field'); fd.append('id_voiture', id); fd.append('field', field); fd.append('value', val);
+    fd.append('action','update_field');
+    fd.append('id_voiture', id);
+    fd.append('field', field);
+    fd.append('value', val);
+
     toast('Sauvegarde...','wait');
     const j = await fetch('admin_voitures.php',{method:'POST',body:fd}).then(r=>r.json());
     if (j.success) toast('Modifié ✓','ok'); else toast(j.message||'Erreur','err');
@@ -332,6 +374,8 @@ async function submitAdd() {
     fd.append('annee', document.getElementById('m-annee').value);
     fd.append('etat', document.getElementById('m-etat').value);
     fd.append('type', document.getElementById('m-type').value);
+    fd.append('kilometrage', document.getElementById('m-kilometrage').value);
+    fd.append('description', document.getElementById('m-description').value);
     const fi = document.getElementById('m-img-input');
     if (fi.files.length) fd.append('image', fi.files[0]);
     toast('Ajout...','wait');
@@ -361,6 +405,21 @@ function confirmArchive(id, modele) {
     };
 }
 function closeConfirm() { document.getElementById('confirm-ov').classList.remove('open'); }
+
+// Détection dynamique : fiche à droite ou à gauche selon la place
+document.querySelectorAll('.story-row .car-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        const rect = this.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const specsWidth = 280;
+
+        if (rect.right + specsWidth > viewportWidth) {
+            this.classList.add('specs-left');
+        } else {
+            this.classList.remove('specs-left');
+        }
+    });
+});
 </script>
 </body>
 </html>

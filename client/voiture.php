@@ -58,9 +58,13 @@ try {
                     <a href="demande.php?id_v=<?= $car['id_voiture'] ?>&modele=<?= urlencode($car['modele']) ?>#booking" class="car-card">
                         <div class="hover-specs">
                             <p class="spec-title">Fiche Technique</p>
-                            <div class="spec-item"><span>Année</span> <span><?= $car['annee'] ?></span></div>
-                            <div class="spec-item"><span>Etat</span>  <span><?= htmlspecialchars($car['etat']) ?></span></div>
-                            <div class="spec-item"><span>Type</span>  <span><?= htmlspecialchars($car['type']) ?></span></div>
+                            <div class="spec-item"><span>Année</span>       <span><?= $car['annee'] ?></span></div>
+                            <div class="spec-item"><span>État</span>        <span><?= htmlspecialchars($car['etat']) ?></span></div>
+                            <div class="spec-item"><span>Type</span>        <span><?= htmlspecialchars($car['type']) ?></span></div>
+                            <div class="spec-item"><span>Kilométrage</span> <span><?= number_format($car['kilometrage'], 0, '.', ' ') ?> km</span></div>
+                            <?php if (!empty($car['description'])): ?>
+                            <p class="spec-desc"><?= htmlspecialchars($car['description']) ?></p>
+                            <?php endif; ?>
                             <p style="font-size:0.65rem; margin-top:1rem; text-align:center; opacity:0.7; font-style:italic;">
                                 Cliquez pour réserver un essai
                             </p>
@@ -93,7 +97,23 @@ try {
             }
         }
 
-        // 2. Recherche dynamique
+        // 2. Détection dynamique : fiche à droite ou à gauche selon la place
+        document.querySelectorAll('.car-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const rect = this.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const specsWidth = 280;
+
+                // Si la fiche dépasse à droite → on la met à gauche
+                if (rect.right + specsWidth > viewportWidth) {
+                    this.classList.add('specs-left');
+                } else {
+                    this.classList.remove('specs-left');
+                }
+            });
+        });
+
+        // 3. Recherche dynamique
         document.getElementById('searchCar').addEventListener('input', function(e) {
             const q = e.target.value.toLowerCase().trim();
 
@@ -111,3 +131,5 @@ try {
     </script>
 
     <?php include 'composants_client/footer.php'; ?>
+</body>
+</html>
