@@ -1469,18 +1469,29 @@ html {
     z-index: 20;
 }
 
+/* ===== MODIFIÉ : conteneur logo plus haut ===== */
 .sidebar-logo {
     margin-bottom: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 120px;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
+/* ===== MODIFIÉ : logo réduit visuellement ===== */
 .sidebar-logo img {
-    height: 56px;
+    height: 100%;
     width: auto;
     object-fit: contain;
-    margin: 0 auto;
+    transform: scale(0.8);
+    transform-origin: center;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-logo img:hover {
+    transform: scale(0.9);
 }
 
 .sidebar-nav {
@@ -2812,8 +2823,10 @@ body.login-body {
         padding: 1rem;
     }
 
+    /* ===== MODIFIÉ : logo réduit ===== */
     .sidebar-logo img {
-        height: 100px;
+        height: 100%;
+        transform: scale(0.8);
     }
 
     .admin-main {
@@ -2844,12 +2857,16 @@ body.login-body {
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    /* ===== MODIFIÉ : conteneur logo en mobile ===== */
+    .sidebar-logo {
+        height: 120px;
+    }
+
     .sidebar-logo img {
-        width: 100%;
-        max-width: 100%;
-        height: auto;
-        max-height: 100px;
+        height: 100%;
+        width: auto;
         object-fit: contain;
+        transform: scale(0.8);
     }
 
     .admin-main {
