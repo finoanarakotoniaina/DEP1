@@ -249,7 +249,7 @@ input[type="number"] {
 }
 
 .number-arrows button {
-    background: var(--beige);
+    background: var(--sky);
     border: 1px solid var(--border);
     color: var(--navy);
     width: 24px;
@@ -3301,7 +3301,7 @@ body.login-body {
 /* Conteneur principal */
 .privacy-main {
     padding: 40px 20px;
-    background-color: var(--beige);
+   background-color: var(--sky);
     min-height: calc(100vh - 150px);
 }
 
