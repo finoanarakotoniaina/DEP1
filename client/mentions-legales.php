@@ -47,7 +47,7 @@ function e($string) {
                     </p>
                     <ul class="legal-list">
                         <li>RANDRIA-MANALINA Koloina Magalie</li>
-                        <li>RANDRIATAHIRY Miantsasoa</li>
+                        <li>RANDRIANTAHIRY Miantsasoa</li>
                         <li>RAKOTONIAINA Finoana Safidisoa</li>
                     </ul>
                     <p class="legal-footer">
