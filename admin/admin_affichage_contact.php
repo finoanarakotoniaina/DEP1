@@ -50,9 +50,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <main class="admin-main">
         <header class="admin-header">
             <div>
-                <h2 class="font-title">CONTACT <span class="title-accent">LIVE EDITOR</span></h2>
-                <p class="admin-subtitle">Cliquez directement dans les zones pointillées pour modifier les textes</p>
-            </div>
+                <h2 class="font-title">CONTACT</h2>
+                </div>
         </header>
 
         <?php if (!empty($message_status)): ?>

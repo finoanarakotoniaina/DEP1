@@ -3200,4 +3200,60 @@ body.login-body {
         flex-wrap: wrap;
         gap: 1rem;
     }
+
+    /* Titre de section (au-dessus des tableaux filtrés) */
+.section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin: 0 0 1.25rem 0;
+    padding: 0.5rem 0 0.5rem 1rem;
+    border-left: 4px solid var(--teal);
+    background: rgba(86, 124, 141, 0.05);
+    border-radius: 0 8px 8px 0;
+}
+
+/* Carte stat active (filtre sélectionné) */
+.stat-card.stat-active {
+    border: 2px solid var(--teal);
+    background: rgba(86, 124, 141, 0.06);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+}
+
+.stat-card.stat-active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    height: 3px;
+    background: var(--teal);
+    border-radius: 50px 50px 0 0;
+}
+
+/* Point rouge (demande refusée) */
+.dot-red {
+    background: #DC2626;
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.5);
+}
+
+/* Badge approuvé (historique) */
+.badge-accepte {
+    background: rgba(34, 197, 94, 0.15);
+    color: #15803D;
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+/* Texte muted (pour le tiret "—" à la place des boutons) */
+.text-muted {
+    color: #CBD5E1;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
 }

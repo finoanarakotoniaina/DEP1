@@ -55,7 +55,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <main class="admin-main">
         <header class="admin-header">
             <div>
-                <h2 class="font-title">INBOX <span class="title-accent">MESSAGES</span></h2>
+                <h2 ><span class="title-accent">MESSAGES</span></h2>
                 <p class="admin-subtitle">Gestion des retours et messages du formulaire de contact client</p>
             </div>
         </header>

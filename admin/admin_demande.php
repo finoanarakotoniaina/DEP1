@@ -37,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
                    ->execute(['image_url/essai/' . $new_file_name]);
             }
         }
-        $message_status = "✅ INTERFACE MISE À JOUR";
+        $message_status = "INTERFACE MISE À JOUR";
     } catch (Exception $e) {
-        $message_status = "❌ ERREUR : " . $e->getMessage();
+        $message_status = "ERREUR : " . $e->getMessage();
     }
 }
 
@@ -52,9 +52,10 @@ try {
     $ui = $db->query("SELECT element_id, content FROM essai_content")->fetchAll(PDO::FETCH_KEY_PAIR);
     $img_path = $ui[6] ?? 'photo_essai.jpeg';
 
+    // Compteurs
     $totalDemandes = $db->query("SELECT COUNT(*) FROM demande_essai")->fetchColumn();
-    $enCours = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'en_attente' OR statut IS NULL OR statut = 'en attente'")->fetchColumn();
-    $acceptees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'accepte'")->fetchColumn();
+    $enCours = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IS NULL OR statut = '' OR statut = 'en_attente' OR statut = 'en attente'")->fetchColumn();
+    $acceptees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'accepte' OR statut = 'accepté'")->fetchColumn();
     $refusees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'refuse' OR statut = 'refusé'")->fetchColumn();
 
     $demandes = $db->query("
@@ -69,6 +70,9 @@ try {
 } catch (PDOException $e) {
     die("Erreur : " . $e->getMessage());
 }
+
+// Filtre depuis l'URL (pour les cartes stats cliquables)
+$filtre = $_GET['filtre'] ?? '';
 
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
@@ -99,20 +103,49 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="alert-message"><?= $message_status ?></div>
         <?php endif; ?>
 
+        <!-- CARTES STATISTIQUES CLIQUABLES -->
+        <div class="admin-stats">
+            <a href="?filtre=all" class="stat-card stat-card-link <?= ($filtre === 'all' || $filtre === '') ? 'stat-active' : '' ?>">
+                <p class="stat-label">Flux Total</p>
+                <h3 class="stat-value"><?= $totalDemandes ?></h3>
+            </a>
+            <a href="?filtre=attente" class="stat-card stat-card-link <?= $filtre === 'attente' ? 'stat-active' : '' ?>">
+                <p class="stat-label">En Attente</p>
+                <h3 class="stat-value"><?= $enCours ?></h3>
+            </a>
+            <a href="?filtre=accepte" class="stat-card stat-card-link <?= $filtre === 'accepte' ? 'stat-active' : '' ?>">
+                <p class="stat-label">Approuvées</p>
+                <h3 class="stat-value"><?= $acceptees ?></h3>
+            </a>
+            <a href="?filtre=refuse" class="stat-card stat-card-link <?= $filtre === 'refuse' ? 'stat-active' : '' ?>">
+                <p class="stat-label">Refusées</p>
+                <h3 class="stat-value"><?= $refusees ?></h3>
+            </a>
+        </div>
+
         <section id="tab-radar" class="tab-content">
-            <div class="admin-stats">
-                <div class="stat-card"><p class="stat-label">Flux Total</p><h3 class="stat-value"><?= $totalDemandes ?></h3></div>
-                <div class="stat-card"><p class="stat-label">En Attente</p><h3 class="stat-value"><?= $enCours ?></h3></div>
-                <div class="stat-card"><p class="stat-label">Approuvées</p><h3 class="stat-value"><?= $acceptees ?></h3></div>
-                <div class="stat-card"><p class="stat-label">Refusées</p><h3 class="stat-value"><?= $refusees ?></h3></div>
-            </div>
+            <?php if ($filtre === 'accepte'): ?>
+                <h3 class="section-title">Demandes Approuvées (<?= $acceptees ?>)</h3>
+            <?php elseif ($filtre === 'refuse'): ?>
+                <h3 class="section-title">Demandes Refusées (<?= $refusees ?>)</h3>
+            <?php elseif ($filtre === 'attente'): ?>
+                <h3 class="section-title">Demandes En Attente (<?= $enCours ?>)</h3>
+            <?php else: ?>
+                <h3 class="section-title">Toutes les demandes (<?= $totalDemandes ?>)</h3>
+            <?php endif; ?>
 
             <div class="table-container">
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>Client</th><th>Modèle Véhicule</th><th>Téléphone</th>
-                            <th>Date Souhaitée</th><th class="text-center">Statut</th><th class="text-center">Actions</th>
+                            <th>Client</th>
+                            <th>Modèle Véhicule</th>
+                            <th>Téléphone</th>
+                            <th>Date Souhaitée</th>
+                            <th class="text-center">Statut</th>
+                            <?php if ($filtre !== 'accepte' && $filtre !== 'refuse'): ?>
+                                <th class="text-center">Actions</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody>
@@ -120,9 +153,31 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         $hasActive = false;
                         foreach($demandes as $d): 
                             $statut = strtolower(trim($d['statut'] ?? ''));
-                            if ($statut === 'termine' || $statut === 'terminé' || $statut === 'refuse' || $statut === 'refusé') continue;
+                            
+                            $estEnAttente = ($statut === '' || $statut === 'en_attente' || $statut === 'en attente' || $d['statut'] === null);
+                            $estAcceptee = ($statut === 'accepte' || $statut === 'accepté');
+                            $estRefusee = ($statut === 'refuse' || $statut === 'refusé');
+                            $estTerminee = ($statut === 'termine' || $statut === 'terminé');
+                            
+                            // Appliquer le filtre
+                            if ($filtre === 'accepte' && !$estAcceptee) continue;
+                            if ($filtre === 'refuse' && !$estRefusee) continue;
+                            if ($filtre === 'attente' && !$estEnAttente) continue;
+                            if (($filtre === 'all' || $filtre === '') && $estTerminee) continue;
+                            
                             $hasActive = true;
-                            $dot = ($statut === 'accepte' || $statut === 'accepté') ? 'dot-green' : 'dot-orange';
+                            
+                            // Déterminer le badge et le libellé selon le statut
+                            if ($estAcceptee) {
+                                $badgeClass = 'badge-accepte';
+                                $badgeLabel = 'Approuvé';
+                            } elseif ($estRefusee) {
+                                $badgeClass = 'badge-refuse';
+                                $badgeLabel = 'Refusé';
+                            } else {
+                                $badgeClass = 'badge-attente';
+                                $badgeLabel = 'En attente';
+                            }
                         ?>
                         <tr>
                             <td>
@@ -132,21 +187,37 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             <td><span class="car-model"><?= htmlspecialchars($d['modele'] ?? '—') ?></span></td>
                             <td><?= htmlspecialchars($d['telephone'] ?? '—') ?></td>
                             <td><?= $d['date_souhaitee'] ? date('d/m/Y', strtotime($d['date_souhaitee'])) : '—' ?></td>
-                            <td class="text-center"><span class="status-dot <?= $dot ?>"></span></td>
+                            
+                            <!-- Colonne Statut : toujours un badge textuel -->
                             <td class="text-center">
-                                <form method="POST" style="display:inline">
-                                    <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
-                                    <button type="submit" name="action" value="accepte" class="btn-accept">✓</button>
-                                </form>
-                                <form method="POST" style="display:inline">
-                                    <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
-                                    <button type="submit" name="action" value="refuse" class="btn-refuse">✕</button>
-                                </form>
+                                <span class="badge <?= $badgeClass ?>"><?= $badgeLabel ?></span>
                             </td>
+                            
+                            <!-- Colonne Actions (uniquement si pas en mode approuvé/refusé) -->
+                            <?php if ($filtre !== 'accepte' && $filtre !== 'refuse'): ?>
+                                <td class="text-center">
+                                    <?php if ($estEnAttente): ?>
+                                        <form method="POST" style="display:inline">
+                                            <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
+                                            <button type="submit" name="action" value="accepte" class="btn-accept">✓</button>
+                                        </form>
+                                        <form method="POST" style="display:inline">
+                                            <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
+                                            <button type="submit" name="action" value="refuse" class="btn-refuse">✕</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span class="text-muted">—</span>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
                         </tr>
                         <?php endforeach; ?>
                         <?php if(!$hasActive): ?>
-                            <tr><td colspan="6" class="table-empty">Aucune nouvelle demande sur le radar.</td></tr>
+                            <tr>
+                                <td colspan="<?= ($filtre === 'accepte' || $filtre === 'refuse') ? 5 : 6 ?>" class="table-empty">
+                                    Aucune demande dans cette catégorie.
+                                </td>
+                            </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -194,10 +265,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         $hasArchive = false;
                         foreach($demandes as $row): 
                             $st = strtolower(trim($row['statut'] ?? ''));
-                            if ($st !== 'refuse' && $st !== 'refusé' && $st !== 'termine' && $st !== 'terminé') continue;
+                            $estRefusee = ($st === 'refuse' || $st === 'refusé');
+                            $estTerminee = ($st === 'termine' || $st === 'terminé');
+                            $estAcceptee = ($st === 'accepte' || $st === 'accepté');
+                            
+                            if (!$estRefusee && !$estTerminee && !$estAcceptee) continue;
                             $hasArchive = true;
-                            if ($st === 'termine' || $st === 'terminé') {
+                            
+                            if ($estTerminee) {
                                 $badgeClass = "badge-termine"; $badgeLabel = "Terminé";
+                            } elseif ($estAcceptee) {
+                                $badgeClass = "badge-accepte"; $badgeLabel = "Approuvé";
                             } else {
                                 $badgeClass = "badge-refuse"; $badgeLabel = "Refusé";
                             }
