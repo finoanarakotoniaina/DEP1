@@ -3203,7 +3203,7 @@ body.login-body {
     }
 } /* <--- FERMETURE DU @MEDIA ICI */
 
-<<<<<<< HEAD
+
     /* Titre de section (au-dessus des tableaux filtrés) */
 .section-title {
     font-family: Georgia, 'Times New Roman', serif;
@@ -3259,7 +3259,7 @@ body.login-body {
     font-size: 14px;
     letter-spacing: 1px;
 }
-=======
+
 /* =========================================
    STYLES POUR LA PAGE POLITIQUE DE CONFIDENTIALITÉ
    (Maintenant en dehors du @media, donc valide partout)
@@ -3407,9 +3407,6 @@ code {
     background-color: var(--navy);
     color: var(--white);
     font-size: 0.9rem;
-<<<<<<< HEAD
+
 }
->>>>>>> 0a465fec5719e2e8a22626481fc7dbf24228ced3
-=======
->>>>>>> 16459d0de4b8ee488f07da8c29afa97f0e54b05a
-}
+
