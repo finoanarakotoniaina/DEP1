@@ -173,7 +173,7 @@ if (isset($_POST['inscription'])) {
 
         <!-- Colonne droite : image -->
         <div class="auth-image-col">
-            <img src="<?= ASSETS_URL ?>/hero/connexionimg.jpg" alt="Ferrari">
+            <img src="<?= ASSETS_URL ?>/hero/Facebook.jfif" alt="Ferrari">
         </div>
     </main>
 

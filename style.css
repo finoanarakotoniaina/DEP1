@@ -1202,7 +1202,7 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
 .auth-form-col {
     display: flex;
     align-items: center;
-    padding: 5rem 4rem 2.5rem 4rem;
+    padding: 6rem 4rem 3rem 4rem;
     background: var(--sky);
 }
 
@@ -1214,7 +1214,8 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
 .auth-content h2 {
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
     color: var(--navy);
 }
 
