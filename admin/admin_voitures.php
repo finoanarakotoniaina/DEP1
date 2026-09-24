@@ -1,11 +1,8 @@
 <?php require_once '../config.php'; ?>
 <?php
-if (!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
-    exit();
-}
+requireAdmin();
 
-$db = $pdo ?? $db ?? $conn;
+/** @var PDO $db */
 
 try {
     $stmtAdmin = $db->prepare("SELECT nom, prenom FROM admin WHERE id_admin = ?");
@@ -28,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $id = intval($_POST['id_voiture']);
             $field = $_POST['field'];
             $value = $_POST['value'];
-            $allowed = ['modele','prix','annee','etat','type'];
+            $allowed = ['modele','prix','annee','etat','type','kilometrage','description'];
             if (!in_array($field, $allowed)) { echo json_encode(['success'=>false,'message'=>'Champ interdit']); exit; }
             $db->prepare("UPDATE voiture SET $field = ? WHERE id_voiture = ?")->execute([$value, $id]);
             echo json_encode(['success'=>true]); exit;
@@ -68,8 +65,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if (!is_dir($dir)) mkdir($dir, 0777, true);
                 move_uploaded_file($_FILES['image']['tmp_name'], $dir.$imageName);
             }
-            $db->prepare("INSERT INTO voiture (modele,prix,annee,etat,type,image_url,id_marque,archive) VALUES (?,?,?,?,?,?,?,0)")
-               ->execute([$_POST['modele'],$_POST['prix'],$_POST['annee'],$_POST['etat'],$_POST['type'],$imageName,$id_marque]);
+            $db->prepare("INSERT INTO voiture (modele,prix,annee,etat,type,kilometrage,description,image_url,id_marque,archive) VALUES (?,?,?,?,?,?,?,?,?,0)")
+               ->execute([
+                   $_POST['modele'],
+                   $_POST['prix'],
+                   $_POST['annee'],
+                   $_POST['etat'],
+                   $_POST['type'],
+                   $_POST['kilometrage'] ?? 0,
+                   $_POST['description'] ?? '',
+                   $imageName,
+                   $id_marque
+               ]);
             $newId = $db->lastInsertId();
             echo json_encode(['success'=>true,'id'=>$newId,'image'=>$imageName,
                 'modele'=>$_POST['modele'],'prix'=>$_POST['prix'],'annee'=>$_POST['annee'],
@@ -153,27 +160,63 @@ try {
                 <div class="story-row" id="<?php echo $rowId; ?>">
                     <?php foreach ($voitures as $car): ?>
                     <div class="car-card" data-id="<?php echo $car['id_voiture']; ?>">
-                        <button class="del-btn" onclick="confirmArchive(<?php echo $car['id_voiture']; ?>,'<?php echo htmlspecialchars(addslashes($car['modele'])); ?>')">📦</button>
 
                         <div class="hover-specs">
                             <p class="spec-title">Fiche Technique</p>
-                            <div class="spec-item"><span>Année</span><span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="annee" onblur="saveField(this)"><?php echo $car['annee']; ?></span></div>
-                            <div class="spec-item"><span>État</span><span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="etat" onblur="saveField(this)"><?php echo htmlspecialchars($car['etat']); ?></span></div>
-                            <div class="spec-item"><span>Type</span><span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="type" onblur="saveField(this)"><?php echo htmlspecialchars($car['type']); ?></span></div>
+                            <div class="spec-item">
+                                <span>Année</span>
+                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="annee" onblur="saveField(this)"><?php echo $car['annee']; ?></span>
+                            </div>
+                            <div class="spec-item">
+                                <span>État</span>
+                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="etat" onblur="saveField(this)"><?php echo htmlspecialchars($car['etat']); ?></span>
+                            </div>
+                            <div class="spec-item">
+                                <span>Type</span>
+                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="type" onblur="saveField(this)"><?php echo htmlspecialchars($car['type']); ?></span>
+                            </div>
+                            <div class="spec-item">
+                                <span>Kilométrage</span>
+                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="kilometrage" onblur="saveField(this)"><?php echo $car['kilometrage']; ?></span>
+                            </div>
+                            <p class="spec-desc"
+                               contenteditable="true"
+                               data-car-id="<?php echo $car['id_voiture']; ?>"
+                               data-field="description"
+                               onblur="saveField(this)">
+                                <?= htmlspecialchars($car['description'] ?? 'Ajouter une description...') ?>
+                            </p>
                         </div>
 
                         <div class="img-wrap">
-                            <label for="file-<?php echo $car['id_voiture']; ?>" class="img-ov">📷 CHANGER PHOTO</label>
-                            <input type="file" id="file-<?php echo $car['id_voiture']; ?>" class="hidden" accept="image/*" data-car-id="<?php echo $car['id_voiture']; ?>" onchange="uploadImg(this)">
                             <img src="<?= UPLOAD_URL ?>/voitures/<?php echo htmlspecialchars($car['image_url']); ?>" id="img-<?php echo $car['id_voiture']; ?>" alt="<?php echo htmlspecialchars($car['modele']); ?>">
+
+                            <div class="img-overlay">
+                                <label for="file-<?php echo $car['id_voiture']; ?>" class="img-overlay-btn" title="Changer la photo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                        <circle cx="12" cy="13" r="4"></circle>
+                                    </svg>
+                                </label>
+                                <input type="file" id="file-<?php echo $car['id_voiture']; ?>" class="hidden" accept="image/*" data-car-id="<?php echo $car['id_voiture']; ?>" onchange="uploadImg(this)">
+                            </div>
                         </div>
 
                         <div class="car-info">
                             <h3>
                                 <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="modele" onblur="saveField(this)"><?php echo htmlspecialchars($car['modele']); ?></span>
                             </h3>
-                            <div class="car-price">
-                                <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="prix" onblur="saveField(this)"><?php echo number_format($car['prix'],0,'.', ' '); ?></span> Rs
+                            <div class="car-price-row">
+                                <div class="car-price">
+                                    <span contenteditable="true" data-car-id="<?php echo $car['id_voiture']; ?>" data-field="prix" onblur="saveField(this)"><?php echo number_format($car['prix'],0,'.', ' '); ?></span> Rs
+                                </div>
+                                <button class="archive-btn" onclick="confirmArchive(<?php echo $car['id_voiture']; ?>,'<?php echo htmlspecialchars(addslashes($car['modele'])); ?>')" title="Archiver ce véhicule">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                                        <rect x="1" y="3" width="22" height="5"></rect>
+                                        <line x1="10" y1="12" x2="14" y2="12"></line>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -218,6 +261,14 @@ try {
                         </div>
                         <div class="form-group"><label>Type</label>
                             <select id="m-type" class="form-select"><option>Coupé</option><option>Berline</option><option>SUV</option><option>Cabriolet</option><option>Break</option><option>Citadine</option></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Kilométrage</label>
+                            <input type="number" id="m-kilometrage" class="form-input" value="0">
+                        </div>
+                        <div class="form-group"><label>Description</label>
+                            <input type="text" id="m-description" class="form-input" placeholder="Courte description...">
                         </div>
                     </div>
                     <div class="form-group">
@@ -267,10 +318,17 @@ function toast(msg, type='ok') {
 async function saveField(el) {
     const id = el.dataset.carId, field = el.dataset.field;
     let val = el.textContent.trim();
-    if (field === 'prix') val = val.replace(/[\s\u00a0]/g,'').replace('Rs','').trim();
-    if (!val) return;
+
+    if (field === 'prix')        val = val.replace(/[\s\u00a0]/g,'').replace('Rs','').trim();
+    if (field === 'kilometrage') val = val.replace(/[\s\u00a0]/g,'').replace('km','').trim();
+    if (!val && field !== 'description') return;
+
     const fd = new FormData();
-    fd.append('action','update_field'); fd.append('id_voiture', id); fd.append('field', field); fd.append('value', val);
+    fd.append('action','update_field');
+    fd.append('id_voiture', id);
+    fd.append('field', field);
+    fd.append('value', val);
+
     toast('Sauvegarde...','wait');
     const j = await fetch('admin_voitures.php',{method:'POST',body:fd}).then(r=>r.json());
     if (j.success) toast('Modifié ✓','ok'); else toast(j.message||'Erreur','err');
@@ -332,6 +390,8 @@ async function submitAdd() {
     fd.append('annee', document.getElementById('m-annee').value);
     fd.append('etat', document.getElementById('m-etat').value);
     fd.append('type', document.getElementById('m-type').value);
+    fd.append('kilometrage', document.getElementById('m-kilometrage').value);
+    fd.append('description', document.getElementById('m-description').value);
     const fi = document.getElementById('m-img-input');
     if (fi.files.length) fd.append('image', fi.files[0]);
     toast('Ajout...','wait');
@@ -361,6 +421,21 @@ function confirmArchive(id, modele) {
     };
 }
 function closeConfirm() { document.getElementById('confirm-ov').classList.remove('open'); }
+
+// Détection dynamique : fiche à droite ou à gauche selon la place
+document.querySelectorAll('.story-row .car-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        const rect = this.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const specsWidth = 280;
+
+        if (rect.right + specsWidth > viewportWidth) {
+            this.classList.add('specs-left');
+        } else {
+            this.classList.remove('specs-left');
+        }
+    });
+});
 </script>
 </body>
 </html>
