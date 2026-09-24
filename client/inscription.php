@@ -48,7 +48,8 @@ if (isset($_POST['inscription'])) {
             $stmt2->execute([$nom, $prenom, $email, $tel, $id_login_cree]);
 
             $db->commit();
-            $message = "Compte créé avec succès !";
+            header("Location: connexion.php?inscription=success");
+            exit();
         } catch (Exception $e) {
             $db->rollBack();
             $message = ($e->getCode() == 23000) ? "Erreur : cet identifiant existe déjà." : "Erreur système : " . $e->getMessage();
@@ -135,26 +136,42 @@ if (isset($_POST['inscription'])) {
                     <div class="grid grid-2" style="gap:1rem;">
                         <div class="form-group">
                             <label class="form-label">Mot de passe</label>
-                            <input type="password" 
-                                   name="password" 
-                                   id="password"
-                                   placeholder="••••••••" 
-                                   required 
-                                   minlength="8"
-                                   class="form-input"
-                                   autocomplete="new-password">
+                            <div class="password-wrapper">
+                                <input type="password" 
+                                       name="password" 
+                                       id="password"
+                                       placeholder="••••••••" 
+                                       required 
+                                       minlength="8"
+                                       class="form-input"
+                                       autocomplete="new-password">
+                                <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="Afficher le mot de passe">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                                    </svg>
+                                </button>
+                            </div>
                             <span class="form-error" id="error-password"></span>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Confirmation</label>
-                            <input type="password" 
-                                   name="confirm_password" 
-                                   id="confirm_password"
-                                   placeholder="••••••••" 
-                                   required 
-                                   minlength="8"
-                                   class="form-input"
-                                   autocomplete="new-password">
+                            <div class="password-wrapper">
+                                <input type="password" 
+                                       name="confirm_password" 
+                                       id="confirm_password"
+                                       placeholder="••••••••" 
+                                       required 
+                                       minlength="8"
+                                       class="form-input"
+                                       autocomplete="new-password">
+                                <button type="button" class="toggle-password" onclick="togglePassword('confirm_password', this)" aria-label="Afficher le mot de passe">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                                    </svg>
+                                </button>
+                            </div>
                             <span class="form-error" id="error-confirm_password"></span>
                         </div>
                     </div>
@@ -178,6 +195,34 @@ if (isset($_POST['inscription'])) {
     </main>
 
     <script>
+        // =========================================================
+        // AFFICHER / MASQUER LE MOT DE PASSE (SVG œil)
+        // =========================================================
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+
+            const iconEyeOpen = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>`;
+
+            const iconEyeClosed = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>`;
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = iconEyeOpen;
+                btn.setAttribute('aria-label', 'Masquer le mot de passe');
+            } else {
+                input.type = 'password';
+                btn.innerHTML = iconEyeClosed;
+                btn.setAttribute('aria-label', 'Afficher le mot de passe');
+            }
+        }
+
         // =========================================================
         // VALIDATION CLIENT — Inscription
         // Mode : blur (par champ) + input (efface erreur) + submit
