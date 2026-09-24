@@ -34,7 +34,7 @@ function e($string) {
 
             <div class="flex flex-wrap gap-2">
                 <a href="voiture.php?from=accueil" class="btn btn-primary">Découvrir le stock</a>
-                <a href="contact.php?from=accueil" class="btn btn-outline">Nous contacter</a>
+                <a href="contact.php" class="btn btn-primary">Nous contacter</a>
             </div>
         </div>
     </section>
