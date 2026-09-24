@@ -1202,7 +1202,7 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
 .auth-form-col {
     display: flex;
     align-items: center;
-    padding: 6rem 4rem 3rem 4rem;
+    padding: 5rem 4rem 2.5rem 4rem;
     background: var(--sky);
 }
 
@@ -1214,7 +1214,7 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
 .auth-content h2 {
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     color: var(--navy);
 }
 
@@ -1222,19 +1222,51 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
     width: 5rem;
     height: 4px;
     background: var(--teal);
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
     border-radius: 4px;
 }
 
+/* Bloc erreur sous le titre */
+.auth-content .form-msg {
+    color: #DC2626;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Espacement des groupes de champs */
 .auth-content form .form-group {
+    margin-bottom: 0.25rem;
+}
+
+/* Grilles du formulaire (2 colonnes) */
+.auth-content form .grid {
     margin-bottom: 0.5rem;
 }
 
+/* Espacement interne des champs */
+.auth-content .form-input {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+}
+
+.auth-content .form-label {
+    margin-bottom: 0.25rem;
+}
+
+/* Message d'erreur par champ */
+.auth-content .form-error {
+    margin-top: 0.15rem;
+    min-height: 0.9em;
+    font-size: 0.68rem;
+}
+
+/* Boutons finaux */
 .auth-actions {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    padding-top: 1.5rem;
+    gap: 1rem;
+    padding-top: 0.75rem;
 }
 
 .auth-alt-link {
@@ -1251,6 +1283,7 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
     color: var(--teal);
 }
 
+/* Colonne image */
 .auth-image-col {
     position: relative;
     overflow: hidden;

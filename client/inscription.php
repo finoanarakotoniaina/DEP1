@@ -80,7 +80,7 @@ if (isset($_POST['inscription'])) {
                 <?php endif; ?>
 
                 <form action="inscription.php" method="POST" id="formInscription" novalidate>
-                    <div class="grid grid-2" style="gap:1.5rem;">
+                    <div class="grid grid-2" style="gap:1rem;">
                         <div class="form-group">
                             <label class="form-label">Prénom</label>
                             <input type="text" 
@@ -107,7 +107,7 @@ if (isset($_POST['inscription'])) {
                         </div>
                     </div>
 
-                    <div class="grid grid-2" style="gap:1.5rem;">
+                    <div class="grid grid-2" style="gap:1rem;">
                         <div class="form-group">
                             <label class="form-label">Email</label>
                             <input type="email" 
@@ -132,7 +132,7 @@ if (isset($_POST['inscription'])) {
                         </div>
                     </div>
 
-                    <div class="grid grid-2" style="gap:1.5rem;">
+                    <div class="grid grid-2" style="gap:1rem;">
                         <div class="form-group">
                             <label class="form-label">Mot de passe</label>
                             <input type="password" 
@@ -157,14 +157,6 @@ if (isset($_POST['inscription'])) {
                                    autocomplete="new-password">
                             <span class="form-error" id="error-confirm_password"></span>
                         </div>
-                    </div>
-
-                    <!-- Indicateur de robustesse -->
-                    <div class="password-strength">
-                        <div class="strength-bar">
-                            <span class="strength-fill" id="strength-fill"></span>
-                        </div>
-                        <p class="strength-text" id="strength-text">Force du mot de passe</p>
                     </div>
 
                     <div class="auth-actions">
@@ -245,28 +237,6 @@ if (isset($_POST['inscription'])) {
 
         const formInscription = document.getElementById('formInscription');
         const passwordInput = document.getElementById('password');
-        const strengthFill = document.getElementById('strength-fill');
-        const strengthText = document.getElementById('strength-text');
-
-        // --- Indicateur de robustesse en temps réel ---
-        passwordInput.addEventListener('input', function() {
-            const val = passwordInput.value;
-            let score = 0;
-
-            if (val.length >= 8)    score++;
-            if (/[A-Z]/.test(val))  score++;
-            if (/[a-z]/.test(val))  score++;
-            if (/[0-9]/.test(val))  score++;
-            if (/[\W_]/.test(val))  score++;
-
-            const colors = ['#6b7280', '#C1121F', '#e07c00', '#e0c000', '#4CAF50', '#4CAF50'];
-            const labels = ['Force du mot de passe', 'Très faible', 'Faible', 'Moyen', 'Fort', 'Très fort'];
-
-            strengthFill.style.width = (score * 20) + '%';
-            strengthFill.style.background = colors[score];
-            strengthText.textContent = labels[score];
-            strengthText.style.color = colors[score];
-        });
 
         // --- Attache : blur (validation) + input (efface erreur) ---
         formInscription.querySelectorAll('.form-input').forEach(input => {
