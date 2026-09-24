@@ -45,7 +45,7 @@ VALUES ('MadisonCarter', 'Carter', 'Madison', 'didison');
 
 INSERT INTO home_content (element_id, content) VALUES 
 ('titre_nos_modeles',       'NOS '),
-('titre_nos_modeles_rouge', 'MODÈLES');
+('titre_nos_modeles_rouge', 'MODÈLES'),
 ('brand_1_name', 'BMW'),
 ('brand_1_desc', 'Bien que la marque se soit diversifiee.'),
 ('brand_2_name', 'MERCEDES-BENZ'),
