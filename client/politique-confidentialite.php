@@ -1,3 +1,10 @@
+<?php 
+require_once '../config.php'; 
+
+function e($string) {
+    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,16 +13,13 @@
     <title>Politique de confidentialité - SuperCar</title>
     <link rel="stylesheet" href="../style.css">
 </head>
-<body>
 
-   <!-- Barre du haut -->
-<div class="privacy-topbar">
-    <a href="index.php" class="logo-mini">SUPER<span>CAR</span></a>
-    <a href="accueil.php" class="back-link-inline">&larr; Retour au site</a>
-</div>
+<body class="bg">
+
+    <?php include 'composants_client/navbar.php'; ?>
 
     <!-- Contenu principal -->
-    <main class="privacy-main">
+    <main class="privacy-main" style="padding-top: 8rem;">
         <article class="privacy-content container">
 
             <div class="privacy-intro">
@@ -84,9 +88,7 @@
         </article>
     </main>
 
-    <footer class="site-footer">
-        <p>&copy; 2026 SuperCar - Projet BTS SIO SLAM. Tous droits réservés.</p>
-    </footer>
+    <?php include 'composants_client/footer.php'; ?>
 
 </body>
 </html>
