@@ -87,9 +87,9 @@ if (isset($_POST['connexion'])) {
                 <h2>CONNEXION</h2>
                 <div class="title-bar"></div>
 
-                <?php if ($message != ""): ?>
-                    <div class="form-msg"><?= htmlspecialchars($message) ?></div>
-                <?php endif; ?>
+                <?php if (!empty($message)): ?>
+    <p class="form-msg"><?= htmlspecialchars($message) ?></p>
+<?php endif; ?>
 
                 <form action="connexion.php" method="POST" id="formConnexion" novalidate>
                     <div class="form-group">
@@ -144,7 +144,7 @@ if (isset($_POST['connexion'])) {
                             Se connecter
                         </button>
                         <a href="inscription.php" class="auth-alt-link">
-                            Créer un profil membre
+                            Créer un compte
                         </a>
                     </div>
                 </form>
