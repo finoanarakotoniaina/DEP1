@@ -1,22 +1,72 @@
 <?php
 require_once '../config.php';
+requireAdmin();
 
-if (!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
-    exit();
-}
+/** @var PDO $db */
 
-$db = $pdo ?? $db ?? $conn;
 $message_status = "";
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_demande'])) {
-    $new_statut = $_POST['action'] === 'accepte' ? 'accepte' : 'refuse';
-    $db->prepare("UPDATE demande_essai SET statut = ? WHERE id_demande = ?")
-       ->execute([$new_statut, $_POST['id_demande']]);
-    header('Location: admin_demande.php');
-    exit();
+// =========================================================
+// 1. AUTO-STATUTS (avant toute lecture)
+// =========================================================
+try {
+    // Auto-REFUS : En attente + date passée
+    $db->query("
+        UPDATE demande_essai 
+        SET statut = 'refuse' 
+        WHERE (statut = 'en attente' OR statut = 'en_attente' OR statut IS NULL OR statut = '')
+          AND CONCAT(date_souhaitee, ' ', COALESCE(heure_souhaitee, '23:59:59')) < NOW()
+    ");
+
+    // Auto-TERMINÉ : Approuvé + date passée
+    $db->query("
+        UPDATE demande_essai 
+        SET statut = 'termine' 
+        WHERE statut = 'accepte' 
+          AND CONCAT(date_souhaitee, ' ', COALESCE(heure_souhaitee, '23:59:59')) < NOW()
+    ");
+} catch (PDOException $e) {
+    // Silencieux
 }
 
+// =========================================================
+// 2. ACTIONS POST (accepter / refuser / modifier date)
+// =========================================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_demande'])) {
+    $id = (int) $_POST['id_demande'];
+    $action = $_POST['action'];
+
+    try {
+        if ($action === 'accepte') {
+            $db->prepare("UPDATE demande_essai SET statut = 'accepte' WHERE id_demande = ?")
+               ->execute([$id]);
+            $message_status = "✅ Demande approuvée.";
+        } elseif ($action === 'refuse') {
+            $db->prepare("UPDATE demande_essai SET statut = 'refuse' WHERE id_demande = ?")
+               ->execute([$id]);
+            $message_status = "❌ Demande refusée.";
+        } elseif ($action === 'termine') {
+            $db->prepare("UPDATE demande_essai SET statut = 'termine' WHERE id_demande = ?")
+               ->execute([$id]);
+            $message_status = "✅ Essai marqué comme terminé.";
+        } elseif ($action === 'modifier_date' && !empty($_POST['nouvelle_date'])) {
+            $nouvelle_date  = $_POST['nouvelle_date'];
+            $nouvelle_heure = $_POST['nouvelle_heure'] ?? null;
+            $db->prepare("UPDATE demande_essai SET date_souhaitee = ?, heure_souhaitee = ? WHERE id_demande = ?")
+               ->execute([$nouvelle_date, $nouvelle_heure, $id]);
+            $message_status = "📅 Date modifiée avec succès.";
+        }
+
+        header("Location: admin_demande.php?msg=" . urlencode($message_status));
+        exit();
+    } catch (PDOException $e) {
+        $message_status = "Erreur : " . $e->getMessage();
+    }
+}
+
+// =========================================================
+// 3. SAVE UI (onglet Interface)
+// =========================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
     try {
         $stmt_text = $db->prepare("UPDATE essai_content SET content = ? WHERE element_id = ?");
@@ -43,6 +93,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
     }
 }
 
+// Message de redirection
+if (!empty($_GET['msg'])) {
+    $message_status = $_GET['msg'];
+}
+
+// =========================================================
+// 4. LECTURE DES DONNÉES
+// =========================================================
 try {
     $stmtAdmin = $db->prepare("SELECT nom, prenom FROM admin WHERE id_admin = ?");
     $stmtAdmin->execute([$_SESSION['admin_id']]);
@@ -54,12 +112,14 @@ try {
 
     // Compteurs
     $totalDemandes = $db->query("SELECT COUNT(*) FROM demande_essai")->fetchColumn();
-    $enCours = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IS NULL OR statut = '' OR statut = 'en_attente' OR statut = 'en attente'")->fetchColumn();
-    $acceptees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'accepte' OR statut = 'accepté'")->fetchColumn();
-    $refusees = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut = 'refuse' OR statut = 'refusé'")->fetchColumn();
+    $enCours       = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IS NULL OR statut = '' OR statut = 'en_attente' OR statut = 'en attente'")->fetchColumn();
+    $acceptees     = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IN ('accepte','accepté')")->fetchColumn();
+    $refusees      = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IN ('refuse','refusé')")->fetchColumn();
+    $terminees     = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IN ('termine','terminé')")->fetchColumn();
 
+    // Requête principale
     $demandes = $db->query("
-        SELECT de.id_demande, de.date_souhaitee, de.statut,
+        SELECT de.id_demande, de.date_souhaitee, de.heure_souhaitee, de.statut,
                CONCAT(c.prenom, ' ', c.nom) AS nom_complet,
                c.email, c.telephone, v.modele
         FROM demande_essai de
@@ -67,20 +127,20 @@ try {
         LEFT JOIN voiture v ON de.id_voiture = v.id_voiture
         ORDER BY de.id_demande DESC
     ")->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     die("Erreur : " . $e->getMessage());
 }
 
-// Filtre depuis l'URL (pour les cartes stats cliquables)
 $filtre = $_GET['filtre'] ?? '';
-
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SuperCar | Command Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des demandes | SuperCar Admin</title>
     <link rel="stylesheet" href="../style.css">
 </head>
 <body class="admin-body">
@@ -100,7 +160,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </header>
 
         <?php if (!empty($message_status)): ?>
-            <div class="alert-message"><?= $message_status ?></div>
+            <div class="alert-message"><?= htmlspecialchars($message_status) ?></div>
         <?php endif; ?>
 
         <!-- CARTES STATISTIQUES CLIQUABLES -->
@@ -121,8 +181,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <p class="stat-label">Refusées</p>
                 <h3 class="stat-value"><?= $refusees ?></h3>
             </a>
+            <a href="?filtre=termine" class="stat-card stat-card-link <?= $filtre === 'termine' ? 'stat-active' : '' ?>">
+                <p class="stat-label">Terminées</p>
+                <h3 class="stat-value"><?= $terminees ?></h3>
+            </a>
         </div>
 
+        <!-- ============ ONGLET DEMANDES ============ -->
         <section id="tab-radar" class="tab-content">
             <?php if ($filtre === 'accepte'): ?>
                 <h3 class="section-title">Demandes Approuvées (<?= $acceptees ?>)</h3>
@@ -130,6 +195,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <h3 class="section-title">Demandes Refusées (<?= $refusees ?>)</h3>
             <?php elseif ($filtre === 'attente'): ?>
                 <h3 class="section-title">Demandes En Attente (<?= $enCours ?>)</h3>
+            <?php elseif ($filtre === 'termine'): ?>
+                <h3 class="section-title">Essais Terminés (<?= $terminees ?>)</h3>
             <?php else: ?>
                 <h3 class="section-title">Toutes les demandes (<?= $totalDemandes ?>)</h3>
             <?php endif; ?>
@@ -139,13 +206,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <thead>
                         <tr>
                             <th>Client</th>
-                            <th>Modèle Véhicule</th>
+                            <th>Modèle</th>
                             <th>Téléphone</th>
-                            <th>Date Souhaitée</th>
+                            <th>Date & Heure souhaitées</th>
                             <th class="text-center">Statut</th>
-                            <?php if ($filtre !== 'accepte' && $filtre !== 'refuse'): ?>
-                                <th class="text-center">Actions</th>
-                            <?php endif; ?>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -155,28 +220,27 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             $statut = strtolower(trim($d['statut'] ?? ''));
                             
                             $estEnAttente = ($statut === '' || $statut === 'en_attente' || $statut === 'en attente' || $d['statut'] === null);
-                            $estAcceptee = ($statut === 'accepte' || $statut === 'accepté');
-                            $estRefusee = ($statut === 'refuse' || $statut === 'refusé');
-                            $estTerminee = ($statut === 'termine' || $statut === 'terminé');
+                            $estAcceptee  = ($statut === 'accepte' || $statut === 'accepté');
+                            $estRefusee   = ($statut === 'refuse' || $statut === 'refusé');
+                            $estTerminee  = ($statut === 'termine' || $statut === 'terminé');
                             
-                            // Appliquer le filtre
+                            // Filtres
                             if ($filtre === 'accepte' && !$estAcceptee) continue;
-                            if ($filtre === 'refuse' && !$estRefusee) continue;
+                            if ($filtre === 'refuse'  && !$estRefusee)  continue;
                             if ($filtre === 'attente' && !$estEnAttente) continue;
-                            if (($filtre === 'all' || $filtre === '') && $estTerminee) continue;
+                            if ($filtre === 'termine' && !$estTerminee) continue;
                             
                             $hasActive = true;
-                            
-                            // Déterminer le badge et le libellé selon le statut
-                            if ($estAcceptee) {
-                                $badgeClass = 'badge-accepte';
-                                $badgeLabel = 'Approuvé';
+
+                            // Badge
+                            if ($estTerminee) {
+                                $badgeClass = 'badge-termine'; $badgeLabel = 'Terminé';
+                            } elseif ($estAcceptee) {
+                                $badgeClass = 'badge-accepte'; $badgeLabel = 'Approuvé';
                             } elseif ($estRefusee) {
-                                $badgeClass = 'badge-refuse';
-                                $badgeLabel = 'Refusé';
+                                $badgeClass = 'badge-refuse';  $badgeLabel = 'Refusé';
                             } else {
-                                $badgeClass = 'badge-attente';
-                                $badgeLabel = 'En attente';
+                                $badgeClass = 'badge-attente'; $badgeLabel = 'En attente';
                             }
                         ?>
                         <tr>
@@ -186,37 +250,49 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             </td>
                             <td><span class="car-model"><?= htmlspecialchars($d['modele'] ?? '—') ?></span></td>
                             <td><?= htmlspecialchars($d['telephone'] ?? '—') ?></td>
-                            <td><?= $d['date_souhaitee'] ? date('d/m/Y', strtotime($d['date_souhaitee'])) : '—' ?></td>
-                            
-                            <!-- Colonne Statut : toujours un badge textuel -->
+                            <td>
+                                <p><?= $d['date_souhaitee'] ? date('d/m/Y', strtotime($d['date_souhaitee'])) : '—' ?></p>
+                                <?php if (!empty($d['heure_souhaitee'])): ?>
+                                    <p class="driver-status"><?= htmlspecialchars(substr($d['heure_souhaitee'], 0, 5)) ?></p>
+                                <?php endif; ?>
+                            </td>
                             <td class="text-center">
                                 <span class="badge <?= $badgeClass ?>"><?= $badgeLabel ?></span>
                             </td>
-                            
-                            <!-- Colonne Actions (uniquement si pas en mode approuvé/refusé) -->
-                            <?php if ($filtre !== 'accepte' && $filtre !== 'refuse'): ?>
-                                <td class="text-center">
-                                    <?php if ($estEnAttente): ?>
-                                        <form method="POST" style="display:inline">
-                                            <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
-                                            <button type="submit" name="action" value="accepte" class="btn-accept">✓</button>
-                                        </form>
-                                        <form method="POST" style="display:inline">
-                                            <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
-                                            <button type="submit" name="action" value="refuse" class="btn-refuse">✕</button>
-                                        </form>
-                                    <?php else: ?>
-                                        <span class="text-muted">—</span>
-                                    <?php endif; ?>
-                                </td>
-                            <?php endif; ?>
+                            <td class="text-center">
+                                <?php if ($estEnAttente): ?>
+                                    <!-- Approuver / Refuser / Modifier date -->
+                                    <form method="POST" style="display:inline">
+                                        <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
+                                        <button type="submit" name="action" value="accepte" class="btn-accept" title="Approuver">✓</button>
+                                    </form>
+                                    <form method="POST" style="display:inline">
+                                        <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
+                                        <button type="submit" name="action" value="refuse" class="btn-refuse" title="Refuser">✕</button>
+                                    </form>
+                                    <button type="button" class="btn-edit" title="Modifier la date"
+                                        onclick="ouvrirModifDate(<?= $d['id_demande'] ?>, '<?= $d['date_souhaitee'] ?>', '<?= $d['heure_souhaitee'] ?? '' ?>')">✎</button>
+
+                                <?php elseif ($estAcceptee): ?>
+                                    <!-- Terminer / Refuser -->
+                                    <form method="POST" style="display:inline">
+                                        <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
+                                        <button type="submit" name="action" value="termine" class="btn-accept" title="Marquer terminé">✔</button>
+                                    </form>
+                                    <form method="POST" style="display:inline">
+                                        <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
+                                        <button type="submit" name="action" value="refuse" class="btn-refuse" title="Refuser">✕</button>
+                                    </form>
+
+                                <?php else: ?>
+                                    <span class="text-muted">—</span>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                         <?php if(!$hasActive): ?>
                             <tr>
-                                <td colspan="<?= ($filtre === 'accepte' || $filtre === 'refuse') ? 5 : 6 ?>" class="table-empty">
-                                    Aucune demande dans cette catégorie.
-                                </td>
+                                <td colspan="6" class="table-empty">Aucune demande dans cette catégorie.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -224,6 +300,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </div>
         </section>
 
+        <!-- ============ ONGLET INTERFACE ============ -->
         <section id="tab-editor" class="tab-content hidden">
             <form method="POST" enctype="multipart/form-data">
                 <div class="live-wrap">
@@ -251,6 +328,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </form>
         </section>
 
+        <!-- ============ ONGLET HISTORIQUE ============ -->
         <section id="tab-history" class="tab-content hidden">
             <div class="table-container">
                 <table class="admin-table">
@@ -265,19 +343,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         $hasArchive = false;
                         foreach($demandes as $row): 
                             $st = strtolower(trim($row['statut'] ?? ''));
-                            $estRefusee = ($st === 'refuse' || $st === 'refusé');
+                            $estRefusee  = ($st === 'refuse'  || $st === 'refusé');
                             $estTerminee = ($st === 'termine' || $st === 'terminé');
-                            $estAcceptee = ($st === 'accepte' || $st === 'accepté');
                             
-                            if (!$estRefusee && !$estTerminee && !$estAcceptee) continue;
+                            if (!$estRefusee && !$estTerminee) continue;
                             $hasArchive = true;
                             
                             if ($estTerminee) {
                                 $badgeClass = "badge-termine"; $badgeLabel = "Terminé";
-                            } elseif ($estAcceptee) {
-                                $badgeClass = "badge-accepte"; $badgeLabel = "Approuvé";
                             } else {
-                                $badgeClass = "badge-refuse"; $badgeLabel = "Refusé";
+                                $badgeClass = "badge-refuse";  $badgeLabel = "Refusé";
                             }
                         ?>
                         <tr>
@@ -303,6 +378,34 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </section>
     </main>
 
+    <!-- MODALE : Modifier la date -->
+    <div id="modal-date" class="modal-bg">
+        <div class="modal-box" style="max-width: 420px;">
+            <div class="modal-head">
+                <h3>MODIFIER LA DATE</h3>
+                <button class="modal-close" onclick="fermerModifDate()">✕</button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="id_demande" id="md-id">
+                    <input type="hidden" name="action" value="modifier_date">
+                    <div class="form-group">
+                        <label>Nouvelle date</label>
+                        <input type="date" name="nouvelle_date" id="md-date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nouvelle heure (optionnel)</label>
+                        <input type="time" name="nouvelle_heure" id="md-heure" class="form-input">
+                    </div>
+                </div>
+                <div class="modal-foot">
+                    <button type="button" class="btn btn-outline" onclick="fermerModifDate()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
@@ -310,12 +413,24 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('btn-' + tabId).classList.add('active');
         }
+
         function previewHero(event) {
             const reader = new FileReader();
             reader.onload = function(){
                 document.getElementById('preview_img').src = reader.result;
             };
             reader.readAsDataURL(event.target.files[0]);
+        }
+
+        function ouvrirModifDate(id, date, heure) {
+            document.getElementById('md-id').value = id;
+            document.getElementById('md-date').value = date;
+            document.getElementById('md-heure').value = heure ? heure.substring(0, 5) : '';
+            document.getElementById('modal-date').classList.add('open');
+        }
+
+        function fermerModifDate() {
+            document.getElementById('modal-date').classList.remove('open');
         }
     </script>
 </body>

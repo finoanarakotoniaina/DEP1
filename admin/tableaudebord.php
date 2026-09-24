@@ -28,24 +28,41 @@ try {
            OR statut = 'en_attente'
     ")->fetchColumn() ?: 0;
 
-    // 5 dernières demandes d'essai
-    $stmtDemandes = $db->query("
+    // 5. Données du graphique — inscriptions par mois
+    $stmtChart = $db->query("
         SELECT 
-            de.id_demande,
-            de.date_souhaitee,
-            de.statut,
-            CONCAT(c.prenom, ' ', c.nom) AS client_nom,
-            c.email AS client_email,
-            v.modele AS voiture_modele,
-            m.nom_marque AS voiture_marque
-        FROM demande_essai de
-        LEFT JOIN client c ON de.id_client = c.id_client
-        LEFT JOIN voiture v ON de.id_voiture = v.id_voiture
-        LEFT JOIN marque m ON v.id_marque = m.id_marque
-        ORDER BY de.id_demande DESC
-        LIMIT 5
+            DATE_FORMAT(date_inscription, '%Y-%m') AS mois,
+            COUNT(*) AS total
+        FROM client
+        WHERE date_inscription IS NOT NULL
+        GROUP BY DATE_FORMAT(date_inscription, '%Y-%m')
+        ORDER BY mois ASC
     ");
-    $demandesRecentes = $stmtDemandes->fetchAll(PDO::FETCH_ASSOC);
+    $chartData = $stmtChart->fetchAll(PDO::FETCH_ASSOC);
+
+    // Préparer les données pour JS
+    $chartLabels = [];
+    $chartValues = [];
+    $totalInscriptions = 0;
+
+    foreach ($chartData as $row) {
+        // Formater le mois : "2026-01" → "Jan 2026"
+        $date = DateTime::createFromFormat('Y-m', $row['mois']);
+        $moisFr = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+        $label = $date ? $moisFr[(int)$date->format('n') - 1] . ' ' . $date->format('Y') : $row['mois'];
+        
+        $chartLabels[] = $label;
+        $chartValues[] = (int) $row['total'];
+        $totalInscriptions += (int) $row['total'];
+    }
+
+    // Liste des clients inscrits (pour la vue "Clients")
+    $stmtClients = $db->query("
+        SELECT id_client, nom, prenom, email, telephone
+        FROM client
+        ORDER BY id_client DESC
+    ");
+    $listeClients = $stmtClients->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
     die("Erreur système : connexion interrompue.");
@@ -60,122 +77,236 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord | SuperCar Admin</title>
     <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="admin-body">
 
     <?php include 'composants/sidebar.php'; ?>
 
     <main class="admin-main">
-        <header class="admin-header">
-            <div>
-                <h2 class="font-title">TABLEAU DE <span class="title-accent">BORD</span></h2>
-                <p class="status-live">● Système opérationnel</p>
+
+        <!-- =============================================
+             VUE 1 : Tableau de bord (par défaut)
+             ============================================= -->
+        <div id="view-dashboard">
+
+            <header class="admin-header">
+                <div>
+                    <h2 class="font-title">TABLEAU DE <span class="title-accent">BORD</span></h2>
+                </div>
+            </header>
+
+            <div class="admin-stats">
+
+                <!-- 1. Véhicules -->
+                <a href="admin_voitures.php" class="stat-card stat-card-link">
+                    <p class="stat-label">Véhicules disponibles</p>
+                    <h3 class="stat-value"><?= $countCars ?></h3>
+                    <p class="stat-sub">En stock actuellement</p>
+                    <div class="stat-bar"></div>
+                </a>
+
+                <!-- 2. Clients → bascule vers vue clients -->
+                <a href="javascript:void(0)" onclick="showClients()" class="stat-card stat-card-link">
+                    <p class="stat-label">Clients inscrits</p>
+                    <h3 class="stat-value"><?= $countClients ?></h3>
+                    <p class="stat-sub">Comptes enregistrés</p>
+                    <div class="stat-bar"></div>
+                </a>
+
+                <!-- 3. Messages -->
+                <a href="admin_contact.php" class="stat-card stat-card-link">
+                    <p class="stat-label">Messages reçus</p>
+                    <h3 class="stat-value"><?= $countMessages ?></h3>
+                    <p class="stat-sub">Depuis le formulaire de contact</p>
+                    <div class="stat-bar"></div>
+                </a>
+
+                <!-- 4. Demandes en attente -->
+                <a href="admin_demande.php" class="stat-card stat-card-accent stat-card-link">
+                    <p class="stat-label">Demandes en attente</p>
+                    <h3 class="stat-value"><?= $countDemandesAttente ?></h3>
+                    <p class="stat-sub">À confirmer</p>
+                    <div class="stat-bar"></div>
+                </a>
+
             </div>
-        </header>
 
-        <!-- 4 cartes stats -->
-        <div class="admin-stats">
+            <!-- Graphique : évolution des inscriptions -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Évolution des inscriptions clients</h3>
+                    <span class="chart-badge"><?= $totalInscriptions ?> AU TOTAL</span>
+                </div>
 
-            <!-- 1. Véhicules -->
-            <div class="stat-card">
-                <p class="stat-label">Véhicules disponibles</p>
-                <h3 class="stat-value"><?= $countCars ?></h3>
-                <p class="stat-sub">En stock actuellement</p>
-                <div class="stat-bar"></div>
+                <div class="chart-wrapper">
+                    <canvas id="chartInscriptions"></canvas>
+                </div>
             </div>
-
-            <!-- 2. Clients -->
-            <div class="stat-card">
-                <p class="stat-label">Clients inscrits</p>
-                <h3 class="stat-value"><?= $countClients ?></h3>
-                <p class="stat-sub">Comptes enregistrés</p>
-                <div class="stat-bar"></div>
-            </div>
-
-            <!-- 3. Messages -->
-            <div class="stat-card">
-                <p class="stat-label">Messages reçus</p>
-                <h3 class="stat-value"><?= $countMessages ?></h3>
-                <p class="stat-sub">Depuis le formulaire de contact</p>
-                <div class="stat-bar"></div>
-            </div>
-
-            <!-- 4. Demandes en attente (cliquable) -->
-            <a href="admin_demande.php" class="stat-card stat-card-accent stat-card-link">
-                <p class="stat-label">Demandes en attente</p>
-                <h3 class="stat-value"><?= $countDemandesAttente ?></h3>
-                <p class="stat-sub">À confirmer</p>
-                <div class="stat-bar"></div>
-            </a>
 
         </div>
 
-        <!-- Tableau dernières demandes d'essai -->
-        <div class="table-container">
-            <div class="table-header">
-                <h3>Dernières demandes d'essai</h3>
-                <a href="admin_demande.php" class="btn-consulter">Voir toutes les demandes</a>
+        <!-- =============================================
+             VUE 2 : Clients inscrits (cachée par défaut)
+             ============================================= -->
+        <div id="view-clients" class="hidden">
+
+            <header class="admin-header">
+                <div>
+                    <button class="back-link" onclick="showDashboard()" title="Retour">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                    </button>
+                    <div style="margin-top: 0.75rem;">
+                        <h2 class="font-title">CLIENTS <span class="title-accent">INSCRITS</span></h2>
+                        <p class="admin-subtitle"><?= $countClients ?> client(s) enregistré(s)</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="clients-list">
+                <?php if (empty($listeClients)): ?>
+                    <div class="table-empty" style="background: var(--white); border-radius: 16px; padding: 3rem;">
+                        Aucun client inscrit
+                    </div>
+                <?php else: ?>
+                    <?php foreach($listeClients as $c): ?>
+                    <div class="client-card">
+                        <div class="client-card-avatar">
+                            <?= strtoupper(substr($c['prenom'], 0, 1) . substr($c['nom'], 0, 1)) ?>
+                        </div>
+                        <div class="client-card-info">
+                            <p class="client-card-name"><?= htmlspecialchars($c['prenom'] . ' ' . $c['nom']) ?></p>
+                            <p class="client-card-meta">
+                                <span class="client-card-label">Email</span>
+                                <span class="client-card-value"><?= htmlspecialchars($c['email']) ?></span>
+                            </p>
+                            <p class="client-card-meta">
+                                <span class="client-card-label">Téléphone</span>
+                                <span class="client-card-value"><?= htmlspecialchars($c['telephone'] ?? '—') ?></span>
+                            </p>
+                        </div>
+                        <div class="client-card-action">
+                            <a href="admin_client_detail.php?id=<?= $c['id_client'] ?>" class="btn btn-outline">Voir la fiche</a>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
 
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Client</th>
-                        <th>Véhicule</th>
-                        <th>Date souhaitée</th>
-                        <th class="text-center">Statut</th>
-                        <th class="text-right">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($demandesRecentes)): ?>
-                        <tr><td colspan="5" class="table-empty">Aucune demande enregistrée</td></tr>
-                    <?php else: ?>
-                        <?php foreach($demandesRecentes as $d): 
-                            $statut = strtolower(trim($d['statut'] ?? ''));
-                            
-                            // Déterminer la classe badge et le label
-                            if ($statut === 'accepte' || $statut === 'accepté' || $statut === 'confirmé') {
-                                $badgeClass = 'badge-termine';
-                                $badgeLabel = 'Acceptée';
-                            } elseif ($statut === 'refuse' || $statut === 'refusé' || $statut === 'annulé') {
-                                $badgeClass = 'badge-refuse';
-                                $badgeLabel = 'Refusée';
-                            } else {
-                                $badgeClass = 'badge-attente';
-                                $badgeLabel = 'En attente';
-                            }
-                        ?>
-                        <tr>
-                            <td>
-                                <div class="driver-cell">
-                                    <div class="driver-avatar"><?= strtoupper(substr($d['client_nom'] ?? 'A', 0, 1)) ?></div>
-                                    <div>
-                                        <p class="driver-name"><?= htmlspecialchars($d['client_nom'] ?? 'Anonyme') ?></p>
-                                        <p class="driver-status"><?= htmlspecialchars($d['client_email'] ?? '—') ?></p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <p class="car-model">
-                                    <?= htmlspecialchars(($d['voiture_marque'] ?? '') . ' ' . ($d['voiture_modele'] ?? '—')) ?>
-                                </p>
-                            </td>
-                            <td class="font-mono" style="font-family: 'Courier New', monospace; font-size: 11px; color: var(--gray);">
-                                <?= !empty($d['date_souhaitee']) ? date('d/m/Y', strtotime($d['date_souhaitee'])) : '—' ?>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge <?= $badgeClass ?>"><?= $badgeLabel ?></span>
-                            </td>
-                            <td class="text-right">
-                                <a href="admin_demande.php" class="btn-consulter">Traiter</a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
         </div>
+
     </main>
+
+    <script>
+        function showClients() {
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-clients').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showDashboard() {
+            document.getElementById('view-clients').classList.add('hidden');
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ============================================
+        // Graphique Chart.js — Évolution des inscriptions
+        // ============================================
+        (function() {
+            const ctx = document.getElementById('chartInscriptions');
+            if (!ctx) return;
+
+            const labels = <?= json_encode($chartLabels) ?>;
+            const values = <?= json_encode($chartValues) ?>;
+
+            // Si aucune donnée → message
+            if (labels.length === 0) {
+                ctx.parentElement.innerHTML = '<div class="chart-empty">Aucune inscription enregistrée pour le moment</div>';
+                return;
+            }
+
+            // Créer un dégradé sous la courbe
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 320);
+            gradient.addColorStop(0, 'rgba(86, 124, 141, 0.4)');
+            gradient.addColorStop(1, 'rgba(86, 124, 141, 0.02)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Inscriptions',
+                        data: values,
+                        borderColor: '#567C8D',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#2F4156',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#567C8D',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#2F4156',
+                            titleColor: '#F5EFEB',
+                            bodyColor: '#FFFFFF',
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            titleFont: { size: 12, weight: '600' },
+                            bodyFont: { size: 13, weight: '700' },
+                            callbacks: {
+                                label: function(context) {
+                                    const v = context.parsed.y;
+                                    return v + (v > 1 ? ' inscriptions' : ' inscription');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                font: { size: 11, weight: '600' }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(47, 65, 86, 0.08)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                font: { size: 11, weight: '600' },
+                                stepSize: 1,
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+
 </body>
 </html>

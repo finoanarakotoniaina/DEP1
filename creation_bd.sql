@@ -41,6 +41,7 @@ CREATE TABLE client (
     email       VARCHAR(150) NOT NULL UNIQUE,
     telephone   VARCHAR(20),
     id_login    INT,
+    date_inscription    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_login) REFERENCES login(id_login)
         ON DELETE SET NULL
         ON UPDATE CASCADE
