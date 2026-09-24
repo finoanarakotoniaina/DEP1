@@ -1,10 +1,8 @@
 <?php
 require_once '../config.php';
+requireAdmin();
 
-if (!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
-    exit();
-}
+/** @var PDO $db */
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header('Location: tableaudebord.php');
@@ -12,16 +10,29 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 
 $clientId = (int) $_GET['id'];
-$db = $pdo ?? $db ?? $conn;
 
 try {
+    // Application des auto-statuts sur les demandes du client
+    $db->query("
+        UPDATE demande_essai 
+        SET statut = 'refuse' 
+        WHERE (statut = 'en attente' OR statut = 'en_attente' OR statut IS NULL OR statut = '')
+          AND CONCAT(date_souhaitee, ' ', COALESCE(heure_souhaitee, '23:59:59')) < NOW()
+    ");
+    $db->query("
+        UPDATE demande_essai 
+        SET statut = 'termine' 
+        WHERE statut = 'accepte' 
+          AND CONCAT(date_souhaitee, ' ', COALESCE(heure_souhaitee, '23:59:59')) < NOW()
+    ");
+
     $stmtClient = $db->prepare("SELECT * FROM client WHERE id_client = ?");
     $stmtClient->execute([$clientId]);
     $client = $stmtClient->fetch(PDO::FETCH_ASSOC);
 
     if (!$client) { header('Location: tableaudebord.php'); exit(); }
 
-    // --- Demandes d'essai du client ---
+    // Demandes d'essai du client
     $demandes = [];
     try {
         $stmtDemandes = $db->prepare("
@@ -36,7 +47,7 @@ try {
         $demandes = $stmtDemandes->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {}
 
-    // --- Messages de contact liés par email ---
+    // Messages de contact liés par email
     $messages = [];
     try {
         $stmtMessages = $db->prepare("SELECT * FROM contact_client WHERE email = ? ORDER BY id_contact DESC");
@@ -61,7 +72,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperCar | Fiche Pilote — <?= $fullName ?></title>
+    <title>SuperCar | Fiche client — <?= $fullName ?></title>
     <link rel="stylesheet" href="../style.css">
 </head>
 <body class="admin-body">
@@ -70,14 +81,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     <main class="admin-main">
         <header class="admin-header">
-            <a href="tableaudebord.php" class="back-link">← Retour</a>
+            <a href="tableaudebord.php" class="back-link">←</a>
             <div>
-                <p class="admin-subtitle">Tableau de bord / Fiche Pilote</p>
-                <h2 class="font-title">FICHE <span class="title-accent">PILOTE</span></h2>
+                <p class="admin-subtitle">Tableau de bord / Fiche client</p>
+                <h2 class="font-title">FICHE <span class="title-accent">CLIENT</span></h2>
             </div>
             <div>
-                <span class="badge badge-termine">● Verified Pilot</span>
-                <a href="admin_demande.php?client=<?= $clientId ?>" class="btn btn-outline">Demandes</a>
+                <a href="admin_demande.php?client=<?= $clientId ?>" class="btn btn-outline">Voir les demandes</a>
             </div>
         </header>
 
@@ -85,7 +95,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="pilot-header">
                 <div class="pilot-avatar"><?= $initials ?></div>
                 <div>
-                    <p class="driver-status">ID PILOTE #<?= str_pad($client['id_client'], 4, '0', STR_PAD_LEFT) ?></p>
+                    <p class="driver-status">ID CLIENT #<?= str_pad($client['id_client'], 4, '0', STR_PAD_LEFT) ?></p>
                     <h1 class="font-title"><?= $fullName ?></h1>
                     <div class="pilot-badges">
                         <span>Login #<?= $client['id_login'] ?? 'N/A' ?></span>
@@ -122,27 +132,37 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </div>
             <table class="admin-table">
                 <thead>
-                    <tr><th>ID</th><th>Véhicule</th><th>Statut</th><th>Date</th></tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Véhicule</th>
+                        <th>Statut</th>
+                        <th>Date souhaitée</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($demandes)): ?>
                         <tr><td colspan="4" class="table-empty">Aucune demande enregistrée</td></tr>
                     <?php else: ?>
-                        <?php foreach ($demandes as $d): ?>
+                        <?php foreach ($demandes as $d): 
+                            $st = strtolower(trim($d['statut'] ?? ''));
+                            $estAcceptee  = ($st === 'accepte'  || $st === 'accepté');
+                            $estRefusee   = ($st === 'refuse'   || $st === 'refusé');
+                            $estTerminee  = ($st === 'termine'  || $st === 'terminé');
+                            
+                            if ($estTerminee) {
+                                $badgeClass = 'badge-termine'; $badgeLabel = 'Terminé';
+                            } elseif ($estAcceptee) {
+                                $badgeClass = 'badge-accepte'; $badgeLabel = 'Approuvé';
+                            } elseif ($estRefusee) {
+                                $badgeClass = 'badge-refuse';  $badgeLabel = 'Refusé';
+                            } else {
+                                $badgeClass = 'badge-attente'; $badgeLabel = 'En attente';
+                            }
+                        ?>
                         <tr>
                             <td class="font-mono">#<?= str_pad($d['id_demande'], 4, '0', STR_PAD_LEFT) ?></td>
                             <td><?= htmlspecialchars(($d['marque'] ?? '') . ' ' . ($d['modele'] ?? 'Véhicule inconnu')) ?></td>
-                            <td>
-                                <?php
-                                $statut = $d['statut'] ?? 'En attente';
-                                $cls = match(strtolower($statut)) {
-                                    'accepté','accepte','confirmé' => 'badge-termine',
-                                    'refusé','refuse','annulé' => 'badge-refuse',
-                                    default => 'badge-attente',
-                                };
-                                ?>
-                                <span class="badge <?= $cls ?>"><?= htmlspecialchars($statut) ?></span>
-                            </td>
+                            <td><span class="badge <?= $badgeClass ?>"><?= $badgeLabel ?></span></td>
                             <td class="font-mono"><?= htmlspecialchars($d['date_souhaitee'] ?? '—') ?></td>
                         </tr>
                         <?php endforeach; ?>

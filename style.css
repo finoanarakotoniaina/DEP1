@@ -2014,10 +2014,11 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
     color: var(--navy);
 }
 
-/* 28. Boutons accept / refuse / delete */
+/* 28. Boutons accept / refuse / delete / edit */
 .btn-accept,
 .btn-refuse,
-.btn-delete {
+.btn-delete,
+.btn-edit {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2052,6 +2053,18 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
     background: #DC2626;
     color: var(--white);
     border-color: #DC2626;
+}
+
+/* Bouton modifier la date (crayon) */
+.btn-edit {
+    background: rgba(86, 124, 141, 0.15);
+    border-color: rgba(86, 124, 141, 0.3);
+    color: var(--teal);
+}
+.btn-edit:hover {
+    background: var(--teal);
+    color: var(--white);
+    border-color: var(--teal);
 }
 
 .btn-delete {
