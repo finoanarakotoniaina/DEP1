@@ -7,7 +7,7 @@ requireAdmin();
 $message_status = "";
 
 // =========================================================
-// 1. AUTO-STATUTS (avant toute lecture)
+// 1. AUTO-STATUTS
 // =========================================================
 try {
     // Auto-REFUS : En attente + date passée
@@ -30,7 +30,7 @@ try {
 }
 
 // =========================================================
-// 2. ACTIONS POST (accepter / refuser / modifier date)
+// 2. ACTIONS POST (accepter / refuser / terminer / modifier date)
 // =========================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_demande'])) {
     $id = (int) $_POST['id_demande'];
@@ -40,24 +40,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
         if ($action === 'accepte') {
             $db->prepare("UPDATE demande_essai SET statut = 'accepte' WHERE id_demande = ?")
                ->execute([$id]);
-            $message_status = "✅ Demande approuvée.";
         } elseif ($action === 'refuse') {
             $db->prepare("UPDATE demande_essai SET statut = 'refuse' WHERE id_demande = ?")
                ->execute([$id]);
-            $message_status = "❌ Demande refusée.";
         } elseif ($action === 'termine') {
             $db->prepare("UPDATE demande_essai SET statut = 'termine' WHERE id_demande = ?")
                ->execute([$id]);
-            $message_status = "✅ Essai marqué comme terminé.";
         } elseif ($action === 'modifier_date' && !empty($_POST['nouvelle_date'])) {
             $nouvelle_date  = $_POST['nouvelle_date'];
             $nouvelle_heure = $_POST['nouvelle_heure'] ?? null;
             $db->prepare("UPDATE demande_essai SET date_souhaitee = ?, heure_souhaitee = ? WHERE id_demande = ?")
                ->execute([$nouvelle_date, $nouvelle_heure, $id]);
-            $message_status = "📅 Date modifiée avec succès.";
         }
 
-        header("Location: admin_demande.php?msg=" . urlencode($message_status));
+        header("Location: admin_demande.php");
         exit();
     } catch (PDOException $e) {
         $message_status = "Erreur : " . $e->getMessage();
@@ -65,17 +61,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
 }
 
 // =========================================================
-// 3. SAVE UI (onglet Interface)
+// 3. SAVE UI (onglet Interface) — avec les champs 7 à 12
 // =========================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
     try {
         $stmt_text = $db->prepare("UPDATE essai_content SET content = ? WHERE element_id = ?");
-        $stmt_text->execute([$_POST['txt_1'] ?? '', 1]);
-        $stmt_text->execute([$_POST['txt_2'] ?? '', 2]);
-        $stmt_text->execute([$_POST['txt_3'] ?? '', 3]);
-        $stmt_text->execute([$_POST['txt_4'] ?? '', 4]);
-        $stmt_text->execute([$_POST['txt_5'] ?? '', 5]);
 
+        // IDs existants (1 à 5)
+        $stmt_text->execute([$_POST['txt_1']  ?? '', 1]);
+        $stmt_text->execute([$_POST['txt_2']  ?? '', 2]);
+        $stmt_text->execute([$_POST['txt_3']  ?? '', 3]);
+        $stmt_text->execute([$_POST['txt_4']  ?? '', 4]);
+        $stmt_text->execute([$_POST['txt_5']  ?? '', 5]);
+
+        // Nouveaux IDs : configurateur (7 à 12)
+        $stmt_text->execute([$_POST['txt_7']  ?? '', 7]);
+        $stmt_text->execute([$_POST['txt_8']  ?? '', 8]);
+        $stmt_text->execute([$_POST['txt_9']  ?? '', 9]);
+        $stmt_text->execute([$_POST['txt_10'] ?? '', 10]);
+        $stmt_text->execute([$_POST['txt_11'] ?? '', 11]);
+        $stmt_text->execute([$_POST['txt_12'] ?? '', 12]);
+
+        // Image hero (ID 6)
         if (isset($_FILES['image_hero']) && $_FILES['image_hero']['error'] === 0) {
             $dir = '../image_url/essai/';
             if (!is_dir($dir)) mkdir($dir, 0777, true);
@@ -83,19 +90,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
             $new_file_name = 'hero_essai_' . time() . '.' . $extension;
             $destination = $dir . $new_file_name;
             if (move_uploaded_file($_FILES['image_hero']['tmp_name'], $destination)) {
-                $db->prepare("UPDATE essai_content SET content = ? WHERE element_id = 6")
-                   ->execute(['image_url/essai/' . $new_file_name]);
+                $stmt_text->execute(['image_url/essai/' . $new_file_name, 6]);
             }
         }
-        $message_status = "INTERFACE MISE À JOUR";
-    } catch (Exception $e) {
-        $message_status = "ERREUR : " . $e->getMessage();
-    }
-}
 
-// Message de redirection
-if (!empty($_GET['msg'])) {
-    $message_status = $_GET['msg'];
+        header("Location: admin_demande.php");
+        exit();
+    } catch (Exception $e) {
+        $message_status = "❌ ERREUR : " . $e->getMessage();
+    }
 }
 
 // =========================================================
@@ -112,7 +115,7 @@ try {
 
     // Compteurs
     $totalDemandes = $db->query("SELECT COUNT(*) FROM demande_essai")->fetchColumn();
-    $enCours       = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IS NULL OR statut = '' OR statut = 'en_attente' OR statut = 'en attente'")->fetchColumn();
+    $enCours       = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IS NULL OR statut = '' OR statut = 'en attente' OR statut = 'en_attente'")->fetchColumn();
     $acceptees     = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IN ('accepte','accepté')")->fetchColumn();
     $refusees      = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IN ('refuse','refusé')")->fetchColumn();
     $terminees     = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IN ('termine','terminé')")->fetchColumn();
@@ -261,7 +264,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             </td>
                             <td class="text-center">
                                 <?php if ($estEnAttente): ?>
-                                    <!-- Approuver / Refuser / Modifier date -->
                                     <form method="POST" style="display:inline">
                                         <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
                                         <button type="submit" name="action" value="accepte" class="btn-accept" title="Approuver">✓</button>
@@ -274,7 +276,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                         onclick="ouvrirModifDate(<?= $d['id_demande'] ?>, '<?= $d['date_souhaitee'] ?>', '<?= $d['heure_souhaitee'] ?? '' ?>')">✎</button>
 
                                 <?php elseif ($estAcceptee): ?>
-                                    <!-- Terminer / Refuser -->
                                     <form method="POST" style="display:inline">
                                         <input type="hidden" name="id_demande" value="<?= $d['id_demande'] ?>">
                                         <button type="submit" name="action" value="termine" class="btn-accept" title="Marquer terminé">✔</button>
@@ -310,6 +311,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         : ASSETS_URL . '/hero/' . $img_path;
                     ?>
                     <img id="preview_img" src="<?= $src_img ?>" class="live-preview-img">
+                    
                     <div class="live-fields">
                         <input type="text" name="txt_1" value="<?= htmlspecialchars($ui[1] ?? '') ?>" class="live-field">
                         <textarea name="txt_2" rows="1" class="live-field font-title"><?= htmlspecialchars($ui[2] ?? '') ?></textarea>
@@ -317,6 +319,42 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         <textarea name="txt_4" rows="3" class="live-field"><?= htmlspecialchars($ui[4] ?? '') ?></textarea>
                         <input type="text" name="txt_5" value="<?= htmlspecialchars($ui[5] ?? '') ?>" class="live-field">
                     </div>
+
+                    <!-- Nouveaux champs : Configurateur d'essai -->
+                    <div class="live-block" style="margin-top: 2rem;">
+                        <p class="spec-title" style="color: var(--navy); border-color: var(--border);">Configurateur d'essai</p>
+                        
+                        <input type="text" name="txt_7" 
+                               value="<?= htmlspecialchars($ui[7] ?? "Configurateur<br>d'essai") ?>" 
+                               class="live-field font-title" 
+                               placeholder="Titre configurateur (HTML autorisé)">
+                        
+                        <input type="text" name="txt_8" 
+                               value="<?= htmlspecialchars($ui[8] ?? 'Mes demandes en cours') ?>" 
+                               class="live-field font-title" 
+                               placeholder="Titre mes demandes">
+                        
+                        <input type="text" name="txt_9" 
+                               value="<?= htmlspecialchars($ui[9] ?? 'Aucune demande en cours pour le moment.') ?>" 
+                               class="live-field" 
+                               placeholder="Message vide">
+                        
+                        <input type="text" name="txt_10" 
+                               value="<?= htmlspecialchars($ui[10] ?? 'Confirmer la demande') ?>" 
+                               class="live-field" 
+                               placeholder="Texte bouton confirmer">
+                        
+                        <input type="text" name="txt_11" 
+                               value="<?= htmlspecialchars($ui[11] ?? 'Limite de 3 demandes atteinte') ?>" 
+                               class="live-field" 
+                               placeholder="Texte bouton limite">
+                        
+                        <input type="text" name="txt_12" 
+                               value="<?= htmlspecialchars($ui[12] ?? 'AUCUN MODÈLE SÉLECTIONNÉ') ?>" 
+                               class="live-field" 
+                               placeholder="Placeholder champ modèle">
+                    </div>
+
                     <label for="image_hero_file" class="upload-btn">Changer l'image
                         <input type="file" id="image_hero_file" name="image_hero" class="hidden" accept="image/*" onchange="previewHero(event)">
                     </label>
@@ -395,7 +433,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     </div>
                     <div class="form-group">
                         <label>Nouvelle heure (optionnel)</label>
-                        <input type="time" name="nouvelle_heure" id="md-heure" class="form-input">
+                        <input type="time" name="nouvelle_heure" id="md-heure" class="form-input" min="08:00" max="17:00">
                     </div>
                 </div>
                 <div class="modal-foot">

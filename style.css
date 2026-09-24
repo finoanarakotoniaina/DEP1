@@ -1232,6 +1232,182 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
     letter-spacing: 0.1em;
 }
 
+/* ============================================
+   Demandes du client (avec onglets)
+   ============================================ */
+.mes-demandes-title {
+    font-family: Georgia, serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin: 1.5rem 0 0.75rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--teal);
+    display: inline-block;
+}
+
+/* Onglets */
+.demandes-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.demande-tab {
+    position: relative;
+    padding: 0.6rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--gray);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.demande-tab:hover {
+    color: var(--navy);
+}
+
+.demande-tab.active {
+    color: var(--teal);
+    border-bottom-color: var(--teal);
+}
+
+.tab-count {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    background: var(--teal);
+    color: var(--white);
+    border-radius: 50px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1;
+}
+
+.demande-tab.active .tab-count {
+    background: var(--navy);
+}
+
+/* Panels (contenu de chaque onglet) */
+.demandes-panel {
+    display: none;
+}
+
+.demandes-panel.active {
+    display: block;
+}
+
+/* Liste des demandes */
+.mes-demandes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 500px;
+}
+
+.demande-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.demande-item:hover {
+    border-color: var(--teal);
+    box-shadow: var(--shadow-md);
+}
+
+.demande-model {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.demande-date {
+    font-size: 0.7rem;
+    color: var(--gray);
+    margin-top: 0.15rem;
+}
+
+.mes-demandes-empty {
+    font-size: 0.85rem;
+    color: var(--gray);
+    font-style: italic;
+    padding: 1rem 0;
+}
+
+/* Nouvelle demande créée — mise en évidence */
+.demande-new {
+    border-color: var(--teal);
+    background: rgba(86, 124, 141, 0.08);
+    box-shadow: 0 0 0 3px rgba(86, 124, 141, 0.15);
+    animation: pulseHighlight 2s ease-out;
+}
+
+@keyframes pulseHighlight {
+    0%   { box-shadow: 0 0 0 0 rgba(86, 124, 141, 0.5); }
+    70%  { box-shadow: 0 0 0 10px rgba(86, 124, 141, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(86, 124, 141, 0); }
+}
+
+/* ============================================
+   Champ Modèle + bouton "Choisir"
+   ============================================ */
+.modele-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.modele-input-wrapper .form-input {
+    flex: 1;
+}
+
+.btn-choose-modele {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--teal);
+    color: var(--white);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-choose-modele:hover {
+    background: var(--navy);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-choose-modele svg {
+    width: 18px;
+    height: 18px;
+}
+
 /* 19. Page connexion / inscription */
 .auth-page {
     display: grid;

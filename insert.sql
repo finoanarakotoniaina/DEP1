@@ -62,7 +62,13 @@ INSERT INTO essai_content (element_id, content) VALUES
 (3, 'D''ESSAI.'),
 (4, 'Prenez les commandes de l''exceptionnel. Choisissez votre modèle, définissez votre créneau et laissez-vous transporter par une ingénierie hors du commun.'),
 (5, 'RÉSERVER MON CRÉNEAU'),
-(6, 'photo_essai.jpeg');
+(6, 'photo_essai.jpeg'),
+(7,  'Configurateur<br>d''essai'),
+(8,  'Mes demandes en cours'),
+(9,  'Aucune demande en cours pour le moment.'),
+(10, 'Confirmer la demande'),
+(11, 'Limite de 3 demandes atteinte'),
+(12, 'AUCUN MODÈLE SÉLECTIONNÉ');
 
 
 INSERT INTO services_content (element_id, content) VALUES

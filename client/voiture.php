@@ -1,6 +1,9 @@
 <?php 
 require_once '../config.php'; 
 
+// Détecte si on vient de la page demande.php
+$from = $_GET['from'] ?? '';
+
 try {
     $query = "SELECT v.*, m.nom_marque 
               FROM voiture v 
@@ -54,8 +57,16 @@ try {
                 <button class="nav-arrow prev" onclick="scrollByThree('<?= $rowId ?>', -1)">❮</button>
 
                 <div class="story-row" id="<?= $rowId ?>">
-                    <?php foreach ($voitures as $car): ?>
-                    <a href="demande.php?id_v=<?= $car['id_voiture'] ?>&modele=<?= urlencode($car['modele']) ?>#booking" class="car-card">
+                    <?php foreach ($voitures as $car): 
+                        // Si on vient de demande.php, on retourne sur demande.php avec l'id + modèle
+                        // Sinon, on va sur demande.php normalement
+                        if ($from === 'demande') {
+                            $lien = "demande.php?id_v=" . $car['id_voiture'] . "&modele=" . urlencode($car['modele']) . "#booking";
+                        } else {
+                            $lien = "demande.php?id_v=" . $car['id_voiture'] . "&modele=" . urlencode($car['modele']) . "#booking";
+                        }
+                    ?>
+                    <a href="<?= $lien ?>" class="car-card" <?= $from === 'demande' ? 'data-from-demande="1"' : '' ?>>
                         <div class="hover-specs">
                             <p class="spec-title">Fiche Technique</p>
                             <div class="spec-item"><span>Année</span>       <span><?= $car['annee'] ?></span></div>
@@ -66,7 +77,7 @@ try {
                             <p class="spec-desc"><?= htmlspecialchars($car['description']) ?></p>
                             <?php endif; ?>
                             <p style="font-size:0.65rem; margin-top:1rem; text-align:center; opacity:0.7; font-style:italic;">
-                                Cliquez pour réserver un essai
+                                <?= $from === 'demande' ? 'Cliquez pour sélectionner ce modèle' : 'Cliquez pour réserver un essai' ?>
                             </p>
                         </div>
 
@@ -104,7 +115,6 @@ try {
                 const viewportWidth = window.innerWidth;
                 const specsWidth = 280;
 
-                // Si la fiche dépasse à droite → on la met à gauche
                 if (rect.right + specsWidth > viewportWidth) {
                     this.classList.add('specs-left');
                 } else {
@@ -122,7 +132,6 @@ try {
                 card.style.display = text.includes(q) ? '' : 'none';
             });
 
-            // Masque les marques sans voiture visible
             document.querySelectorAll('.brand-section').forEach(sec => {
                 const visible = sec.querySelectorAll('.car-card:not([style*="display: none"])').length;
                 sec.style.display = visible > 0 ? '' : 'none';
