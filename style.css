@@ -3200,4 +3200,152 @@ body.login-body {
         flex-wrap: wrap;
         gap: 1rem;
     }
+
+/* =========================================
+   STYLES POUR LA PAGE POLITIQUE DE CONFIDENTIALITÉ
+   ========================================= */
+
+/* Barre du haut */
+.privacy-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: var(--white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.logo-mini {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--navy);
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+.logo-mini span {
+    color: var(--teal);
+}
+
+.back-link-inline {
+    color: var(--navy);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.back-link-inline:hover {
+    color: var(--teal);
+}
+
+/* Conteneur principal */
+.privacy-main {
+    padding: 40px 20px;
+    background-color: var(--beige); /* Fond beige pour toute la page */
+    min-height: calc(100vh - 150px);
+}
+
+.privacy-content {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: var(--white);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    color: var(--navy);
+}
+
+/* Introduction */
+.privacy-intro {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.privacy-tag {
+    display: inline-block;
+    background-color: var(--teal);
+    color: var(--white);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.privacy-intro h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: var(--navy);
+}
+
+.privacy-subtitle {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
+/* Avertissement */
+.privacy-warning {
+    background-color: #fff3cd; /* Jaune clair */
+    border-left: 5px solid #ffc107;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 40px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Sections de texte */
+.privacy-section {
+    margin-bottom: 35px;
+}
+
+.privacy-section h2 {
+    font-size: 1.4rem;
+    color: var(--teal);
+    border-bottom: 2px solid var(--beige);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.privacy-section p {
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+.privacy-list {
+    list-style-type: disc;
+    padding-left: 25px;
+    margin-bottom: 15px;
+    line-height: 1.7;
+}
+
+.privacy-list li {
+    margin-bottom: 8px;
+}
+
+.muted {
+    color: #777;
+    font-style: italic;
+}
+
+code {
+    background-color: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+    color: #d63384;
+}
+
+/* Pied de page */
+.site-footer {
+    text-align: center;
+    padding: 20px;
+    background-color: var(--navy);
+    color: var(--white);
+    font-size: 0.9rem;
+}
 }
