@@ -1173,8 +1173,27 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
     gap: 0.3rem;
 }
 
-.modal-box .btn-block {
-    width: 100%;
+.modal-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    
+    /* MODIFICATIONS POUR LE FORMAT CARRÉ */
+    width: 300px;              /* Largeur réduite (était 340px) */
+    height: 300px;             /* Hauteur fixe pour créer un carré */
+    min-height: 300px;         /* Sécurité pour garder la hauteur */
+    
+    /* Centrage vertical du contenu */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    padding: 1.5rem;           /* Un peu moins de padding */
+    text-align: center;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    box-sizing: border-box;
 }
 
 /* ============================================================
@@ -3056,18 +3075,27 @@ body.admin-body .admin-main .car-card:has(.hover-specs:hover) {
 }
 .modal-bg.open { display: flex; }
 
+/* Modale compacte et carrée */
 .modal-box {
     background: var(--white);
     border: 1px solid var(--border);
-    border-radius: 22px;
-    width: 100%;
-    max-width: 620px;
-    max-height: 90vh;
-    overflow-y: auto;
+    border-radius: 14px;
+    
+    /* Format carré un peu plus large */
+    width: 320px;              /* <--- Augmenté de 280px à 320px */
+    height: 320px;             /* <--- Même hauteur pour garder le carré */
+    
+    padding: 2rem 1.5rem;      /* Un peu plus d'espace à l'intérieur */
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
     box-shadow: var(--shadow-lg);
-    padding: 0;
+    box-sizing: border-box;
 }
-
 .modal-head {
     padding: 24px 28px 16px;
     border-bottom: 1px solid var(--border);
