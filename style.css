@@ -1101,13 +1101,13 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
 }
 .modal-overlay.hidden { display: none; }
 
-/* Modale compacte et carrée */
+/* Modale compacte — plus haute que large */
 .modal-box {
     background: var(--white);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 2rem 2.25rem;
-    width: 340px;
+    padding: 3.5rem 1.75rem;      /* ➕ plus haute | ➖ côtés réduits */
+    width: 300px;                  /* ➖ largeur réduite (était 340px) */
     max-width: calc(100vw - 3rem);
     text-align: center;
     position: relative;
@@ -3042,7 +3042,7 @@ body.admin-body .admin-main .car-card:has(.hover-specs:hover) {
     text-transform: uppercase;
 }
 
-/* 36. Modal */
+/* 36. Modal (admin) */
 .modal-bg {
     position: fixed;
     inset: 0;
@@ -3056,7 +3056,7 @@ body.admin-body .admin-main .car-card:has(.hover-specs:hover) {
 }
 .modal-bg.open { display: flex; }
 
-.modal-box {
+.modal-box-admin {
     background: var(--white);
     border: 1px solid var(--border);
     border-radius: 22px;
@@ -3791,4 +3791,31 @@ code {
     background-color: var(--navy);
     color: var(--white);
     font-size: 0.9rem;
+}
+
+/* ============================================================
+   ADMIN — Header : onglets + barre de recherche intégrée
+   (scopé .admin-body → n'impacte PAS le client)
+   ============================================================ */
+.admin-body .admin-header .tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+}
+
+.admin-body .tabs .search-wrapper.tabs-search {
+    margin-left: auto;          /* pousse la recherche tout à droite */
+    max-width: 320px;
+    flex: 0 0 auto;
+    min-width: 220px;
+    padding-bottom: 6px;        /* aligne verticalement avec les onglets */
+}
+
+.admin-body .tabs .search-wrapper.tabs-search .search-bar {
+    padding: 0.5rem 1.1rem;
+    font-size: 0.75rem;
+    border-radius: 30px;
 }

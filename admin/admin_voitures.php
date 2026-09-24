@@ -233,8 +233,9 @@ try {
         <?php endforeach; ?>
 
         <!-- Modal ajout -->
+        <!-- Modal ajout -->
         <div class="modal-bg" id="add-modal">
-            <div class="modal-box">
+            <div class="modal-box-admin">
                 <div class="modal-head">
                     <h3 id="modal-title">AJOUTER UN VÉHICULE</h3>
                     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -288,7 +289,7 @@ try {
         </div>
 
         <div id="confirm-ov" class="modal-bg">
-            <div class="modal-box">
+            <div class="modal-box-admin">
                 <h4>ARCHIVER CE VÉHICULE ?</h4>
                 <p id="confirm-text"></p>
                 <div class="modal-foot">
