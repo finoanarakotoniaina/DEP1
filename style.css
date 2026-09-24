@@ -3334,7 +3334,7 @@ body.login-body {
     background: var(--beige);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 9px 14px;     /* <-- Réduit de 10px 15px à 9px 14px */
+    padding: 9px 14px;
     color: var(--navy);
     font-size: 0.85rem;
     width: 100%;
@@ -3348,19 +3348,50 @@ body.login-body {
     box-shadow: 0 0 0 3px rgba(86, 124, 141, 0.15);
 }
 
-.password-container { position: relative; width: 100%; }
+/* ============================================
+   Champ mot de passe + icône œil (admin login)
+   ============================================ */
+.password-container {
+    position: relative;
+    width: 100%;
+}
+
+.password-container input {
+    padding-right: 2.75rem;
+}
 
 .toggle-password {
     position: absolute;
-    right: 12px;
+    right: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    margin: 0;
+    width: auto;
+    height: auto;
     cursor: pointer;
     color: var(--gray);
-    font-size: 0.9rem;
-    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    line-height: 1;
+    box-shadow: none;
+    border-radius: 0;
 }
-.toggle-password:hover { color: var(--navy); }
+
+.toggle-password:hover {
+    color: var(--teal);
+    background: none;
+    transform: translateY(-50%);
+}
+
+.toggle-password svg {
+    width: 18px;
+    height: 18px;
+}
 
 .brand-verification { margin: 20px 0; }
 .verify-label {
@@ -3407,7 +3438,8 @@ body.login-body {
     box-shadow: 0 8px 15px rgba(86, 124, 141, 0.3);
 }
 
-.login-card button {
+/* ⚠️ Cible UNIQUEMENT le bouton submit — pas l'œil */
+.login-card button[type="submit"] {
     background-color: var(--teal);
     color: var(--white);
     border-radius: 12px;
@@ -3419,8 +3451,11 @@ body.login-body {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
 }
-.login-card button:hover {
+
+.login-card button[type="submit"]:hover {
     background-color: var(--navy);
     color: var(--white);
     transform: translateY(-2px);
