@@ -1051,6 +1051,7 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
     inset: 0;
     background: rgba(47, 65, 86, 0.7);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1059,26 +1060,85 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
 }
 .modal-overlay.hidden { display: none; }
 
+/* Modale compacte et carrée */
 .modal-box {
     background: var(--white);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 3rem;
-    max-width: 450px;
-    width: 100%;
+    border-radius: 14px;
+    padding: 2rem 2.25rem;
+    width: 340px;
+    max-width: calc(100vw - 3rem);
     text-align: center;
     position: relative;
     box-shadow: var(--shadow-lg);
+    box-sizing: border-box;
+}
+
+.modal-box h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.2rem;
+    color: var(--navy);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+
+.modal-desc {
+    font-size: 0.75rem;
+    color: var(--gray);
+    line-height: 1.5;
+    margin: 0 0 1.5rem 0;
+    font-style: italic;
+}
+
+/* Conteneur des boutons — largeur limitée pour ne pas toucher les bords */
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 220px;
+    margin: 0 auto;
 }
 
 .modal-close {
     position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    color: var(--gray);
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    background: var(--beige);
+    border: 1px solid var(--border);
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+    font-size: 10px;
+    line-height: 1;
+    transition: 0.2s;
 }
-.modal-close:hover { color: var(--navy); }
+.modal-close:hover {
+    background: var(--teal);
+    color: var(--white);
+    border-color: var(--teal);
+}
+
+/* Boutons de la modale — mini */
+.modal-box .btn {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    border-radius: 6px;
+    gap: 0.3rem;
+}
+
+.modal-box .btn-block {
+    width: 100%;
+}
+
+/* ============================================================
+   FORMULAIRE DE RÉSERVATION (section #booking)
+   ============================================================ */
 
 .booking-grid {
     display: grid;

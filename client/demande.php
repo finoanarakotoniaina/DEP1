@@ -67,8 +67,8 @@ $src_img = (strpos($img_hero, 'image_url/') === 0)
         <div class="modal-box">
             <span class="modal-close" onclick="closeModal()">✕</span>
             <h2>Accès Réservé</h2>
-            <p class="text-muted mt-1 mb-2">Veuillez vous identifier pour accéder au configurateur d'essai.</p>
-            <div class="flex flex-col gap-2 mt-2">
+            <p class="modal-desc">Veuillez vous identifier pour accéder au configurateur d'essai.</p>
+            <div class="modal-actions">
                 <a href="connexion.php?redirect=demande.php" class="btn btn-primary btn-block">Connexion</a>
                 <a href="inscription.php" class="btn btn-outline btn-block">Inscription</a>
             </div>
