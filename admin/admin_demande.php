@@ -36,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
     $idAdmin = (int) $_SESSION['admin_id'];
 
     try {
-        // Récupérer l'ancien état de la demande (pour les logs)
         $stmtOld = $db->prepare("SELECT date_souhaitee, heure_souhaitee, statut FROM demande_essai WHERE id_demande = ?");
         $stmtOld->execute([$id]);
         $old = $stmtOld->fetch(PDO::FETCH_ASSOC);
@@ -79,7 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
                ->execute([$nouvelle_date, $nouvelle_heure, $id]);
         }
 
-        // INSERTION DU LOG
         if ($action !== '') {
             $stmtLog = $db->prepare("
                 INSERT INTO demande_essai_logs 
@@ -97,7 +95,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
 }
 
 // =========================================================
-// 3. SAVE UI (onglet Interface)
+// 2.5. ACTIONS AJAX (live editor)
+// =========================================================
+
+// Sauvegarde d'un champ individuel (au blur)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_live') {
+    try {
+        $key = (int) $_POST['key'];
+        $content = $_POST['content'] ?? '';
+
+        $stmt = $db->prepare("UPDATE essai_content SET content = ? WHERE element_id = ?");
+        $stmt->execute([$content, $key]);
+
+        echo "OK";
+    } catch (Exception $e) {
+        echo "ERR";
+    }
+    exit;
+}
+
+// Upload de l'image hero
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'upload_hero') {
+    try {
+        if (isset($_FILES['image_hero']) && $_FILES['image_hero']['error'] === 0) {
+            $dir = '../image_url/essai/';
+            if (!is_dir($dir)) mkdir($dir, 0777, true);
+
+            $ext = pathinfo($_FILES['image_hero']['name'], PATHINFO_EXTENSION);
+            $new_file = 'hero_essai_' . time() . '.' . $ext;
+            $destination = $dir . $new_file;
+
+            if (move_uploaded_file($_FILES['image_hero']['tmp_name'], $destination)) {
+                $stmt = $db->prepare("UPDATE essai_content SET content = ? WHERE element_id = 6");
+                $stmt->execute(['image_url/essai/' . $new_file]);
+
+                echo json_encode([
+                    'success' => true,
+                    'path' => BASE_URL . '/image_url/essai/' . $new_file
+                ]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'move_uploaded_file failed']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'no file']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// =========================================================
+// 3. SAVE UI (ancien fallback)
 // =========================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
     try {
@@ -114,17 +163,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
         $stmt_text->execute([$_POST['txt_10'] ?? '', 10]);
         $stmt_text->execute([$_POST['txt_11'] ?? '', 11]);
         $stmt_text->execute([$_POST['txt_12'] ?? '', 12]);
-
-        if (isset($_FILES['image_hero']) && $_FILES['image_hero']['error'] === 0) {
-            $dir = '../image_url/essai/';
-            if (!is_dir($dir)) mkdir($dir, 0777, true);
-            $extension = pathinfo($_FILES['image_hero']['name'], PATHINFO_EXTENSION);
-            $new_file_name = 'hero_essai_' . time() . '.' . $extension;
-            $destination = $dir . $new_file_name;
-            if (move_uploaded_file($_FILES['image_hero']['tmp_name'], $destination)) {
-                $stmt_text->execute(['image_url/essai/' . $new_file_name, 6]);
-            }
-        }
 
         header("Location: admin_demande.php");
         exit();
@@ -163,9 +201,7 @@ try {
         ORDER BY de.id_demande DESC
     ")->fetchAll(PDO::FETCH_ASSOC);
 
-    // =============================
-    // LOGS (historique admin)
-    // =============================
+    // LOGS
     $logs = $db->query("
         SELECT 
             l.id_log,
@@ -189,6 +225,10 @@ try {
 } catch (PDOException $e) {
     die("Erreur : " . $e->getMessage());
 }
+
+$src_img = (strpos($img_path, 'image_url/') === 0) 
+    ? BASE_URL . '/' . $img_path 
+    : ASSETS_URL . '/hero/' . $img_path;
 
 $filtre = $_GET['filtre'] ?? '';
 $currentPage = basename($_SERVER['PHP_SELF']);
@@ -215,7 +255,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <div onclick="switchTab('radar')"   id="btn-radar"   class="tab-btn active">Demandes</div>
                 <div onclick="switchTab('history')" id="btn-history" class="tab-btn">Historique</div>
 
-                <!--  Barre de recherche poussée à droite -->
                 <div class="search-wrapper tabs-search">
                     <input type="text" id="globalSearch" class="search-bar"
                         placeholder="Rechercher">
@@ -227,7 +266,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="alert-message"><?= htmlspecialchars($message_status) ?></div>
         <?php endif; ?>
 
-        <!-- CARTES STATISTIQUES CLIQUABLES (uniquement onglet Demandes) -->
+        <!-- CARTES STATISTIQUES -->
         <div class="admin-stats stat-only-radar">
             <a href="?filtre=all" class="stat-card stat-card-link <?= ($filtre === 'all' || $filtre === '') ? 'stat-active' : '' ?>">
                 <p class="stat-label">Flux Total</p>
@@ -360,45 +399,156 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </div>
         </section>
 
-        <!-- ============ ONGLET INTERFACE ============ -->
+        <!-- ============ ONGLET INTERFACE (LIVE EDITOR) ============ -->
         <section id="tab-editor" class="tab-content hidden">
-            <form method="POST" enctype="multipart/form-data">
-                <div class="live-wrap">
-                    <?php 
-                    $src_img = (strpos($img_path, 'image_url/') === 0) 
-                        ? BASE_URL . '/' . $img_path 
-                        : ASSETS_URL . '/hero/' . $img_path;
-                    ?>
-                    <img id="preview_img" src="<?= $src_img ?>" class="live-preview-img">
+            
+            <!-- HERO -->
+            <div class="admin-live-hero">
+                <div class="admin-live-hero-bg">
+                    <img id="live_hero_img" src="<?= $src_img ?>" alt="Hero essai">
+                    <div class="admin-live-hero-overlay"></div>
                     
-                    <div class="live-fields">
-                        <input type="text" name="txt_1" value="<?= htmlspecialchars($ui[1] ?? '') ?>" class="live-field">
-                        <textarea name="txt_2" rows="1" class="live-field font-title"><?= htmlspecialchars($ui[2] ?? '') ?></textarea>
-                        <textarea name="txt_3" rows="1" class="live-field font-title title-accent"><?= htmlspecialchars($ui[3] ?? '') ?></textarea>
-                        <textarea name="txt_4" rows="3" class="live-field"><?= htmlspecialchars($ui[4] ?? '') ?></textarea>
-                        <input type="text" name="txt_5" value="<?= htmlspecialchars($ui[5] ?? '') ?>" class="live-field">
-                    </div>
-
-                    <div class="live-block" style="margin-top: 2rem;">
-                        <p class="spec-title" style="color: var(--navy); border-color: var(--border);">Configurateur d'essai</p>
-                        
-                        <input type="text" name="txt_7" value="<?= htmlspecialchars($ui[7] ?? "Configurateur<br>d'essai") ?>" class="live-field font-title" placeholder="Titre configurateur">
-                        <input type="text" name="txt_8" value="<?= htmlspecialchars($ui[8] ?? 'Mes demandes en cours') ?>" class="live-field font-title" placeholder="Titre mes demandes">
-                        <input type="text" name="txt_9" value="<?= htmlspecialchars($ui[9] ?? 'Aucune demande en cours pour le moment.') ?>" class="live-field" placeholder="Message vide">
-                        <input type="text" name="txt_10" value="<?= htmlspecialchars($ui[10] ?? 'Confirmer la demande') ?>" class="live-field" placeholder="Texte bouton confirmer">
-                        <input type="text" name="txt_11" value="<?= htmlspecialchars($ui[11] ?? 'Limite de 3 demandes atteinte') ?>" class="live-field" placeholder="Texte bouton limite">
-                        <input type="text" name="txt_12" value="<?= htmlspecialchars($ui[12] ?? 'AUCUN MODÈLE SÉLECTIONNÉ') ?>" class="live-field" placeholder="Placeholder champ modèle">
-                    </div>
-
-                    <label for="image_hero_file" class="upload-btn">Changer l'image
-                        <input type="file" id="image_hero_file" name="image_hero" class="hidden" accept="image/*" onchange="previewHero(event)">
+                    <label for="image_hero_file" class="admin-live-img-overlay" title="Changer l'image">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        <span>Changer l'image</span>
                     </label>
+                    <input type="file" id="image_hero_file" class="hidden" accept="image/*" onchange="uploadHeroImage(event)">
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" name="save_ui" class="btn btn-primary">Mettre à jour</button>
+                <div class="admin-live-hero-content">
+                    <p class="admin-live-subtitle edit-zone" 
+                       contenteditable="true" 
+                       data-key="1" 
+                       onblur="saveLiveField(this)"><?= htmlspecialchars($ui[1] ?? 'EXPÉRIENCE ULTIME') ?></p>
+
+                    <h1 class="admin-live-title">
+                        <span class="edit-zone" 
+                              contenteditable="true" 
+                              data-key="2" 
+                              onblur="saveLiveField(this)"><?= htmlspecialchars($ui[2] ?? 'DEMANDE') ?></span><br>
+                        <span class="edit-zone title-accent" 
+                              contenteditable="true" 
+                              data-key="3" 
+                              onblur="saveLiveField(this)"><?= htmlspecialchars($ui[3] ?? "D'ESSAI.") ?></span>
+                    </h1>
+
+                    <p class="admin-live-desc edit-zone" 
+                       contenteditable="true" 
+                       data-key="4" 
+                       onblur="saveLiveField(this)"><?= htmlspecialchars($ui[4] ?? '') ?></p>
+
+                    <span class="admin-live-btn edit-zone" 
+                          contenteditable="true" 
+                          data-key="5" 
+                          onblur="saveLiveField(this)"><?= htmlspecialchars($ui[5] ?? 'RÉSERVER MON CRÉNEAU') ?></span>
                 </div>
-            </form>
+            </div>
+
+            <!-- APERÇU CONFIGURATEUR -->
+            <div class="admin-live-booking">
+
+                <div class="admin-live-booking-left">
+                    <h2 class="admin-live-config-title">
+                        <span class="edit-zone" 
+                              contenteditable="true" 
+                              data-key="7" 
+                              onblur="saveLiveField(this)"><?= htmlspecialchars(strip_tags($ui[7] ?? "Configurateur d'essai")) ?></span>
+                    </h2>
+
+                    <h3 class="mes-demandes-title">
+                        <span class="edit-zone" 
+                              contenteditable="true" 
+                              data-key="8" 
+                              onblur="saveLiveField(this)"><?= htmlspecialchars($ui[8] ?? 'Mes demandes') ?></span>
+                    </h3>
+
+                    <div class="demandes-tabs" style="pointer-events: none; opacity: 0.6;">
+                        <button type="button" class="demande-tab active">En cours</button>
+                        <button type="button" class="demande-tab">Refusés</button>
+                        <button type="button" class="demande-tab">Terminés</button>
+                    </div>
+
+                    <p class="mes-demandes-empty">
+                        <span class="edit-zone" 
+                              contenteditable="true" 
+                              data-key="9" 
+                              onblur="saveLiveField(this)"><?= htmlspecialchars($ui[9] ?? 'Aucune demande en cours pour le moment.') ?></span>
+                    </p>
+                </div>
+
+                <div class="admin-live-booking-right">
+                    <div class="admin-live-form-preview">
+                        <div class="grid grid-2" style="gap:1.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Nom</label>
+                                <input type="text" value="EXEMPLE" readonly class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Prénom</label>
+                                <input type="text" value="Client" readonly class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" value="client@exemple.com" readonly class="form-input">
+                        </div>
+
+                        <div class="grid grid-2" style="gap:1.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Modèle</label>
+                                <div class="modele-input-wrapper">
+                                    <input type="text" value="" placeholder="<?= htmlspecialchars($ui[12] ?? 'AUCUN MODÈLE SÉLECTIONNÉ') ?>" readonly class="form-input input-crimson">
+                                    <span class="btn-choose-modele">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <span class="admin-live-hint">Placeholder : 
+                                    <span class="edit-zone" 
+                                          contenteditable="true" 
+                                          data-key="12" 
+                                          onblur="saveLiveField(this)"><?= htmlspecialchars($ui[12] ?? 'AUCUN MODÈLE SÉLECTIONNÉ') ?></span>
+                                </span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Téléphone</label>
+                                <input type="tel" value="0000000000" readonly class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-2" style="gap:1.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Date préférée</label>
+                                <input type="date" readonly class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Créneau (08h-17h)</label>
+                                <input type="time" readonly class="form-input">
+                            </div>
+                        </div>
+
+                        <span class="btn btn-primary btn-block edit-zone" 
+                              contenteditable="true" 
+                              data-key="10" 
+                              onblur="saveLiveField(this)"
+                              style="margin-top:1rem;"><?= htmlspecialchars($ui[10] ?? 'Confirmer la demande') ?></span>
+
+                        <span class="admin-live-hint" style="margin-top:0.75rem;">Bouton limite : 
+                            <span class="edit-zone" 
+                                  contenteditable="true" 
+                                  data-key="11" 
+                                  onblur="saveLiveField(this)"><?= htmlspecialchars($ui[11] ?? 'Limite de 3 demandes atteinte') ?></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
         <!-- ============ ONGLET HISTORIQUE ============ -->
@@ -508,23 +658,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('btn-' + tabId).classList.add('active');
 
-            // Cacher les cartes de stats sur Interface et Historique
             const statsBox = document.querySelector('.stat-only-radar');
             if (statsBox) {
-                if (tabId === 'radar') {
-                    statsBox.classList.remove('hidden');
-                } else {
-                    statsBox.classList.add('hidden');
-                }
+                if (tabId === 'radar') statsBox.classList.remove('hidden');
+                else statsBox.classList.add('hidden');
             }
-        }
-
-        function previewHero(event) {
-            const reader = new FileReader();
-            reader.onload = function(){
-                document.getElementById('preview_img').src = reader.result;
-            };
-            reader.readAsDataURL(event.target.files[0]);
         }
 
         function ouvrirModifDate(id, date, heure) {
@@ -539,8 +677,54 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         }
 
         // =============================
+        // SAUVEGARDE LIVE PAR CHAMP
+        // =============================
+        function saveLiveField(el) {
+            const key = el.dataset.key;
+            const content = el.innerText.trim();
+
+            if (!content) return;
+
+            const fd = new FormData();
+            fd.append('action', 'save_live');
+            fd.append('key', key);
+            fd.append('content', content);
+
+            fetch('admin_demande.php', { method: 'POST', body: fd })
+            .then(r => r.text())
+            .then(data => {
+                if (data.trim() === 'OK') {
+                    el.classList.add('live-saved');
+                    setTimeout(() => el.classList.remove('live-saved'), 800);
+                }
+            })
+            .catch(() => {});
+        }
+
+        // =============================
+        // UPLOAD IMAGE HERO
+        // =============================
+        function uploadHeroImage(event) {
+            if (!event.target.files.length) return;
+
+            const fd = new FormData();
+            fd.append('action', 'upload_hero');
+            fd.append('image_hero', event.target.files[0]);
+
+            fetch('admin_demande.php', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('live_hero_img').src = data.path + '?t=' + Date.now();
+                } else {
+                    alert('Erreur : ' + (data.message || 'upload'));
+                }
+            })
+            .catch(() => alert('Erreur de connexion'));
+        }
+
+        // =============================
         // RECHERCHE LIVE GLOBALE
-        // Filtre : onglet Demandes + onglet Historique
         // =============================
         document.getElementById('globalSearch').addEventListener('input', function(e) {
             const q = e.target.value.toLowerCase().trim();
@@ -548,15 +732,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             const rowsDemandes = document.querySelectorAll('#table-demandes tbody tr');
             rowsDemandes.forEach(row => {
                 if (row.querySelector('.table-empty')) return;
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(q) ? '' : 'none';
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
             });
 
             const rowsHisto = document.querySelectorAll('#table-historique tbody tr');
             rowsHisto.forEach(row => {
                 if (row.querySelector('.table-empty')) return;
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(q) ? '' : 'none';
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
             });
         });
     </script>
