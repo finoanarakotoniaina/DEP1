@@ -109,14 +109,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="info-field">
                 <p class="stat-label">Adresse Email</p>
                 <p class="font-mono"><?= htmlspecialchars($client['email']) ?></p>
-                <a href="mailto:<?= htmlspecialchars($client['email']) ?>" class="link-crimson">Envoyer un email →</a>
             </div>
             <div class="info-field">
                 <p class="stat-label">Téléphone</p>
                 <p class="font-mono"><?= htmlspecialchars($client['telephone'] ?? 'Non renseigné') ?></p>
-                <?php if (!empty($client['telephone'])): ?>
-                <a href="tel:<?= htmlspecialchars($client['telephone']) ?>" class="link-crimson">Appeler →</a>
-                <?php endif; ?>
             </div>
             <div class="info-field">
                 <p class="stat-label">Statut Compte</p>

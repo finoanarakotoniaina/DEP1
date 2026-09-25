@@ -211,14 +211,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <h2 class="font-title">GESTION DES <span class="title-accent">DEMANDES</span></h2>
             </div>
             <div class="tabs">
-                <div onclick="switchTab('radar')"   id="btn-radar"   class="tab-btn active">Demandes</div>
                 <div onclick="switchTab('editor')"  id="btn-editor"  class="tab-btn">Interface</div>
+                <div onclick="switchTab('radar')"   id="btn-radar"   class="tab-btn active">Demandes</div>
                 <div onclick="switchTab('history')" id="btn-history" class="tab-btn">Historique</div>
 
                 <!--  Barre de recherche poussée à droite -->
                 <div class="search-wrapper tabs-search">
                     <input type="text" id="globalSearch" class="search-bar"
-                           placeholder="Rechercher">
+                        placeholder="Rechercher">
                 </div>
             </div>
         </header>

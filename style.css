@@ -3256,18 +3256,6 @@ body.admin-body .admin-main .car-card:has(.hover-specs:hover) {
     color: var(--navy);
 }
 
-.link-crimson {
-    display: block;
-    font-size: 9px;
-    color: var(--teal);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-top: 0.75rem;
-    transition: 0.2s;
-}
-.link-crimson:hover { text-decoration: underline; color: var(--navy); }
-
 .message-item {
     padding: 1.5rem;
     border-bottom: 1px solid var(--border);
@@ -3861,4 +3849,131 @@ code {
     content: "Cliquez pour écrire...";
     color: rgba(47, 65, 86, 0.4);
     font-style: italic;
+}
+
+/* ============================================================
+   ADMIN — Liste des clients (vue Clients inscrits)
+   ============================================================ */
+.clients-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.client-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: 0.3s ease;
+}
+
+.client-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--teal);
+    box-shadow: var(--shadow-md);
+}
+
+.client-card-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--navy);
+    border: 2px solid var(--teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syncopate', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--white);
+    flex-shrink: 0;
+    letter-spacing: 1px;
+}
+
+.client-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.client-card-name {
+    font-family: Georgia, serif;
+    font-size: 1rem;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.client-card-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 12px;
+    color: var(--gray);
+}
+
+.client-card-label {
+    font-family: 'Syncopate', Georgia, serif;
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--teal);
+    min-width: 70px;
+    flex-shrink: 0;
+}
+
+.client-card-value {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--navy);
+    word-break: break-all;
+}
+
+.client-card-action {
+    flex-shrink: 0;
+}
+
+.client-card-action .btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .client-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .client-card-action {
+        width: 100%;
+    }
+
+    .client-card-action .btn {
+        width: 100%;
+    }
+
+    .client-card-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.15rem;
+    }
+
+    .client-card-label {
+        min-width: auto;
+    }
 }
