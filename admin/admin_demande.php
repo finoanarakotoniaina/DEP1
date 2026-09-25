@@ -10,7 +10,6 @@ $message_status = "";
 // 1. AUTO-STATUTS
 // =========================================================
 try {
-    // Auto-REFUS : En attente + date passée
     $db->query("
         UPDATE demande_essai 
         SET statut = 'refuse' 
@@ -18,7 +17,6 @@ try {
           AND CONCAT(date_souhaitee, ' ', COALESCE(heure_souhaitee, '23:59:59')) < NOW()
     ");
 
-    // Auto-TERMINÉ : Approuvé + date passée
     $db->query("
         UPDATE demande_essai 
         SET statut = 'termine' 
@@ -33,24 +31,62 @@ try {
 // 2. ACTIONS POST (accepter / refuser / terminer / modifier date)
 // =========================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_demande'])) {
-    $id = (int) $_POST['id_demande'];
-    $action = $_POST['action'];
+    $id      = (int) $_POST['id_demande'];
+    $action  = $_POST['action'];
+    $idAdmin = (int) $_SESSION['admin_id'];
 
     try {
+        // Récupérer l'ancien état de la demande (pour les logs)
+        $stmtOld = $db->prepare("SELECT date_souhaitee, heure_souhaitee, statut FROM demande_essai WHERE id_demande = ?");
+        $stmtOld->execute([$id]);
+        $old = $stmtOld->fetch(PDO::FETCH_ASSOC);
+
+        $ancienneValeur = null;
+        $nouvelleValeur = null;
+
         if ($action === 'accepte') {
-            $db->prepare("UPDATE demande_essai SET statut = 'accepte' WHERE id_demande = ?")
-               ->execute([$id]);
+            $db->prepare("UPDATE demande_essai SET statut = 'accepte' WHERE id_demande = ?")->execute([$id]);
+            $ancienneValeur = $old['statut'] ?? null;
+            $nouvelleValeur = 'accepte';
+
         } elseif ($action === 'refuse') {
-            $db->prepare("UPDATE demande_essai SET statut = 'refuse' WHERE id_demande = ?")
-               ->execute([$id]);
+            $db->prepare("UPDATE demande_essai SET statut = 'refuse' WHERE id_demande = ?")->execute([$id]);
+            $ancienneValeur = $old['statut'] ?? null;
+            $nouvelleValeur = 'refuse';
+
         } elseif ($action === 'termine') {
-            $db->prepare("UPDATE demande_essai SET statut = 'termine' WHERE id_demande = ?")
-               ->execute([$id]);
+            $db->prepare("UPDATE demande_essai SET statut = 'termine' WHERE id_demande = ?")->execute([$id]);
+            $ancienneValeur = $old['statut'] ?? null;
+            $nouvelleValeur = 'termine';
+
         } elseif ($action === 'modifier_date' && !empty($_POST['nouvelle_date'])) {
             $nouvelle_date  = $_POST['nouvelle_date'];
             $nouvelle_heure = $_POST['nouvelle_heure'] ?? null;
+
+            $oldDate  = $old['date_souhaitee'] ?? null;
+            $oldHeure = !empty($old['heure_souhaitee']) ? substr($old['heure_souhaitee'], 0, 5) : '';
+
+            if ($oldDate) {
+                $ancienneValeur = date('d/m/Y', strtotime($oldDate)) . ($oldHeure ? ' ' . $oldHeure : '');
+            } else {
+                $ancienneValeur = '—';
+            }
+
+            $newHeure = !empty($nouvelle_heure) ? substr($nouvelle_heure, 0, 5) : '';
+            $nouvelleValeur = date('d/m/Y', strtotime($nouvelle_date)) . ($newHeure ? ' ' . $newHeure : '');
+
             $db->prepare("UPDATE demande_essai SET date_souhaitee = ?, heure_souhaitee = ? WHERE id_demande = ?")
                ->execute([$nouvelle_date, $nouvelle_heure, $id]);
+        }
+
+        // INSERTION DU LOG
+        if ($action !== '') {
+            $stmtLog = $db->prepare("
+                INSERT INTO demande_essai_logs 
+                    (id_demande, id_admin, action, ancienne_valeur, nouvelle_valeur, date_action)
+                VALUES (?, ?, ?, ?, ?, NOW())
+            ");
+            $stmtLog->execute([$id, $idAdmin, $action, $ancienneValeur, $nouvelleValeur]);
         }
 
         header("Location: admin_demande.php");
@@ -61,20 +97,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
 }
 
 // =========================================================
-// 3. SAVE UI (onglet Interface) — avec les champs 7 à 12
+// 3. SAVE UI (onglet Interface)
 // =========================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
     try {
         $stmt_text = $db->prepare("UPDATE essai_content SET content = ? WHERE element_id = ?");
 
-        // IDs existants (1 à 5)
         $stmt_text->execute([$_POST['txt_1']  ?? '', 1]);
         $stmt_text->execute([$_POST['txt_2']  ?? '', 2]);
         $stmt_text->execute([$_POST['txt_3']  ?? '', 3]);
         $stmt_text->execute([$_POST['txt_4']  ?? '', 4]);
         $stmt_text->execute([$_POST['txt_5']  ?? '', 5]);
-
-        // Nouveaux IDs : configurateur (7 à 12)
         $stmt_text->execute([$_POST['txt_7']  ?? '', 7]);
         $stmt_text->execute([$_POST['txt_8']  ?? '', 8]);
         $stmt_text->execute([$_POST['txt_9']  ?? '', 9]);
@@ -82,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
         $stmt_text->execute([$_POST['txt_11'] ?? '', 11]);
         $stmt_text->execute([$_POST['txt_12'] ?? '', 12]);
 
-        // Image hero (ID 6)
         if (isset($_FILES['image_hero']) && $_FILES['image_hero']['error'] === 0) {
             $dir = '../image_url/essai/';
             if (!is_dir($dir)) mkdir($dir, 0777, true);
@@ -131,6 +163,29 @@ try {
         ORDER BY de.id_demande DESC
     ")->fetchAll(PDO::FETCH_ASSOC);
 
+    // =============================
+    // LOGS (historique admin)
+    // =============================
+    $logs = $db->query("
+        SELECT 
+            l.id_log,
+            l.id_demande,
+            l.action,
+            l.ancienne_valeur,
+            l.nouvelle_valeur,
+            l.date_action,
+            CONCAT(c.prenom, ' ', c.nom) AS client_nom,
+            v.modele AS vehicule,
+            CONCAT(a.prenom, ' ', a.nom) AS admin_nom,
+            l.id_admin
+        FROM demande_essai_logs l
+        LEFT JOIN demande_essai d ON l.id_demande = d.id_demande
+        LEFT JOIN client c        ON d.id_client  = c.id_client
+        LEFT JOIN voiture v       ON d.id_voiture = v.id_voiture
+        LEFT JOIN admin a         ON l.id_admin   = a.id_admin
+        ORDER BY l.date_action DESC
+    ")->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     die("Erreur : " . $e->getMessage());
 }
@@ -156,9 +211,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <h2 class="font-title">GESTION DES <span class="title-accent">DEMANDES</span></h2>
             </div>
             <div class="tabs">
-                <div onclick="switchTab('radar')" id="btn-radar" class="tab-btn active">Demandes</div>
-                <div onclick="switchTab('editor')" id="btn-editor" class="tab-btn">Interface</div>
+                <div onclick="switchTab('radar')"   id="btn-radar"   class="tab-btn active">Demandes</div>
+                <div onclick="switchTab('editor')"  id="btn-editor"  class="tab-btn">Interface</div>
                 <div onclick="switchTab('history')" id="btn-history" class="tab-btn">Historique</div>
+
+                <!--  Barre de recherche poussée à droite -->
+                <div class="search-wrapper tabs-search">
+                    <input type="text" id="globalSearch" class="search-bar"
+                           placeholder="Rechercher">
+                </div>
             </div>
         </header>
 
@@ -166,8 +227,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="alert-message"><?= htmlspecialchars($message_status) ?></div>
         <?php endif; ?>
 
-        <!-- CARTES STATISTIQUES CLIQUABLES -->
-        <div class="admin-stats">
+        <!-- CARTES STATISTIQUES CLIQUABLES (uniquement onglet Demandes) -->
+        <div class="admin-stats stat-only-radar">
             <a href="?filtre=all" class="stat-card stat-card-link <?= ($filtre === 'all' || $filtre === '') ? 'stat-active' : '' ?>">
                 <p class="stat-label">Flux Total</p>
                 <h3 class="stat-value"><?= $totalDemandes ?></h3>
@@ -205,7 +266,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <?php endif; ?>
 
             <div class="table-container">
-                <table class="admin-table">
+                <table class="admin-table" id="table-demandes">
                     <thead>
                         <tr>
                             <th>Client</th>
@@ -227,7 +288,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             $estRefusee   = ($statut === 'refuse' || $statut === 'refusé');
                             $estTerminee  = ($statut === 'termine' || $statut === 'terminé');
                             
-                            // Filtres
                             if ($filtre === 'accepte' && !$estAcceptee) continue;
                             if ($filtre === 'refuse'  && !$estRefusee)  continue;
                             if ($filtre === 'attente' && !$estEnAttente) continue;
@@ -235,7 +295,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             
                             $hasActive = true;
 
-                            // Badge
                             if ($estTerminee) {
                                 $badgeClass = 'badge-termine'; $badgeLabel = 'Terminé';
                             } elseif ($estAcceptee) {
@@ -320,39 +379,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         <input type="text" name="txt_5" value="<?= htmlspecialchars($ui[5] ?? '') ?>" class="live-field">
                     </div>
 
-                    <!-- Nouveaux champs : Configurateur d'essai -->
                     <div class="live-block" style="margin-top: 2rem;">
                         <p class="spec-title" style="color: var(--navy); border-color: var(--border);">Configurateur d'essai</p>
                         
-                        <input type="text" name="txt_7" 
-                               value="<?= htmlspecialchars($ui[7] ?? "Configurateur<br>d'essai") ?>" 
-                               class="live-field font-title" 
-                               placeholder="Titre configurateur (HTML autorisé)">
-                        
-                        <input type="text" name="txt_8" 
-                               value="<?= htmlspecialchars($ui[8] ?? 'Mes demandes en cours') ?>" 
-                               class="live-field font-title" 
-                               placeholder="Titre mes demandes">
-                        
-                        <input type="text" name="txt_9" 
-                               value="<?= htmlspecialchars($ui[9] ?? 'Aucune demande en cours pour le moment.') ?>" 
-                               class="live-field" 
-                               placeholder="Message vide">
-                        
-                        <input type="text" name="txt_10" 
-                               value="<?= htmlspecialchars($ui[10] ?? 'Confirmer la demande') ?>" 
-                               class="live-field" 
-                               placeholder="Texte bouton confirmer">
-                        
-                        <input type="text" name="txt_11" 
-                               value="<?= htmlspecialchars($ui[11] ?? 'Limite de 3 demandes atteinte') ?>" 
-                               class="live-field" 
-                               placeholder="Texte bouton limite">
-                        
-                        <input type="text" name="txt_12" 
-                               value="<?= htmlspecialchars($ui[12] ?? 'AUCUN MODÈLE SÉLECTIONNÉ') ?>" 
-                               class="live-field" 
-                               placeholder="Placeholder champ modèle">
+                        <input type="text" name="txt_7" value="<?= htmlspecialchars($ui[7] ?? "Configurateur<br>d'essai") ?>" class="live-field font-title" placeholder="Titre configurateur">
+                        <input type="text" name="txt_8" value="<?= htmlspecialchars($ui[8] ?? 'Mes demandes en cours') ?>" class="live-field font-title" placeholder="Titre mes demandes">
+                        <input type="text" name="txt_9" value="<?= htmlspecialchars($ui[9] ?? 'Aucune demande en cours pour le moment.') ?>" class="live-field" placeholder="Message vide">
+                        <input type="text" name="txt_10" value="<?= htmlspecialchars($ui[10] ?? 'Confirmer la demande') ?>" class="live-field" placeholder="Texte bouton confirmer">
+                        <input type="text" name="txt_11" value="<?= htmlspecialchars($ui[11] ?? 'Limite de 3 demandes atteinte') ?>" class="live-field" placeholder="Texte bouton limite">
+                        <input type="text" name="txt_12" value="<?= htmlspecialchars($ui[12] ?? 'AUCUN MODÈLE SÉLECTIONNÉ') ?>" class="live-field" placeholder="Placeholder champ modèle">
                     </div>
 
                     <label for="image_hero_file" class="upload-btn">Changer l'image
@@ -368,47 +403,69 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
         <!-- ============ ONGLET HISTORIQUE ============ -->
         <section id="tab-history" class="tab-content hidden">
+            <h3 class="section-title">Journal des actions admin (<?= count($logs) ?>)</h3>
+
             <div class="table-container">
-                <table class="admin-table">
+                <table class="admin-table" id="table-historique">
                     <thead>
                         <tr>
-                            <th>Client</th><th>Modèle</th><th>Téléphone / Email</th>
-                            <th>Date Session</th><th class="text-center">État Final</th>
+                            <th>Admin</th>
+                            <th>Client</th>
+                            <th>Véhicule</th>
+                            <th class="text-center">Action</th>
+                            <th>Détail</th>
+                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
-                        $hasArchive = false;
-                        foreach($demandes as $row): 
-                            $st = strtolower(trim($row['statut'] ?? ''));
-                            $estRefusee  = ($st === 'refuse'  || $st === 'refusé');
-                            $estTerminee = ($st === 'termine' || $st === 'terminé');
-                            
-                            if (!$estRefusee && !$estTerminee) continue;
-                            $hasArchive = true;
-                            
-                            if ($estTerminee) {
-                                $badgeClass = "badge-termine"; $badgeLabel = "Terminé";
-                            } else {
-                                $badgeClass = "badge-refuse";  $badgeLabel = "Refusé";
-                            }
-                        ?>
-                        <tr>
-                            <td>
-                                <p class="driver-name"><?= htmlspecialchars($row['nom_complet'] ?? 'Anonyme') ?></p>
-                                <p class="driver-status">#<?= $row['id_demande'] ?></p>
-                            </td>
-                            <td><?= htmlspecialchars($row['modele'] ?? '—') ?></td>
-                            <td>
-                                <p><?= htmlspecialchars($row['telephone'] ?? '—') ?></p>
-                                <p class="driver-email"><?= htmlspecialchars($row['email'] ?? '—') ?></p>
-                            </td>
-                            <td><?= $row['date_souhaitee'] ? date('d/m/Y', strtotime($row['date_souhaitee'])) : '—' ?></td>
-                            <td class="text-center"><span class="badge <?= $badgeClass ?>"><?= $badgeLabel ?></span></td>
-                        </tr>
-                        <?php endforeach; ?>
-                        <?php if(!$hasArchive): ?>
-                            <tr><td colspan="5" class="table-empty">Aucun historique enregistré.</td></tr>
+                        <?php if (empty($logs)): ?>
+                            <tr><td colspan="6" class="table-empty">Aucune action enregistrée.</td></tr>
+                        <?php else: ?>
+                            <?php foreach($logs as $log): 
+                                $act = strtolower($log['action']);
+
+                                if ($act === 'accepte') {
+                                    $badgeClass = 'badge-accepte'; $badgeLabel = '✓ Approuvé';
+                                } elseif ($act === 'refuse') {
+                                    $badgeClass = 'badge-refuse';  $badgeLabel = '✕ Refusé';
+                                } elseif ($act === 'termine') {
+                                    $badgeClass = 'badge-termine'; $badgeLabel = '✔ Terminé';
+                                } elseif ($act === 'modifier_date') {
+                                    $badgeClass = 'badge-attente'; $badgeLabel = '✎ Date modifiée';
+                                } else {
+                                    $badgeClass = 'badge-attente'; $badgeLabel = htmlspecialchars($log['action']);
+                                }
+                            ?>
+                            <tr>
+                                <td>
+                                    <p class="driver-name"><?= htmlspecialchars($log['admin_nom'] ?? 'Admin supprimé') ?></p>
+                                    <p class="driver-status">#<?= $log['id_admin'] ?? '—' ?></p>
+                                </td>
+                                <td>
+                                    <p class="driver-name"><?= htmlspecialchars($log['client_nom'] ?? 'Client supprimé') ?></p>
+                                    <p class="driver-status">Demande #<?= $log['id_demande'] ?></p>
+                                </td>
+                                <td><span class="car-model"><?= htmlspecialchars($log['vehicule'] ?? '—') ?></span></td>
+                                <td class="text-center">
+                                    <span class="badge <?= $badgeClass ?>"><?= $badgeLabel ?></span>
+                                </td>
+                                <td>
+                                    <?php if ($act === 'modifier_date'): ?>
+                                        <p class="driver-status">
+                                            <?= htmlspecialchars($log['ancienne_valeur'] ?? '—') ?>
+                                            →
+                                            <?= htmlspecialchars($log['nouvelle_valeur'] ?? '—') ?>
+                                        </p>
+                                    <?php else: ?>
+                                        <span class="text-muted">—</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <p><?= $log['date_action'] ? date('d/m/Y', strtotime($log['date_action'])) : '—' ?></p>
+                                    <p class="driver-status"><?= $log['date_action'] ? date('H:i', strtotime($log['date_action'])) : '' ?></p>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -418,7 +475,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     <!-- MODALE : Modifier la date -->
     <div id="modal-date" class="modal-bg">
-        <div class="modal-box" style="max-width: 420px;">
+        <div class="modal-box-admin" style="max-width: 420px;">
             <div class="modal-head">
                 <h3>MODIFIER LA DATE</h3>
                 <button class="modal-close" onclick="fermerModifDate()">✕</button>
@@ -450,6 +507,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('btn-' + tabId).classList.add('active');
+
+            // Cacher les cartes de stats sur Interface et Historique
+            const statsBox = document.querySelector('.stat-only-radar');
+            if (statsBox) {
+                if (tabId === 'radar') {
+                    statsBox.classList.remove('hidden');
+                } else {
+                    statsBox.classList.add('hidden');
+                }
+            }
         }
 
         function previewHero(event) {
@@ -470,6 +537,28 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         function fermerModifDate() {
             document.getElementById('modal-date').classList.remove('open');
         }
+
+        // =============================
+        // RECHERCHE LIVE GLOBALE
+        // Filtre : onglet Demandes + onglet Historique
+        // =============================
+        document.getElementById('globalSearch').addEventListener('input', function(e) {
+            const q = e.target.value.toLowerCase().trim();
+
+            const rowsDemandes = document.querySelectorAll('#table-demandes tbody tr');
+            rowsDemandes.forEach(row => {
+                if (row.querySelector('.table-empty')) return;
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(q) ? '' : 'none';
+            });
+
+            const rowsHisto = document.querySelectorAll('#table-historique tbody tr');
+            rowsHisto.forEach(row => {
+                if (row.querySelector('.table-empty')) return;
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(q) ? '' : 'none';
+            });
+        });
     </script>
 </body>
 </html>

@@ -178,7 +178,7 @@ if (isset($_POST['inscription'])) {
 
                     <div class="auth-actions">
                         <button type="submit" name="inscription" class="btn btn-primary btn-block">
-                            Créer un profil membre
+                            Créer un compte
                         </button>
                         <a href="connexion.php" class="auth-alt-link">
                             Déjà membre ? Se connecter

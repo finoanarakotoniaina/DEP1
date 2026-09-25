@@ -119,3 +119,21 @@ CREATE TABLE contact_content (
     element_id  VARCHAR(50) PRIMARY KEY,
     content     TEXT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- logs des demandes 
+CREATE TABLE demande_essai_logs (
+    id_log             INT AUTO_INCREMENT PRIMARY KEY,
+    id_demande         INT NOT NULL,
+    id_admin           INT NOT NULL,
+    action             VARCHAR(50) NOT NULL,           -- 'accepte', 'refuse', 'termine', 'modifie_date'
+    ancienne_valeur    VARCHAR(255) DEFAULT NULL,      -- ex: "2026-10-08 12:30"
+    nouvelle_valeur    VARCHAR(255) DEFAULT NULL,      -- ex: "2026-10-15 14:00"
+    date_action        DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_demande) REFERENCES demande_essai(id_demande)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (id_admin) REFERENCES admin(id_admin)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
