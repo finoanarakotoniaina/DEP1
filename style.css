@@ -4271,4 +4271,116 @@ code {
         padding: 2rem;
         min-height: 400px;
     }
+
+    /* ============================================================
+   ADMIN — Page Contact (éditeur live carte + aperçu)
+   ============================================================ */
+
+/* Bloc carte dans le live editor */
+.map-editor-block {
+    margin-top: 2rem;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.map-editor-block .contact-info-label {
+    margin-bottom: 0.25rem;
+}
+
+/* Champ URL de la carte */
+.map-url-field {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0;
+    min-height: 60px;
+    resize: vertical;
+}
+
+/* Bouton "Générer la carte depuis l'adresse" */
+.btn-map-auto {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: transparent;
+    border: 1px solid var(--teal);
+    color: var(--teal);
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-map-auto:hover {
+    background: var(--teal);
+    color: var(--white);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(86, 124, 141, 0.3);
+}
+
+/* Aperçu de la carte */
+.map-preview-wrap {
+    margin-top: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--beige);
+    min-height: 280px;
+    position: relative;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.map-preview-wrap:hover {
+    border-color: var(--teal);
+    box-shadow: var(--shadow-md);
+}
+
+.map-preview-wrap iframe {
+    width: 100%;
+    height: 300px;
+    border: 0;
+    display: block;
+}
+
+/* État vide */
+.map-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    padding: 2rem;
+    text-align: center;
+    color: var(--gray);
+    font-family: 'Syncopate', Georgia, serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .map-preview-wrap iframe {
+        height: 220px;
+    }
+
+    .map-empty {
+        height: 200px;
+    }
+
+    .btn-map-auto {
+        width: 100%;
+        justify-content: center;
+    }
+}
 }

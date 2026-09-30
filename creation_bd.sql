@@ -120,6 +120,9 @@ CREATE TABLE contact_content (
     content     TEXT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT INTO contact_content (element_id, content) 
+VALUES ('map_iframe', '')
+ON DUPLICATE KEY UPDATE element_id = element_id;
 
 -- logs des demandes 
 CREATE TABLE demande_essai_logs (

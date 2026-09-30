@@ -33,7 +33,7 @@ function e($string) {
             <p class="hero-desc"><?= e(getContent('hero_subtitle')) ?></p>
 
             <div class="flex flex-wrap gap-2">
-                <a href="voiture.php?from=accueil" class="btn btn-primary">Découvrir le stock</a>
+                <a href="voiture.php?from=accueil" class="btn btn-primary">Découvrir la collection</a>
                 <a href="contact.php" class="btn btn-primary">Nous contacter</a>
             </div>
         </div>

@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
         $stmt_text->execute([trim($_POST['txt_3'] ?? ''), 'siege_contact']);
         $stmt_text->execute([trim($_POST['txt_4'] ?? ''), 'tel_contact']);
         $stmt_text->execute([trim($_POST['txt_5'] ?? ''), 'email_contact']);
+        $stmt_text->execute([trim($_POST['map_iframe'] ?? ''), 'map_iframe']);
         $message_status = "✅ INTERFACE MISE À JOUR AVEC SUCCÈS";
     } catch (Exception $e) {
         $message_status = "❌ ERREUR : " . $e->getMessage();
@@ -51,7 +52,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <header class="admin-header">
             <div>
                 <h2 class="font-title">CONTACT</h2>
-                </div>
+            </div>
         </header>
 
         <?php if (!empty($message_status)): ?>
@@ -71,7 +72,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <div class="contact-cards">
                     <div class="contact-card">
                         <span class="contact-info-label">Adresse</span>
-                        <textarea name="txt_3" rows="2" class="live-field"><?= htmlspecialchars($settings['siege_contact'] ?? '') ?></textarea>
+                        <textarea name="txt_3" id="adresse_input" rows="2" class="live-field"><?= htmlspecialchars($settings['siege_contact'] ?? '') ?></textarea>
                     </div>
 
                     <div class="contact-card">
@@ -84,6 +85,26 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         <input type="text" name="txt_5" value="<?= htmlspecialchars($settings['email_contact'] ?? '') ?>" class="live-field">
                     </div>
                 </div>
+
+                <!-- BLOC MAP -->
+                <div class="map-editor-block">
+                    <span class="contact-info-label">Carte Google Maps (URL embed)</span>
+                    <textarea name="map_iframe" id="map_input" rows="2"
+                              class="live-field map-url-field"
+                              placeholder="https://maps.google.com/maps?q=...&output=embed"><?= htmlspecialchars($settings['map_iframe'] ?? '') ?></textarea>
+
+                    <button type="button" id="btn_auto_map" class="btn-map-auto">
+                        🔄 Générer la carte depuis l'adresse
+                    </button>
+
+                    <div class="map-preview-wrap" id="map_preview">
+                        <?php if (!empty($settings['map_iframe'])): ?>
+                            <iframe src="<?= htmlspecialchars($settings['map_iframe']) ?>" loading="lazy" allowfullscreen></iframe>
+                        <?php else: ?>
+                            <div class="map-empty">Aucune carte configurée</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
 
             <div class="form-actions">
@@ -91,6 +112,39 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </div>
         </form>
     </main>
+
+    <script>
+    (function () {
+        const mapInput   = document.getElementById('map_input');
+        const mapPreview = document.getElementById('map_preview');
+        const adresseIn  = document.getElementById('adresse_input');
+        const btnAuto    = document.getElementById('btn_auto_map');
+
+        function renderPreview(url) {
+            if (url && url.trim() !== '') {
+                mapPreview.innerHTML = '<iframe src="' + url.replace(/"/g, '&quot;') + '" loading="lazy" allowfullscreen></iframe>';
+            } else {
+                mapPreview.innerHTML = '<div class="map-empty">Aucune carte configurée</div>';
+            }
+        }
+
+        // Aperçu live quand on modifie l'URL à la main
+        mapInput.addEventListener('input', () => renderPreview(mapInput.value.trim()));
+
+        // Bouton : génère l'URL Google Maps à partir de l'adresse
+        btnAuto.addEventListener('click', () => {
+            const adresse = adresseIn.value.trim();
+            if (!adresse) {
+                alert("Veuillez d'abord renseigner une adresse dans le champ « Adresse ».");
+                adresseIn.focus();
+                return;
+            }
+            const url = 'https://maps.google.com/maps?q=' + encodeURIComponent(adresse) + '&t=&z=15&ie=UTF8&iwloc=&output=embed';
+            mapInput.value = url;
+            renderPreview(url);
+        });
+    })();
+    </script>
 
 </body>
 </html>

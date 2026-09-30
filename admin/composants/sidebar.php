@@ -25,13 +25,13 @@ $logoPath = '../assets/logos/superlogo.png';
         <div class="sidebar-section">
             
             <a href="tableaudebord.php" class="nav-link <?= ($currentPage == 'tableaudebord.php') ? 'active' : '' ?>">Tableau de bord</a>
-            <a href="admin_voitures.php" class="nav-link <?= ($currentPage == 'admin_voitures.php') ? 'active' : '' ?>">Voiture</a>
-            <a href="admin_demande.php" class="nav-link <?= ($currentPage == 'admin_demande.php') ? 'active' : '' ?>">Demandes d'essai</a>
-            <a href="admin_contact.php" class="nav-link <?= ($currentPage == 'admin_contact.php') ? 'active' : '' ?>">Messages</a>
             <a href="admin_accueil.php" class="nav-link <?= ($currentPage == 'admin_accueil.php') ? 'active' : '' ?>">Accueil</a>
-            <a href="admin_affichage_contact.php" class="nav-link <?= ($currentPage == 'admin_affichage_contact.php') ? 'active' : '' ?>">Contact</a>
+            <a href="admin_voitures.php" class="nav-link <?= ($currentPage == 'admin_voitures.php') ? 'active' : '' ?>">Voitures</a>
+            <a href="admin_demande.php" class="nav-link <?= ($currentPage == 'admin_demande.php') ? 'active' : '' ?>">Demande d'essai</a>
             <a href="admin_services.php" class="nav-link <?= ($currentPage == 'admin_services.php') ? 'active' : '' ?>">Services</a>
-        </div>
+            <a href="admin_contact.php" class="nav-link <?= ($currentPage == 'admin_contact.php') ? 'active' : '' ?>">Messages</a>
+            <a href="admin_affichage_contact.php" class="nav-link <?= ($currentPage == 'admin_affichage_contact.php') ? 'active' : '' ?>">Contact</a>
+             </div>
     </nav>
 
     <div class="sidebar-footer">
