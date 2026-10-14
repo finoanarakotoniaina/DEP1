@@ -71,7 +71,6 @@ CREATE TABLE demande_essai (
     id_demande      INT AUTO_INCREMENT PRIMARY KEY,
     date_souhaitee  DATE NOT NULL,
     heure_souhaitee TIME,
-    mobile          VARCHAR(20),
     statut          VARCHAR(50) DEFAULT 'en attente',
     id_client       INT NOT NULL,
     id_voiture      INT,
