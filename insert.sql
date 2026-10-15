@@ -62,7 +62,7 @@ INSERT INTO essai_content (element_id, content) VALUES
 (3, 'D''ESSAI.'),
 (4, 'Prenez les commandes de l''exceptionnel. Choisissez votre modèle, définissez votre créneau et laissez-vous transporter par une ingénierie hors du commun.'),
 (5, 'RÉSERVER MON CRÉNEAU'),
-(6, 'photo_essai.jpeg'),
+(6, 'photo_essai.webp'),
 (7,  'Configurateur<br>d''essai'),
 (8,  'Mes demandes en cours'),
 (9,  'Aucune demande en cours pour le moment.'),
@@ -90,7 +90,7 @@ INSERT INTO services_content (element_id, content) VALUES
 
 INSERT INTO contact_content (element_id, content) VALUES
 ('titre_principal',     'NOUS CONTACTER'),
-('image_supercar',      'connexionimg.jpg'),
+('image_supercar',      'photo_contact.webp'),
 ('email_contact',       'contact@supercar.com'),
 ('tel_contact',         '+33 1 23 45 67 89'),
 ('siege_contact',       'Paris, France'),

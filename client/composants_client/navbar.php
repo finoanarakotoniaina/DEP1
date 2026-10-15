@@ -8,7 +8,7 @@ function isActive($page, $currentPage) {
 ?>
 <nav class="navbar">
     <a href="accueil.php" class="navbar-logo">
-        <img src="<?= ASSETS_URL ?>/logos/superlogo.png" alt="SuperCar" class="logo-img">
+        <img src="<?= ASSETS_URL ?>/logos/superlogo.webp" alt="SuperCar" class="logo-img">
     </a>
 
     <ul class="navbar-menu">

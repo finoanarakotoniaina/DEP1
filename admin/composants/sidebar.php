@@ -12,7 +12,7 @@ $gestionPages = ['tableaudebord.php', 'admin_voitures.php', 'admin_demande.php',
 $editionPages = ['admin_accueil.php', 'admin_affichage_contact.php', 'admin_services.php'];
 
 // Chemin absolu du logo (depuis la racine web)
-$logoPath = '../assets/logos/superlogo.png';
+$logoPath = '../assets/logos/superlogo.webp';
 ?>
 <aside class="sidebar">
     <div class="sidebar-logo">

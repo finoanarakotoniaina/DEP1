@@ -165,7 +165,7 @@ if (isset($_POST['connexion'])) {
 
         <!-- Colonne droite : image -->
         <div class="auth-image-col">
-            <img src="<?= ASSETS_URL ?>/hero/Facebook.jfif" alt="Ferrari">
+            <img src="<?= ASSETS_URL ?>/hero/photo_connexion.webp" alt="Ferrari">
         </div>
     </main>
 

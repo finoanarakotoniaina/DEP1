@@ -437,10 +437,10 @@ input[type="number"] {
     font-weight: 600;
 }
 .nav-link:hover { color: var(--teal); opacity: 1; }
-.nav-link.active { color: var(--teal); opacity: 1; font-weight: bold; }
+.nav-link.active { color: #DC2626; opacity: 1; font-weight: bold; }
 
 .nav-btn {
-    background: var(--teal);
+    background: #DC2626;
     color: var(--white);
     padding: 0.6rem 1.2rem;
     border-radius: 6px;
