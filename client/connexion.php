@@ -16,15 +16,12 @@ if (isset($_POST['connexion'])) {
     $mdp_saisi     = $_POST['password'] ?? '';
     $captcha_saisi = isset($_POST['captcha']) ? intval($_POST['captcha']) : -1;
 
-    // --- VALIDATION SERVEUR ---
-    if (!filter_var($email_saisi, FILTER_VALIDATE_EMAIL)) {
-        $message = "Adresse email invalide.";
-    } elseif (strlen($mdp_saisi) < 1) {
-        $message = "Mot de passe requis.";
-    } elseif ($captcha_saisi < 0) {
-        $message = "Captcha invalide (nombre positif attendu).";
-    } elseif ($captcha_saisi !== $_SESSION['captcha_reponse']) {
-        $message = "Captcha incorrect.";
+    // --- VALIDATION UNIFIÉE ---
+    if (!filter_var($email_saisi, FILTER_VALIDATE_EMAIL)
+        || strlen($mdp_saisi) < 1
+        || $captcha_saisi < 0
+        || $captcha_saisi !== $_SESSION['captcha_reponse']) {
+        $message = "Identifiants ou vérification incorrects.";
     } else {
         try {
             $sql = "SELECT l.password, c.id_client, c.prenom, c.nom, c.email, c.telephone 
@@ -36,29 +33,25 @@ if (isset($_POST['connexion'])) {
             $stmt->execute([$email_saisi]);
             $user = $stmt->fetch();
 
-            if ($user) {
-                if (password_verify($mdp_saisi, $user['password'])) {
-                    $_SESSION['id_client'] = $user['id_client'];
-                    $_SESSION['prenom']    = $user['prenom'];
-                    $_SESSION['nom']       = $user['nom'];
-                    $_SESSION['email']     = $user['email'];
-                    $_SESSION['telephone'] = $user['telephone'];
+            if ($user && password_verify($mdp_saisi, $user['password'])) {
+                $_SESSION['id_client'] = $user['id_client'];
+                $_SESSION['prenom']    = $user['prenom'];
+                $_SESSION['nom']       = $user['nom'];
+                $_SESSION['email']     = $user['email'];
+                $_SESSION['telephone'] = $user['telephone'];
 
-                    $final_redirect = 'accueil.php';
-                    if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'redirect=demande.php') !== false) {
-                        $final_redirect = 'demande.php';
-                    }
-
-                    header("Location: " . $final_redirect);
-                    exit();
-                } else {
-                    $message = "Mot de passe incorrect.";
+                $final_redirect = 'accueil.php';
+                if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'redirect=demande.php') !== false) {
+                    $final_redirect = 'demande.php';
                 }
+
+                header("Location: " . $final_redirect);
+                exit();
             } else {
-                $message = "Identifiant inconnu.";
+                $message = "Identifiants ou vérification incorrects.";
             }
         } catch (PDOException $e) {
-            $message = "Erreur de base de données : " . $e->getMessage();
+            $message = "Une erreur est survenue. Veuillez réessayer plus tard.";
         }
     }
 
@@ -66,6 +59,15 @@ if (isset($_POST['connexion'])) {
     $n1 = rand(0, 3); $n2 = rand(0, 3);
     $_SESSION['captcha_reponse'] = $n1 + $n2;
     $_SESSION['captcha_question'] = "$n1 + $n2";
+}
+
+// Gestion du message d'affichage (succès vs erreur)
+$msgType = 'error';
+$msgText = $message;
+
+if (isset($_GET['inscription']) && $_GET['inscription'] === 'success' && empty($message)) {
+    $msgText = "Connectez-vous pour continuer.";
+    $msgType = 'success';
 }
 ?>
 <!DOCTYPE html>
@@ -87,12 +89,8 @@ if (isset($_POST['connexion'])) {
                 <h2>CONNEXION</h2>
                 <div class="title-bar"></div>
 
-                <?php if (isset($_GET['inscription']) && $_GET['inscription'] === 'success' && empty($message)): ?>
-                    <?php $message = "Compte créé avec succès ! Vous pouvez maintenant vous connecter."; ?>
-                <?php endif; ?>
-
-                <?php if (!empty($message)): ?>
-                    <p class="form-msg"><?= htmlspecialchars($message) ?></p>
+                <?php if (!empty($msgText)): ?>
+                    <p class="form-msg <?= $msgType ?>"><?= htmlspecialchars($msgText) ?></p>
                 <?php endif; ?>
 
                 <form action="connexion.php" method="POST" id="formConnexion" novalidate>
@@ -200,10 +198,7 @@ if (isset($_POST['connexion'])) {
 
         // =========================================================
         // VALIDATION CLIENT — Connexion
-        // Mode : blur (par champ) + submit (global)
         // =========================================================
-
-        // --- Règles de validation par champ ---
         const rulesConnexion = {
             email: (v) => {
                 if (!v.trim()) return "Email requis.";
@@ -222,7 +217,6 @@ if (isset($_POST['connexion'])) {
             }
         };
 
-        // --- Fonction générique de validation d'un champ ---
         function validateField(input, errorId) {
             const value = input.value;
             const errorEl = document.getElementById(errorId);
@@ -235,18 +229,15 @@ if (isset($_POST['connexion'])) {
             return msg === "";
         }
 
-        // --- Attache : blur (validation immédiate) + input (efface l'erreur) ---
         const formConnexion = document.getElementById('formConnexion');
 
         formConnexion.querySelectorAll('.form-input').forEach(input => {
             const errorId = 'error-' + input.id;
 
-            // Au blur : on valide
             input.addEventListener('blur', function() {
                 if (this.value !== "") validateField(this, errorId);
             });
 
-            // Au input : si l'erreur était affichée et que ça devient valide, on efface
             input.addEventListener('input', function() {
                 const errorEl = document.getElementById(errorId);
                 if (errorEl.textContent !== "" && validateField(this, errorId)) {
@@ -255,7 +246,6 @@ if (isset($_POST['connexion'])) {
             });
         });
 
-        // --- Validation finale à la soumission ---
         formConnexion.addEventListener('submit', function(e) {
             let allValid = true;
 
@@ -268,7 +258,6 @@ if (isset($_POST['connexion'])) {
 
             if (!allValid) {
                 e.preventDefault();
-                // Focus sur le premier champ en erreur
                 const firstError = formConnexion.querySelector('.input-error');
                 if (firstError) firstError.focus();
             }
