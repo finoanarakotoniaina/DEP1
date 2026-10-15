@@ -24,7 +24,7 @@ try {
           AND CONCAT(date_souhaitee, ' ', COALESCE(heure_souhaitee, '23:59:59')) < NOW()
     ");
 } catch (PDOException $e) {
-    // Silencieux
+    error_log("[SuperCar] auto-statuts : " . $e->getMessage());
 }
 
 // =========================================================
@@ -90,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
         header("Location: admin_demande.php");
         exit();
     } catch (PDOException $e) {
-        $message_status = "Erreur : " . $e->getMessage();
+        error_log("[SuperCar] admin_demande action : " . $e->getMessage());
+        $message_status = MSG_ERREUR;
     }
 }
 
@@ -108,6 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         echo "OK";
     } catch (Exception $e) {
+        error_log("[SuperCar] save_live : " . $e->getMessage());
         echo "ERR";
     }
     exit;
@@ -141,7 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             echo json_encode(['success' => false, 'message' => 'no file']);
         }
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        error_log("[SuperCar] upload_hero : " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => MSG_ERREUR]);
     }
     exit;
 }
@@ -168,7 +171,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
         header("Location: admin_demande.php");
         exit();
     } catch (Exception $e) {
-        $message_status = "❌ ERREUR : " . $e->getMessage();
+        error_log("[SuperCar] save_ui : " . $e->getMessage());
+        $message_status = MSG_ERREUR;
     }
 }
 
@@ -221,7 +225,8 @@ try {
     ")->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
-    die("Erreur : " . $e->getMessage());
+    error_log("[SuperCar] admin_demande lecture : " . $e->getMessage());
+    die(MSG_ERREUR);
 }
 
 $src_img = (strpos($img_path, 'image_url/') === 0) 

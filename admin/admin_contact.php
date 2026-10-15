@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
             $message_status = "✅ MESSAGE SUPPRIMÉ AVEC SUCCÈS";
         }
     } catch (Exception $e) {
-        $message_status = "❌ ERREUR : " . $e->getMessage();
+        error_log("[SuperCar] admin_contact delete : " . $e->getMessage());
+        $message_status = "❌ " . MSG_ERREUR;
     }
 }
 
@@ -36,7 +37,8 @@ try {
     ")->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
-    die("Erreur Système : " . $e->getMessage());
+    error_log("[SuperCar] admin_contact lecture : " . $e->getMessage());
+    die(MSG_ERREUR);
 }
 
 $currentPage = basename($_SERVER['PHP_SELF']);

@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_ui'])) {
         $stmt_text->execute([trim($_POST['map_iframe'] ?? ''), 'map_iframe']);
         $message_status = "✅ INTERFACE MISE À JOUR AVEC SUCCÈS";
     } catch (Exception $e) {
-        $message_status = "❌ ERREUR : " . $e->getMessage();
+        error_log("[SuperCar] admin_affichage_contact save : " . $e->getMessage());
+        $message_status = "❌ " . MSG_ERREUR;
     }
 }
 
@@ -31,7 +32,8 @@ try {
 
     $settings = $db->query("SELECT element_id, content FROM contact_content")->fetchAll(PDO::FETCH_KEY_PAIR);
 } catch (PDOException $e) {
-    die("Erreur Système : " . $e->getMessage());
+    error_log("[SuperCar] admin_affichage_contact lecture : " . $e->getMessage());
+    die(MSG_ERREUR);
 }
 
 $currentPage = basename($_SERVER['PHP_SELF']);

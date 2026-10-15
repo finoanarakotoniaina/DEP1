@@ -22,13 +22,19 @@ try {
         ]
     );
 } catch (PDOException $e) {
-    error_log("Erreur BDD : " . $e->getMessage());
-    die("Erreur de connexion à la base de données.");
+    error_log("[SuperCar] Erreur BDD : " . $e->getMessage());
+    die("Plateforme momentanément indisponible. Veuillez réessayer plus tard.");
 }
 
 // Alias globaux pour cohérence (évite les warnings dans les IDE)
 $pdo  = $db;
 $conn = $db;
+
+/**
+ * Message d'erreur générique (BDD / système)
+ * Utilisé partout pour uniformiser et ne pas exposer de détails techniques
+ */
+define('MSG_ERREUR', "Plateforme momentanément indisponible. Veuillez réessayer plus tard.");
 
 /**
  * 3. CONSTANTES DE CHEMINS (auto-détectées)
@@ -66,7 +72,8 @@ function getContent(string $element_id): string {
         return "Texte [$element_id] manquant en BDD";
 
     } catch (Exception $e) {
-        return "Erreur SQL : " . $e->getMessage();
+        error_log("[SuperCar] getContent : " . $e->getMessage());
+        return MSG_ERREUR;
     }
 }
 
@@ -79,6 +86,7 @@ try {
     $stmt = $db->query("SELECT element_id, content FROM contact_content");
     $contactSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 } catch (Exception $e) {
+    error_log("[SuperCar] Contact settings : " . $e->getMessage());
     $contactSettings = [];
 }
 
@@ -103,8 +111,6 @@ function requireAdmin(): void {
 
 /**
  * 7. CONVERSION AUTOMATIQUE DES IMAGES EN WEBP
- * Usage : convertToWebp($tmpFile, $destination, $quality = 80)
- * Retourne true si OK, false sinon
  */
 function convertToWebp(string $source, string $destination, int $quality = 80): bool {
     if (!function_exists('imagewebp')) return false;
@@ -132,10 +138,6 @@ function convertToWebp(string $source, string $destination, int $quality = 80): 
     return $ok;
 }
 
-/**
- * Helper : reçoit un $_FILES['xxx'] et renvoie le nom du .webp créé
- * Retourne null si échec
- */
 function uploadAsWebp(array $file, string $dir, string $prefix = 'img'): ?string {
     if (!isset($file['tmp_name']) || $file['error'] !== 0) return null;
     if (!is_dir($dir)) mkdir($dir, 0777, true);
@@ -146,6 +148,4 @@ function uploadAsWebp(array $file, string $dir, string $prefix = 'img'): ?string
     if (convertToWebp($file['tmp_name'], $dest)) return $newName;
     return null;
 }
-
 ?>
-

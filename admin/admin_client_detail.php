@@ -45,7 +45,9 @@ try {
         ");
         $stmtDemandes->execute([$clientId]);
         $demandes = $stmtDemandes->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {}
+    } catch (PDOException $e) {
+        error_log("[SuperCar] client_detail demandes : " . $e->getMessage());
+    }
 
     // Messages de contact liés par email
     $messages = [];
@@ -53,14 +55,17 @@ try {
         $stmtMessages = $db->prepare("SELECT * FROM contact_client WHERE email = ? ORDER BY id_contact DESC");
         $stmtMessages->execute([$client['email']]);
         $messages = $stmtMessages->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {}
+    } catch (PDOException $e) {
+        error_log("[SuperCar] client_detail messages : " . $e->getMessage());
+    }
 
     $stmtAdmin = $db->prepare("SELECT nom, prenom FROM admin WHERE id_admin = ?");
     $stmtAdmin->execute([$_SESSION['admin_id']]);
     $resAdmin = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
     $adminFullName = $resAdmin ? $resAdmin['prenom'] . " " . $resAdmin['nom'] : "Admin";
 } catch (PDOException $e) {
-    die("ERREUR SYSTÈME : " . $e->getMessage());
+    error_log("[SuperCar] admin_client_detail lecture : " . $e->getMessage());
+    die(MSG_ERREUR);
 }
 
 $initials = strtoupper(substr($client['nom'], 0, 1) . substr($client['prenom'], 0, 1));

@@ -18,7 +18,8 @@ try {
         $voituresParMarque[$nomM][] = $v;
     }
 } catch (PDOException $e) {
-    die("Erreur : " . $e->getMessage());
+    error_log("[SuperCar] voiture.php : " . $e->getMessage());
+    die(MSG_ERREUR);
 }
 ?>
 <!DOCTYPE html>

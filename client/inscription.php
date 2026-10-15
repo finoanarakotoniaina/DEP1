@@ -13,27 +13,27 @@ if (isset($_POST['inscription'])) {
 
     // --- VALIDATION SERVEUR ---
     if (empty($prenom) || empty($nom)) {
-        $message = "Nom et prénom requis.";
+        $message = "Veuillez renseigner votre nom et prénom.";
     } elseif (strlen($prenom) < 2 || strlen($nom) < 2) {
-        $message = "Nom et prénom doivent contenir au moins 2 caractères.";
+        $message = "Votre nom et prénom doivent contenir au moins 2 caractères.";
     } elseif (!preg_match("/^[a-zA-ZÀ-ÿ\s\-']+$/u", $prenom) || !preg_match("/^[a-zA-ZÀ-ÿ\s\-']+$/u", $nom)) {
-        $message = "Nom et prénom ne doivent contenir que des lettres.";
+        $message = "Seules les lettres sont autorisées pour le nom et le prénom.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message = "Adresse email invalide.";
+        $message = "Veuillez saisir une adresse email valide.";
     } elseif (!preg_match("/^[0-9\s\+\-\(\)]{8,20}$/", $tel)) {
-        $message = "Numéro de téléphone invalide.";
+        $message = "Veuillez saisir un numéro de téléphone valide.";
     } elseif (strlen($mdp) < 8) {
-        $message = "Le mot de passe doit contenir au moins 8 caractères.";
+        $message = "Votre mot de passe doit contenir au moins 8 caractères.";
     } elseif (!preg_match("/[A-Z]/", $mdp)) {
-        $message = "Le mot de passe doit contenir au moins une majuscule.";
+        $message = "Ajoutez au moins une majuscule à votre mot de passe.";
     } elseif (!preg_match("/[a-z]/", $mdp)) {
-        $message = "Le mot de passe doit contenir au moins une minuscule.";
+        $message = "Ajoutez au moins une minuscule à votre mot de passe.";
     } elseif (!preg_match("/[0-9]/", $mdp)) {
-        $message = "Le mot de passe doit contenir au moins un chiffre.";
+        $message = "Ajoutez au moins un chiffre à votre mot de passe.";
     } elseif (!preg_match("/[\W_]/", $mdp)) {
-        $message = "Le mot de passe doit contenir au moins un caractère spécial.";
+        $message = "Ajoutez au moins un caractère spécial (!, @, #…).";
     } elseif ($mdp !== $mdp_confirm) {
-        $message = "Les mots de passe ne correspondent pas.";
+        $message = "Les deux mots de passe ne correspondent pas.";
     } else {
         $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);
         try {
@@ -52,7 +52,11 @@ if (isset($_POST['inscription'])) {
             exit();
         } catch (Exception $e) {
             $db->rollBack();
-            $message = ($e->getCode() == 23000) ? "Erreur : cet identifiant existe déjà." : "Erreur système : " . $e->getMessage();
+            if ($e->getCode() == 23000) {
+                $message = "Un compte existe déjà avec cet email.";
+            } else {
+                $message = "Une erreur est survenue. Veuillez réessayer plus tard.";
+            }
         }
     }
 }
@@ -77,7 +81,7 @@ if (isset($_POST['inscription'])) {
                 <div class="title-bar"></div>
 
                 <?php if ($message != ""): ?>
-                    <div class="form-msg"><?= htmlspecialchars($message) ?></div>
+                    <p class="form-msg error"><?= htmlspecialchars($message) ?></p>
                 <?php endif; ?>
 
                 <form action="inscription.php" method="POST" id="formInscription" novalidate>
@@ -190,7 +194,7 @@ if (isset($_POST['inscription'])) {
 
         <!-- Colonne droite : image -->
         <div class="auth-image-col">
-            <img src="<?= ASSETS_URL ?>/hero/Facebook.jfif" alt="Ferrari">
+            <img src="<?= ASSETS_URL ?>/hero/photo_connexion.webp" alt="Ferrari">
         </div>
     </main>
 
@@ -225,50 +229,46 @@ if (isset($_POST['inscription'])) {
 
         // =========================================================
         // VALIDATION CLIENT — Inscription
-        // Mode : blur (par champ) + input (efface erreur) + submit
         // =========================================================
-
-        // --- Règles de validation par champ ---
         const rulesInscription = {
             prenom: (v) => {
-                if (!v.trim()) return "Prénom requis.";
-                if (v.trim().length < 2) return "Prénom trop court (2 min).";
+                if (!v.trim()) return "Veuillez renseigner votre prénom.";
+                if (v.trim().length < 2) return "Au moins 2 caractères.";
                 if (!/^[a-zA-ZÀ-ÿ\s\-']+$/.test(v.trim())) return "Lettres uniquement.";
                 return "";
             },
             nom: (v) => {
-                if (!v.trim()) return "Nom requis.";
-                if (v.trim().length < 2) return "Nom trop court (2 min).";
+                if (!v.trim()) return "Veuillez renseigner votre nom.";
+                if (v.trim().length < 2) return "Au moins 2 caractères.";
                 if (!/^[a-zA-ZÀ-ÿ\s\-']+$/.test(v.trim())) return "Lettres uniquement.";
                 return "";
             },
             email: (v) => {
-                if (!v.trim()) return "Email requis.";
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) return "Format email invalide.";
+                if (!v.trim()) return "Veuillez saisir votre email.";
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) return "Format d'email invalide.";
                 return "";
             },
             telephone: (v) => {
-                if (!v.trim()) return "Téléphone requis.";
+                if (!v.trim()) return "Veuillez saisir votre téléphone.";
                 if (!/^[0-9\s\+\-\(\)]{8,20}$/.test(v.trim())) return "Numéro invalide (8-20 chiffres).";
                 return "";
             },
             password: (v) => {
-                if (!v) return "Mot de passe requis.";
+                if (!v) return "Choisissez un mot de passe.";
                 if (v.length < 8) return "8 caractères minimum.";
-                if (!/[A-Z]/.test(v)) return "Au moins une majuscule.";
-                if (!/[a-z]/.test(v)) return "Au moins une minuscule.";
-                if (!/[0-9]/.test(v)) return "Au moins un chiffre.";
-                if (!/[\W_]/.test(v)) return "Au moins un caractère spécial.";
+                if (!/[A-Z]/.test(v)) return "Ajoutez une majuscule.";
+                if (!/[a-z]/.test(v)) return "Ajoutez une minuscule.";
+                if (!/[0-9]/.test(v)) return "Ajoutez un chiffre.";
+                if (!/[\W_]/.test(v)) return "Ajoutez un caractère spécial.";
                 return "";
             },
             confirm_password: (v) => {
-                if (!v) return "Confirmation requise.";
-                if (v !== document.getElementById('password').value) return "Les mots de passe ne correspondent pas.";
+                if (!v) return "Confirmez votre mot de passe.";
+                if (v !== document.getElementById('password').value) return "Les deux mots de passe ne correspondent pas.";
                 return "";
             }
         };
 
-        // --- Fonction générique de validation ---
         function validateField(input, errorId) {
             const errorEl = document.getElementById(errorId);
             const rule = rulesInscription[input.id];
@@ -283,30 +283,25 @@ if (isset($_POST['inscription'])) {
         const formInscription = document.getElementById('formInscription');
         const passwordInput = document.getElementById('password');
 
-        // --- Attache : blur (validation) + input (efface erreur) ---
         formInscription.querySelectorAll('.form-input').forEach(input => {
             const errorId = 'error-' + input.id;
 
-            // Au blur : on valide
             input.addEventListener('blur', function() {
                 if (this.value !== "") validateField(this, errorId);
             });
 
-            // Au input : efface l'erreur si ça devient valide
             input.addEventListener('input', function() {
                 const errorEl = document.getElementById(errorId);
                 if (errorEl.textContent !== "" && validateField(this, errorId)) {
                     errorEl.textContent = "";
                 }
 
-                // Cas spécial : si on modifie le mot de passe, on revalide la confirmation
                 if (this.id === 'password' && document.getElementById('confirm_password').value !== "") {
                     validateField(document.getElementById('confirm_password'), 'error-confirm_password');
                 }
             });
         });
 
-        // --- Validation finale à la soumission ---
         formInscription.addEventListener('submit', function(e) {
             let allValid = true;
 

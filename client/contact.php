@@ -1,7 +1,7 @@
 <?php 
 require_once '../config.php'; 
 $s = $contactSettings ?? [];
-if (!$s) { die("Erreur : Les réglages de contact ne sont pas configurés dans la base de données."); }
+if (!$s) { die(MSG_ERREUR); }
 $message_envoi = ""; $show_modal = false;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nom=htmlspecialchars($_POST['nom']); $prenom=htmlspecialchars($_POST['prenom']);
@@ -11,7 +11,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt=$db->prepare("INSERT INTO contact_client (nom,prenom,email,message) VALUES (:nom,:prenom,:email,:message)");
             $stmt->execute([':nom'=>$nom,':prenom'=>$prenom,':email'=>$email,':message'=>$message]);
             $message_envoi="Votre message a bien été enregistré !"; $show_modal=true;
-        } catch (PDOException $e) { die("Erreur lors de l'enregistrement : ".$e->getMessage()); }
+        } catch (PDOException $e) {
+            error_log("[SuperCar] Contact : " . $e->getMessage());
+            die(MSG_ERREUR);
+        }
     }
 }
 ?>
@@ -56,7 +59,7 @@ section.container{padding-top:0;}
             <h1><?= nl2br($s['titre_principal'] ?? 'NOUS CONTACTER') ?></h1>
         </div>
         <div class="contact-circle">
-            <img src="<?= ASSETS_URL ?>/hero/<?= htmlspecialchars($s['image_supercar'] ?: 'M4.jfif') ?>" alt="Supercar">
+            <img src="<?= ASSETS_URL ?>/hero/<?= htmlspecialchars($s['image_supercar'] ?: 'photo_contact.webp') ?>" alt="Supercar">
         </div>
     </div>
 </section>

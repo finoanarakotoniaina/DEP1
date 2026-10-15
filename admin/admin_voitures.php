@@ -11,6 +11,7 @@ try {
     $adminFullName = $resAdmin ? $resAdmin['prenom'] . " " . $resAdmin['nom'] : "Admin";
     $adminName = $adminFullName;
 } catch (PDOException $e) {
+    error_log("[SuperCar] admin_voitures admin : " . $e->getMessage());
     $adminFullName = "Admin";
     $adminName = "Admin";
 }
@@ -112,7 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             echo json_encode(['success'=>true]); exit;
         }
     } catch (PDOException $e) {
-        echo json_encode(['success'=>false,'message'=>$e->getMessage()]); exit;
+        error_log("[SuperCar] admin_voitures action : " . $e->getMessage());
+        echo json_encode(['success'=>false,'message'=>MSG_ERREUR]); exit;
     }
 }
 
@@ -124,7 +126,10 @@ try {
         $voituresParMarque[$nomM][] = $v;
     }
     $marquesAll = $db->query("SELECT * FROM marque ORDER BY nom_marque")->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) { die("Erreur : ".$e->getMessage()); }
+} catch (PDOException $e) {
+    error_log("[SuperCar] admin_voitures lecture : " . $e->getMessage());
+    die(MSG_ERREUR);
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">

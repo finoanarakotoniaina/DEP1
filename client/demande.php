@@ -5,6 +5,7 @@ try {
     $query_ui = $db->query("SELECT element_id, content FROM essai_content");
     $ui = $query_ui->fetchAll(PDO::FETCH_KEY_PAIR);
 } catch (Exception $e) {
+    error_log("[SuperCar] essai_content : " . $e->getMessage());
     $ui = []; 
 }
 
@@ -14,7 +15,7 @@ $txt_ligne1   = $ui[2] ?? "DEMANDE";
 $txt_ligne2   = $ui[3] ?? "D'ESSAI.";
 $txt_desc     = $ui[4] ?? "Prenez les commandes de l'exceptionnel. Choisissez votre modèle, définissez votre créneau et laissez-vous transporter par une ingénierie hors du commun.";
 $txt_btn      = $ui[5] ?? "RÉSERVER MON CRÉNEAU";
-$img_hero     = $ui[6] ?? "photo_essai.jpeg";
+$img_hero     = $ui[6] ?? "photo_essai.webp";
 
 // Textes CONFIGURATEUR
 $txt_config_title   = $ui[7]  ?? "Configurateur<br>d'essai";
@@ -54,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['valider_essai'])) {
             $stmtLimit->execute([$id_client]);
             $nbDemandesActives = (int) $stmtLimit->fetchColumn();
         } catch (PDOException $e) {
+            error_log("[SuperCar] limit demandes : " . $e->getMessage());
             $nbDemandesActives = 0;
         }
 
@@ -71,7 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['valider_essai'])) {
                 header("Location: demande.php?success=1#booking");
                 exit();
             } catch (Exception $e) {
-                $message = "ERREUR : " . $e->getMessage();
+                error_log("[SuperCar] insert demande : " . $e->getMessage());
+                $message = MSG_ERREUR;
             }
         }
     }
@@ -98,6 +101,7 @@ if ($isLoggedIn) {
         $stmtLimit->execute([$_SESSION['id_client']]);
         $nbDemandesActives = (int) $stmtLimit->fetchColumn();
     } catch (PDOException $e) {
+        error_log("[SuperCar] count demandes : " . $e->getMessage());
         $nbDemandesActives = 0;
     }
 }
@@ -118,6 +122,7 @@ if ($isLoggedIn) {
         $stmtMes->execute([$_SESSION['id_client']]);
         $mesDemandes = $stmtMes->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
+        error_log("[SuperCar] mes demandes : " . $e->getMessage());
         $mesDemandes = [];
     }
 }
@@ -203,7 +208,7 @@ $src_img = (strpos($img_hero, 'image_url/') === 0)
                     <h2 class="mb-2"><?= $txt_config_title ?></h2>
 
                     <?php if ($message): ?>
-                        <div class="form-msg"><?= htmlspecialchars($message) ?></div>
+                        <div class="form-msg error"><?= htmlspecialchars($message) ?></div>
                     <?php endif; ?>
 
                     <!-- Demandes du client -->
@@ -367,12 +372,9 @@ $src_img = (strpos($img_hero, 'image_url/') === 0)
 
         // Basculer entre les onglets "Mes demandes"
         function switchDemandeTab(tabId, btn) {
-            // Cacher tous les panels
             document.querySelectorAll('.demandes-panel').forEach(p => p.classList.remove('active'));
-            // Retirer active de tous les boutons
             document.querySelectorAll('.demande-tab').forEach(b => b.classList.remove('active'));
 
-            // Afficher le panel + activer le bouton
             document.getElementById('panel-' + tabId).classList.add('active');
             btn.classList.add('active');
         }

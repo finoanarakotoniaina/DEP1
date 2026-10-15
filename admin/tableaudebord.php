@@ -65,7 +65,8 @@ try {
     $listeClients = $stmtClients->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
-    die("Erreur système : connexion interrompue.");
+    error_log("[SuperCar] tableaudebord : " . $e->getMessage());
+    die(MSG_ERREUR);
 }
 
 $currentPage = basename($_SERVER['PHP_SELF']);
