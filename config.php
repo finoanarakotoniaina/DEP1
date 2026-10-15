@@ -100,4 +100,52 @@ function requireAdmin(): void {
         exit();
     }
 }
+
+/**
+ * 7. CONVERSION AUTOMATIQUE DES IMAGES EN WEBP
+ * Usage : convertToWebp($tmpFile, $destination, $quality = 80)
+ * Retourne true si OK, false sinon
+ */
+function convertToWebp(string $source, string $destination, int $quality = 80): bool {
+    if (!function_exists('imagewebp')) return false;
+
+    $info = @getimagesize($source);
+    if (!$info) return false;
+
+    $img = false;
+    switch ($info['mime']) {
+        case 'image/jpeg': $img = @imagecreatefromjpeg($source); break;
+        case 'image/png':  $img = @imagecreatefrompng($source);  break;
+        case 'image/gif':  $img = @imagecreatefromgif($source);  break;
+        case 'image/webp': $img = @imagecreatefromwebp($source); break;
+        case 'image/bmp':  $img = @imagecreatefrombmp($source);  break;
+        default: return false;
+    }
+    if (!$img) return false;
+
+    imagepalettetotruecolor($img);
+    imagealphablending($img, true);
+    imagesavealpha($img, true);
+
+    $ok = imagewebp($img, $destination, $quality);
+    imagedestroy($img);
+    return $ok;
+}
+
+/**
+ * Helper : reçoit un $_FILES['xxx'] et renvoie le nom du .webp créé
+ * Retourne null si échec
+ */
+function uploadAsWebp(array $file, string $dir, string $prefix = 'img'): ?string {
+    if (!isset($file['tmp_name']) || $file['error'] !== 0) return null;
+    if (!is_dir($dir)) mkdir($dir, 0777, true);
+
+    $newName = $prefix . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.webp';
+    $dest = rtrim($dir, '/') . '/' . $newName;
+
+    if (convertToWebp($file['tmp_name'], $dest)) return $newName;
+    return null;
+}
+
 ?>
+

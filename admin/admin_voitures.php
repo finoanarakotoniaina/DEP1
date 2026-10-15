@@ -33,13 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($action === 'update_image') {
             $id = intval($_POST['id_voiture']);
             if (!empty($_FILES['image']['name'])) {
-                $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-                $nm = 'car_'.$id.'_'.time().'.'.$ext;
                 $dir = '../image_url/voitures/';
-                if (!is_dir($dir)) mkdir($dir, 0777, true);
-                move_uploaded_file($_FILES['image']['tmp_name'], $dir.$nm);
-                $db->prepare("UPDATE voiture SET image_url = ? WHERE id_voiture = ?")->execute([$nm, $id]);
-                echo json_encode(['success'=>true,'image'=>$nm]);
+
+                $oldImg = $db->prepare("SELECT image_url FROM voiture WHERE id_voiture = ?");
+                $oldImg->execute([$id]);
+                $oldImgName = $oldImg->fetchColumn();
+
+                $newName = uploadAsWebp($_FILES['image'], $dir, 'car_' . $id);
+                if ($newName) {
+                    $db->prepare("UPDATE voiture SET image_url = ? WHERE id_voiture = ?")->execute([$newName, $id]);
+                    if ($oldImgName && file_exists($dir . $oldImgName)) @unlink($dir . $oldImgName);
+                    echo json_encode(['success'=>true,'image'=>$newName]);
+                } else {
+                    echo json_encode(['success'=>false,'message'=>'Conversion WebP échouée']);
+                }
             } else { echo json_encode(['success'=>false,'message'=>'Aucun fichier']); }
             exit;
         }
@@ -57,14 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $db->prepare("INSERT INTO marque (nom_marque) VALUES (?)")->execute([$nomM]);
                 $id_marque = $db->lastInsertId();
             } else { $id_marque = $m['id_marque']; }
-            $imageName = 'default.jpg';
+
+            $imageName = 'default.webp';
             if (!empty($_FILES['image']['name'])) {
-                $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-                $imageName = 'car_new_'.time().'.'.$ext;
                 $dir = '../image_url/voitures/';
-                if (!is_dir($dir)) mkdir($dir, 0777, true);
-                move_uploaded_file($_FILES['image']['tmp_name'], $dir.$imageName);
+                $uploaded = uploadAsWebp($_FILES['image'], $dir, 'car_new');
+                if ($uploaded) $imageName = $uploaded;
             }
+
             $db->prepare("INSERT INTO voiture (modele,prix,annee,etat,type,kilometrage,description,image_url,id_marque,archive) VALUES (?,?,?,?,?,?,?,?,?,0)")
                ->execute([
                    $_POST['modele'],
@@ -232,7 +239,6 @@ try {
         </section>
         <?php endforeach; ?>
 
-        <!-- Modal ajout -->
         <!-- Modal ajout -->
         <div class="modal-bg" id="add-modal">
             <div class="modal-box-admin">
@@ -423,7 +429,6 @@ function confirmArchive(id, modele) {
 }
 function closeConfirm() { document.getElementById('confirm-ov').classList.remove('open'); }
 
-// Détection dynamique : fiche à droite ou à gauche selon la place
 document.querySelectorAll('.story-row .car-card').forEach(card => {
     card.addEventListener('mouseenter', function() {
         const rect = this.getBoundingClientRect();

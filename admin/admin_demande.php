@@ -98,7 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
 // 2.5. ACTIONS AJAX (live editor)
 // =========================================================
 
-// Sauvegarde d'un champ individuel (au blur)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_live') {
     try {
         $key = (int) $_POST['key'];
@@ -114,27 +113,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// Upload de l'image hero
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'upload_hero') {
     try {
         if (isset($_FILES['image_hero']) && $_FILES['image_hero']['error'] === 0) {
             $dir = '../image_url/essai/';
-            if (!is_dir($dir)) mkdir($dir, 0777, true);
 
-            $ext = pathinfo($_FILES['image_hero']['name'], PATHINFO_EXTENSION);
-            $new_file = 'hero_essai_' . time() . '.' . $ext;
-            $destination = $dir . $new_file;
+            $oldStmt = $db->prepare("SELECT content FROM essai_content WHERE element_id = 6");
+            $oldStmt->execute();
+            $oldPath = $oldStmt->fetchColumn();
+            $oldFile = $oldPath ? basename($oldPath) : null;
 
-            if (move_uploaded_file($_FILES['image_hero']['tmp_name'], $destination)) {
+            $newFile = uploadAsWebp($_FILES['image_hero'], $dir, 'hero_essai');
+            if ($newFile) {
                 $stmt = $db->prepare("UPDATE essai_content SET content = ? WHERE element_id = 6");
-                $stmt->execute(['image_url/essai/' . $new_file]);
+                $stmt->execute(['image_url/essai/' . $newFile]);
+
+                if ($oldFile && file_exists($dir . $oldFile)) @unlink($dir . $oldFile);
 
                 echo json_encode([
                     'success' => true,
-                    'path' => BASE_URL . '/image_url/essai/' . $new_file
+                    'path' => BASE_URL . '/image_url/essai/' . $newFile
                 ]);
             } else {
-                echo json_encode(['success' => false, 'message' => 'move_uploaded_file failed']);
+                echo json_encode(['success' => false, 'message' => 'Conversion WebP échouée']);
             }
         } else {
             echo json_encode(['success' => false, 'message' => 'no file']);
@@ -181,16 +182,14 @@ try {
     $adminFullName = $resAdmin ? $resAdmin['prenom'] . " " . $resAdmin['nom'] : "Admin";
 
     $ui = $db->query("SELECT element_id, content FROM essai_content")->fetchAll(PDO::FETCH_KEY_PAIR);
-    $img_path = $ui[6] ?? 'photo_essai.jpeg';
+    $img_path = $ui[6] ?? 'photo_essai.webp';
 
-    // Compteurs
     $totalDemandes = $db->query("SELECT COUNT(*) FROM demande_essai")->fetchColumn();
     $enCours       = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IS NULL OR statut = '' OR statut = 'en attente' OR statut = 'en_attente'")->fetchColumn();
     $acceptees     = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IN ('accepte','accepté')")->fetchColumn();
     $refusees      = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IN ('refuse','refusé')")->fetchColumn();
     $terminees     = $db->query("SELECT COUNT(*) FROM demande_essai WHERE statut IN ('termine','terminé')")->fetchColumn();
 
-    // Requête principale
     $demandes = $db->query("
         SELECT de.id_demande, de.date_souhaitee, de.heure_souhaitee, de.statut,
                CONCAT(c.prenom, ' ', c.nom) AS nom_complet,
@@ -201,7 +200,6 @@ try {
         ORDER BY de.id_demande DESC
     ")->fetchAll(PDO::FETCH_ASSOC);
 
-    // LOGS
     $logs = $db->query("
         SELECT 
             l.id_log,
@@ -266,7 +264,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="alert-message"><?= htmlspecialchars($message_status) ?></div>
         <?php endif; ?>
 
-        <!-- CARTES STATISTIQUES -->
         <div class="admin-stats stat-only-radar">
             <a href="?filtre=all" class="stat-card stat-card-link <?= ($filtre === 'all' || $filtre === '') ? 'stat-active' : '' ?>">
                 <p class="stat-label">Flux Total</p>
@@ -290,7 +287,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </a>
         </div>
 
-        <!-- ============ ONGLET DEMANDES ============ -->
         <section id="tab-radar" class="tab-content">
             <?php if ($filtre === 'accepte'): ?>
                 <h3 class="section-title">Demandes Approuvées (<?= $acceptees ?>)</h3>
@@ -399,10 +395,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </div>
         </section>
 
-        <!-- ============ ONGLET INTERFACE (LIVE EDITOR) ============ -->
         <section id="tab-editor" class="tab-content hidden">
             
-            <!-- HERO -->
             <div class="admin-live-hero">
                 <div class="admin-live-hero-bg">
                     <img id="live_hero_img" src="<?= $src_img ?>" alt="Hero essai">
@@ -447,7 +441,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 </div>
             </div>
 
-            <!-- APERÇU CONFIGURATEUR -->
             <div class="admin-live-booking">
 
                 <div class="admin-live-booking-left">
@@ -551,7 +544,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
         </section>
 
-        <!-- ============ ONGLET HISTORIQUE ============ -->
         <section id="tab-history" class="tab-content hidden">
             <h3 class="section-title">Journal des actions admin (<?= count($logs) ?>)</h3>
 
@@ -623,7 +615,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </section>
     </main>
 
-    <!-- MODALE : Modifier la date -->
     <div id="modal-date" class="modal-bg">
         <div class="modal-box-admin" style="max-width: 420px;">
             <div class="modal-head">
@@ -676,9 +667,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             document.getElementById('modal-date').classList.remove('open');
         }
 
-        // =============================
-        // SAUVEGARDE LIVE PAR CHAMP
-        // =============================
         function saveLiveField(el) {
             const key = el.dataset.key;
             const content = el.innerText.trim();
@@ -701,9 +689,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             .catch(() => {});
         }
 
-        // =============================
-        // UPLOAD IMAGE HERO
-        // =============================
         function uploadHeroImage(event) {
             if (!event.target.files.length) return;
 
@@ -723,9 +708,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             .catch(() => alert('Erreur de connexion'));
         }
 
-        // =============================
-        // RECHERCHE LIVE GLOBALE
-        // =============================
         document.getElementById('globalSearch').addEventListener('input', function(e) {
             const q = e.target.value.toLowerCase().trim();
 
