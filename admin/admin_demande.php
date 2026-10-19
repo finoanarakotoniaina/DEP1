@@ -29,6 +29,7 @@ try {
 
 // =========================================================
 // 2. ACTIONS POST (accepter / refuser / terminer / modifier date)
+//    ⚡ Le log est géré par le TRIGGER trg_demande_essai_after_update
 // =========================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_demande'])) {
     $id      = (int) $_POST['id_demande'];
@@ -36,55 +37,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
     $idAdmin = (int) $_SESSION['admin_id'];
 
     try {
-        $stmtOld = $db->prepare("SELECT date_souhaitee, heure_souhaitee, statut FROM demande_essai WHERE id_demande = ?");
-        $stmtOld->execute([$id]);
-        $old = $stmtOld->fetch(PDO::FETCH_ASSOC);
-
-        $ancienneValeur = null;
-        $nouvelleValeur = null;
+        // ⚡ On passe l'id_admin au trigger via une variable MySQL
+        $db->exec("SET @admin_id = " . $idAdmin);
 
         if ($action === 'accepte') {
             $db->prepare("UPDATE demande_essai SET statut = 'accepte' WHERE id_demande = ?")->execute([$id]);
-            $ancienneValeur = $old['statut'] ?? null;
-            $nouvelleValeur = 'accepte';
 
         } elseif ($action === 'refuse') {
             $db->prepare("UPDATE demande_essai SET statut = 'refuse' WHERE id_demande = ?")->execute([$id]);
-            $ancienneValeur = $old['statut'] ?? null;
-            $nouvelleValeur = 'refuse';
 
         } elseif ($action === 'termine') {
             $db->prepare("UPDATE demande_essai SET statut = 'termine' WHERE id_demande = ?")->execute([$id]);
-            $ancienneValeur = $old['statut'] ?? null;
-            $nouvelleValeur = 'termine';
 
         } elseif ($action === 'modifier_date' && !empty($_POST['nouvelle_date'])) {
             $nouvelle_date  = $_POST['nouvelle_date'];
             $nouvelle_heure = $_POST['nouvelle_heure'] ?? null;
 
-            $oldDate  = $old['date_souhaitee'] ?? null;
-            $oldHeure = !empty($old['heure_souhaitee']) ? substr($old['heure_souhaitee'], 0, 5) : '';
-
-            if ($oldDate) {
-                $ancienneValeur = date('d/m/Y', strtotime($oldDate)) . ($oldHeure ? ' ' . $oldHeure : '');
-            } else {
-                $ancienneValeur = '—';
-            }
-
-            $newHeure = !empty($nouvelle_heure) ? substr($nouvelle_heure, 0, 5) : '';
-            $nouvelleValeur = date('d/m/Y', strtotime($nouvelle_date)) . ($newHeure ? ' ' . $newHeure : '');
-
             $db->prepare("UPDATE demande_essai SET date_souhaitee = ?, heure_souhaitee = ? WHERE id_demande = ?")
                ->execute([$nouvelle_date, $nouvelle_heure, $id]);
-        }
-
-        if ($action !== '') {
-            $stmtLog = $db->prepare("
-                INSERT INTO demande_essai_logs 
-                    (id_demande, id_admin, action, ancienne_valeur, nouvelle_valeur, date_action)
-                VALUES (?, ?, ?, ?, ?, NOW())
-            ");
-            $stmtLog->execute([$id, $idAdmin, $action, $ancienneValeur, $nouvelleValeur]);
         }
 
         header("Location: admin_demande.php");
@@ -571,11 +541,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             <?php foreach($logs as $log): 
                                 $act = strtolower($log['action']);
 
-                                if ($act === 'accepte') {
+                                if ($act === 'accepte' || $act === 'statut_accepte') {
                                     $badgeClass = 'badge-accepte'; $badgeLabel = '✓ Approuvé';
-                                } elseif ($act === 'refuse') {
+                                } elseif ($act === 'refuse' || $act === 'statut_refuse') {
                                     $badgeClass = 'badge-refuse';  $badgeLabel = '✕ Refusé';
-                                } elseif ($act === 'termine') {
+                                } elseif ($act === 'termine' || $act === 'statut_termine') {
                                     $badgeClass = 'badge-termine'; $badgeLabel = '✔ Terminé';
                                 } elseif ($act === 'modifier_date') {
                                     $badgeClass = 'badge-attente'; $badgeLabel = '✎ Date modifiée';
@@ -585,7 +555,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             ?>
                             <tr>
                                 <td>
-                                    <p class="driver-name"><?= htmlspecialchars($log['admin_nom'] ?? 'Admin supprimé') ?></p>
+                                    <p class="driver-name"><?= htmlspecialchars($log['admin_nom'] ?? 'Système / Admin supprimé') ?></p>
                                     <p class="driver-status">#<?= $log['id_admin'] ?? '—' ?></p>
                                 </td>
                                 <td>
@@ -597,7 +567,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                     <span class="badge <?= $badgeClass ?>"><?= $badgeLabel ?></span>
                                 </td>
                                 <td>
-                                    <?php if ($act === 'modifier_date'): ?>
+                                    <?php if ($act === 'modifier_date' || $act === 'statut_accepte' || $act === 'statut_refuse' || $act === 'statut_termine'): ?>
                                         <p class="driver-status">
                                             <?= htmlspecialchars($log['ancienne_valeur'] ?? '—') ?>
                                             →
