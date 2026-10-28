@@ -41,7 +41,6 @@ VALUES
 INSERT INTO admin (identifiant, nom, prenom, motdepasse) 
 VALUES ('MadisonCarter', 'Carter', 'Madison', 'didison');
 
-
 INSERT INTO home_content (element_id, content) VALUES 
 ('titre_nos_modeles',       'NOS '),
 ('titre_nos_modeles_rouge', 'MODÈLES'),

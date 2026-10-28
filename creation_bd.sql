@@ -1,8 +1,7 @@
 -- CRÉATION DE LA BASE DE DONNÉES : supercar
 
-CREATE DATABASE IF NOT EXISTS supercar
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE supercar;
+
 
 USE supercar;
 
