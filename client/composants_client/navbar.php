@@ -6,6 +6,26 @@ function isActive($page, $currentPage) {
     return $page === $currentPage ? 'active' : '';
 }
 ?>
+
+<style>
+@media (max-width: 768px) {
+    .navbar-menu.mobile-open {
+        display: flex !important;
+        flex-direction: column !important;
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: var(--beige) !important;
+        padding: 1.5rem !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+        z-index: 9999 !important;
+        margin-top: 10px !important;
+    }
+}
+</style>
+
 <nav class="navbar">
     <a href="accueil.php" class="navbar-logo">
         <img src="<?= ASSETS_URL ?>/logos/superlogo.webp" alt="SuperCar" class="logo-img">

@@ -1777,7 +1777,41 @@ body.page-voiture:has(.hover-specs:hover) .navbar {
     .section { padding: 4rem 0; }
     .navbar { padding: 1rem 1.25rem; }
     .navbar-menu { display: none; }
-    .nav-toggle { display: block; }
+    .nav-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.4rem;
+        color: var(--navy);
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+    .navbar-menu.mobile-open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        left: 0;
+        right: 0;
+        background: rgba(245, 239, 235, 0.98);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        gap: 1rem;
+        box-shadow: var(--shadow-md);
+        z-index: 60;
+    }
+    .navbar-menu.mobile-open li { width: 100%; }
+    .navbar-menu.mobile-open .nav-link,
+    .navbar-menu.mobile-open .nav-btn {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 1rem;
+    }
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
     .contact-grid-2 { grid-template-columns: 1fr; }
     .contact-info-grid { grid-template-columns: 1fr; }
